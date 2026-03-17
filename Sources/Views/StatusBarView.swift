@@ -2,6 +2,7 @@ import SwiftUI
 
 // MARK: - Root
 
+@MainActor
 struct StatusBarView: View {
     @Bindable var viewModel: DaemonViewModel
 
