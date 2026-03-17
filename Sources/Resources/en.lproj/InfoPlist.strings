@@ -1,0 +1,8 @@
+/* App name */
+"CFBundleDisplayName" = "DuoduoManager";
+"CFBundleName" = "DuoduoManager";
+
+/* Privacy descriptions */
+"NSAppleEventsUsageDescription" = "Requires access to system services for management commands";
+"NSDesktopFolderUsageDescription" = "Requires access to Desktop directory";
+"NSDocumentsFolderUsageDescription" = "Requires access to Documents directory";

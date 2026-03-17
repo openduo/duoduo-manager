@@ -1,0 +1,26 @@
+# Build artifacts
+.build/
+.agents/
+.claude/
+.vscode/
+dist/
+
+# Signing secrets
+.secret.env
+
+# macOS
+.DS_Store
+*.dmg
+*.zip
+
+# Xcode
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+*.xcworkspace/*
+!*.xcworkspace/contents.xcworkspacedata
+!*.xcworkspace/xcshareddata/
+
+# Swift Package Manager
+.swiftpm/
+Package.resolved

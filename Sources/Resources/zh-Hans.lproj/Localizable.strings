@@ -1,0 +1,70 @@
+/* Status */
+"status.running" = "运行中";
+"status.stopped" = "已停止";
+"status.hasUpdate" = "有更新";
+"status.configure" = "配置";
+"status.install" = "安装";
+"status.clear" = "清除";
+"status.quit" = "退出";
+
+/* Config */
+"config.save" = "保存";
+
+/* Daemon Config */
+"daemonConfig.title" = "Daemon 配置";
+"daemonConfig.workDir" = "工作目录";
+"daemonConfig.workDirHint" = "ALADUO_WORK_DIR";
+"daemonConfig.workDirSelect" = "选择...";
+"daemonConfig.workDirPanelMessage" = "选择 duoduo 工作目录";
+"daemonConfig.network" = "网络";
+"daemonConfig.listenPort" = "监听端口";
+"daemonConfig.logging" = "日志";
+"daemonConfig.logLevel" = "日志级别";
+"daemonConfig.permissions" = "权限";
+"daemonConfig.permissionMode" = "权限模式";
+"daemonConfig.session" = "会话";
+"daemonConfig.maxConcurrent" = "最大并发数";
+"daemonConfig.advancedSettings" = "高级设置";
+"daemonConfig.idleTimeout" = "空闲超时";
+"daemonConfig.idleTimeoutHint" = "毫秒（默认 3600000 = 60 分钟）";
+"daemonConfig.disableAutoMain" = "禁止自动 main session";
+"daemonConfig.autoMainDisabled" = "已禁用自动创建";
+"daemonConfig.autoMainDefault" = "默认自动创建";
+"daemonConfig.pullLimit" = "拉取限制";
+
+/* Feishu Config */
+"feishuConfig.title" = "飞书配置";
+"feishuConfig.auth" = "认证";
+"feishuConfig.connection" = "连接";
+"feishuConfig.feishuDomain" = "飞书域名";
+"feishuConfig.accessControl" = "访问控制";
+"feishuConfig.dmPolicy" = "私信策略";
+"feishuConfig.dmPolicyOpen" = "open — 所有人";
+"feishuConfig.dmPolicyAllowlist" = "allowlist — 仅白名单";
+"feishuConfig.groupPolicy" = "群组策略";
+"feishuConfig.requireMention" = "需要 @提及";
+"feishuConfig.requireMentionOn" = "群消息需要 @bot";
+"feishuConfig.requireMentionOff" = "群消息无需 @bot";
+"feishuConfig.allowedUsers" = "允许用户";
+"feishuConfig.allowedGroups" = "允许群组";
+"feishuConfig.render" = "渲染";
+"feishuConfig.renderMode" = "渲染模式";
+"feishuConfig.renderModeDescAuto" = "纯文本为主，含代码块或表格时自动切换为卡片";
+"feishuConfig.renderModeDescRaw" = "始终使用纯文本";
+"feishuConfig.renderModeDescCard" = "始终使用交互式卡片";
+"feishuConfig.advancedSettings" = "高级设置";
+"feishuConfig.botOpenId" = "Bot Open ID";
+"feishuConfig.logLevel" = "日志级别";
+
+/* Channel */
+"channel.feishuDisplayName" = "飞书";
+"channel.feishuConfigHint" = "飞书配置";
+
+/* Error */
+"error.executionFailed %@" = "执行失败: %@";
+"error.commandNotFound %@" = "找不到命令: %@";
+"error.prefix %@" = "错误: %@";
+
+/* Upgrade */
+"upgrade.allUpToDate" = "所有组件已是最新版本";
+

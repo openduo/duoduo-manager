@@ -1,0 +1,8 @@
+/* App name */
+"CFBundleDisplayName" = "DuoduoManager";
+"CFBundleName" = "DuoduoManager";
+
+/* Privacy descriptions */
+"NSAppleEventsUsageDescription" = "需要访问系统服务以执行管理命令";
+"NSDesktopFolderUsageDescription" = "需要访问桌面目录";
+"NSDocumentsFolderUsageDescription" = "需要访问文稿目录";

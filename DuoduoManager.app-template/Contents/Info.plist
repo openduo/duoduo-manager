@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <string>DuoduoManager</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon.icns</string>
+    <key>CFBundleIdentifier</key>
+    <string>ai.openduo.manager</string>
+    <key>CFBundleName</key>
+    <string>DuoduoManager</string>
+    <key>CFBundleDisplayName</key>
+    <string>DuoduoManager</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+    <key>CFBundleVersion</key>
+    <string>1.0.0</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>14.0</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>LSBackgroundOnly</key>
+    <false/>
+    <key>LSUIElement</key>
+    <true/>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.utilities</string>
+    <key>CFBundleLocalizations</key>
+    <array>
+        <string>en</string>
+        <string>zh-Hans</string>
+    </array>
+    <key>NSHumanReadableCopyright</key>
+    <string>© 2026 Duoduo</string>
+    <key>NSAppleEventsUsageDescription</key>
+    <string>需要访问系统服务以执行管理命令</string>
+    <key>NSDesktopFolderUsageDescription</key>
+    <string>需要访问桌面目录</string>
+    <key>NSDocumentsFolderUsageDescription</key>
+    <string>需要访问文稿目录</string>
+</dict>
+</plist>

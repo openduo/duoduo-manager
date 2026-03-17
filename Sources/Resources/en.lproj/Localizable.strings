@@ -1,0 +1,70 @@
+/* Status */
+"status.running" = "Running";
+"status.stopped" = "Stopped";
+"status.hasUpdate" = "Update";
+"status.configure" = "Configure";
+"status.install" = "Install";
+"status.clear" = "Clear";
+"status.quit" = "Quit";
+
+/* Config */
+"config.save" = "Save";
+
+/* Daemon Config */
+"daemonConfig.title" = "Daemon Settings";
+"daemonConfig.workDir" = "Working Directory";
+"daemonConfig.workDirHint" = "ALADUO_WORK_DIR";
+"daemonConfig.workDirSelect" = "Select...";
+"daemonConfig.workDirPanelMessage" = "Select duoduo working directory";
+"daemonConfig.network" = "Network";
+"daemonConfig.listenPort" = "Listen Port";
+"daemonConfig.logging" = "Logging";
+"daemonConfig.logLevel" = "Log Level";
+"daemonConfig.permissions" = "Permissions";
+"daemonConfig.permissionMode" = "Permission Mode";
+"daemonConfig.session" = "Session";
+"daemonConfig.maxConcurrent" = "Max Concurrent";
+"daemonConfig.advancedSettings" = "Advanced Settings";
+"daemonConfig.idleTimeout" = "Idle Timeout";
+"daemonConfig.idleTimeoutHint" = "Milliseconds (default 3600000 = 60 min)";
+"daemonConfig.disableAutoMain" = "Disable Auto Main Session";
+"daemonConfig.autoMainDisabled" = "Auto-create disabled";
+"daemonConfig.autoMainDefault" = "Auto-create enabled (default)";
+"daemonConfig.pullLimit" = "Pull Limit";
+
+/* Feishu Config */
+"feishuConfig.title" = "Feishu Settings";
+"feishuConfig.auth" = "Authentication";
+"feishuConfig.connection" = "Connection";
+"feishuConfig.feishuDomain" = "Feishu Domain";
+"feishuConfig.accessControl" = "Access Control";
+"feishuConfig.dmPolicy" = "DM Policy";
+"feishuConfig.dmPolicyOpen" = "open — Everyone";
+"feishuConfig.dmPolicyAllowlist" = "allowlist — Allowlist only";
+"feishuConfig.groupPolicy" = "Group Policy";
+"feishuConfig.requireMention" = "Require @Mention";
+"feishuConfig.requireMentionOn" = "@bot required for group messages";
+"feishuConfig.requireMentionOff" = "@bot not required for group messages";
+"feishuConfig.allowedUsers" = "Allowed Users";
+"feishuConfig.allowedGroups" = "Allowed Groups";
+"feishuConfig.render" = "Rendering";
+"feishuConfig.renderMode" = "Render Mode";
+"feishuConfig.renderModeDescAuto" = "Plain text by default, auto-switch to card for code blocks or tables";
+"feishuConfig.renderModeDescRaw" = "Always use plain text";
+"feishuConfig.renderModeDescCard" = "Always use interactive cards";
+"feishuConfig.advancedSettings" = "Advanced Settings";
+"feishuConfig.botOpenId" = "Bot Open ID";
+"feishuConfig.logLevel" = "Log Level";
+
+/* Channel */
+"channel.feishuDisplayName" = "Feishu";
+"channel.feishuConfigHint" = "Feishu Settings";
+
+/* Error */
+"error.executionFailed %@" = "Execution failed: %@";
+"error.commandNotFound %@" = "Command not found: %@";
+"error.prefix %@" = "Error: %@";
+
+/* Upgrade */
+"upgrade.allUpToDate" = "All components are up to date";
+
