@@ -5,9 +5,7 @@ struct DuoduoManagerApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
-        Settings {
-            EmptyView()
-        }
+        // No window scenes needed — this is a menu bar app
     }
 }
 
