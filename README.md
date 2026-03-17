@@ -16,8 +16,8 @@ A macOS menu bar application for managing the [duoduo](https://github.com/opendu
 ### From source
 
 ```bash
-git clone https://github.com/openduo/DuoduoManager.git
-cd DuoduoManager
+git clone https://github.com/openduo/duoduo-manager.git
+cd duoduo-manager
 make run        # Build and launch for development
 make app        # Build universal .app bundle
 ```
@@ -52,7 +52,6 @@ make release    # Full release: build + sign + notarize + DMG
 ```bash
 make version                    # Show current version
 make update-version NEW_VERSION=x.y.z
-make commit-version             # Commit version change
 ```
 
 ## Architecture
