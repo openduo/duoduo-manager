@@ -9,6 +9,9 @@ final class DaemonViewModel {
     private(set) var lastOutput = ""
     private(set) var errorMessage: String?
 
+    /// Update check results, keyed by "daemon" or channel type
+    private(set) var latestVersions: [String: String] = [:]
+
     private var daemonService: DaemonService!
     private var channelService: ChannelService!
     private let versionService = VersionService()
@@ -21,6 +24,20 @@ final class DaemonViewModel {
         self.daemonConfig = config
         self.daemonService = DaemonService()
         self.channelService = ChannelService()
+    }
+
+    // MARK: - Update Check Helpers
+
+    func hasUpdate(type: String, installedVersion: String) -> Bool {
+        guard !installedVersion.isEmpty,
+              let latest = latestVersions[type], !latest.isEmpty
+        else { return false }
+        return installedVersion.compare(latest, options: .numeric) == .orderedAscending
+    }
+
+    var hasAnyUpdate: Bool {
+        hasUpdate(type: "daemon", installedVersion: status.version)
+            || channels.contains { hasUpdate(type: $0.type, installedVersion: $0.version) }
     }
 
     // MARK: - Daemon Commands
@@ -43,20 +60,16 @@ final class DaemonViewModel {
         }
     }
 
-    /// Update all components: daemon + channels with new versions
+    /// Update all components: daemon + all channels
     func upgradeAll() {
         executeCommand {
             try await self.upgradeService.upgradeAll(
                 channels: self.channels,
                 extraEnv: { type in self.extraEnv(for: type) },
-                installChannel: { pkg in try await self.channelService.installChannel(pkg) },
+                syncChannel: { pkg in try await self.channelService.syncChannel(pkg) },
                 startChannel: { type, env in try await self.channelService.startChannel(type, extraEnv: env) }
             )
         }
-    }
-
-    var hasAnyUpdate: Bool {
-        status.hasUpdate || channels.contains { $0.hasUpdate }
     }
 
     // MARK: - Channel Config
@@ -112,9 +125,10 @@ final class DaemonViewModel {
     func refreshStatus() async {
         // Get daemon status and local version
         do {
-            var newStatus = try await daemonService.getStatus()
-            newStatus.version = try await daemonService.getVersion()
-            if status != newStatus { status = newStatus }
+            let newStatus = try await daemonService.getStatus()
+            var updated = newStatus
+            updated.version = try await daemonService.getVersion()
+            if status != updated { status = updated }
         } catch {
             print("[DuoduoManager] getStatus error: \(error)")
             status = DaemonStatus.empty
@@ -132,18 +146,17 @@ final class DaemonViewModel {
     }
 
     func checkForUpdates() async {
-        // Check latest daemon version
-        if let latest = await versionService.checkLatestVersion(repo: "duoduo") {
-            if status.latestVersion != latest { status.latestVersion = latest }
+        // Check latest daemon version via npm
+        if let latest = try? await versionService.getNpmLatestVersion("@openduo/duoduo") {
+            latestVersions["daemon"] = latest
         }
 
-        // Check latest channel versions
-        for i in channels.indices {
-            let type = channels[i].type
-            if let latest = await versionService.checkLatestVersion(repo: "channel-\(type)") {
-                if channels[i].latestVersion != latest {
-                    channels[i].latestVersion = latest
-                }
+        // Check latest channel versions via npm
+        for channel in channels {
+            let pkg = ChannelRegistry.entry(for: channel.type, feishuConfig: feishuConfig)?.packageName
+                ?? "@openduo/channel-\(channel.type)"
+            if let latest = try? await versionService.getNpmLatestVersion(pkg) {
+                latestVersions[channel.type] = latest
             }
         }
     }
@@ -166,6 +179,10 @@ final class DaemonViewModel {
     func clearOutput() {
         lastOutput = ""
         errorMessage = nil
+    }
+
+    func showConfigRequired() {
+        errorMessage = L10n.Channel.feishuConfigRequired
     }
 
     // MARK: - Refresh (bound to popover lifecycle)
@@ -206,11 +223,16 @@ final class DaemonViewModel {
             guard let self else { return }
 
             do {
+                print("[DuoduoManager] upgrade started")
                 let output = try await operation()
+                print("[DuoduoManager] upgrade output: \(output)")
                 self.lastOutput = output
                 await self.refreshStatus()
+                await self.checkForUpdates()
                 self.updateStatusBarIcon?()
+                print("[DuoduoManager] upgrade done, hasUpdate=\(self.hasAnyUpdate), version=\(self.status.version), latest=\(self.latestVersions["daemon"] ?? "")")
             } catch {
+                print("[DuoduoManager] upgrade error: \(error)")
                 self.errorMessage = error.localizedDescription
             }
 

@@ -52,6 +52,10 @@ struct ChannelService: Sendable {
         return npmOutput + "\n" + syncOutput
     }
 
+    func syncChannel(_ packageName: String) async throws -> String {
+        try await runDuoduo("channel", "install", packageName)
+    }
+
     // MARK: - Private
 
     private func runDuoduo(_ args: String...) async throws -> String {

@@ -59,6 +59,7 @@
 /* Channel */
 "channel.feishuDisplayName" = "飞书";
 "channel.feishuConfigHint" = "飞书配置";
+"channel.feishuConfigRequired" = "请先配置 App ID 和 App Secret";
 
 /* Error */
 "error.executionFailed %@" = "执行失败: %@";

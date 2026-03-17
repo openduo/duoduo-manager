@@ -11,9 +11,9 @@ Views → ViewModels → Services → Models
 ```
 DuoduoManagerApp.swift (entry point, menu bar lifecycle)
 ├── StatusBarView.swift        (popover UI)
-│   ├── ConfigView.swift       (initial setup window)
 │   ├── DaemonConfigView.swift (daemon settings panel)
-│   └── FeishuConfigView.swift (Feishu channel settings panel)
+│   ├── FeishuConfigView.swift (Feishu channel settings panel)
+│   └── ConfigLayout.swift     (shared config row components)
 ├── DaemonViewModel.swift      (single @Observable view model)
 ├── Services/
 │   ├── ShellService.swift     (process execution, PATH loading)
@@ -23,9 +23,9 @@ DuoduoManagerApp.swift (entry point, menu bar lifecycle)
 │   └── VersionService.swift   (GitHub/npm version queries)
 ├── Models/
 │   ├── DaemonConfig.swift     (daemon settings + env var mapping)
-│   ├── DaemonStatus.swift     (runtime status)
+│   ├── DaemonStatus.swift     (runtime status: running, version, pid)
 │   ├── FeishuConfig.swift     (Feishu channel settings + env var mapping)
-│   ├── ChannelInfo.swift      (installed channel runtime info)
+│   ├── ChannelInfo.swift      (installed channel runtime info: type, version, pid, running)
 │   ├── ChannelRegistry.swift  (channel type registry)
 │   └── PackageVersion.swift   (npm package version info)
 └── Localization/
@@ -58,9 +58,13 @@ The app needs localization to work both in `swift run` (development) and in the 
 
 All configuration (daemon settings, Feishu channel settings) is stored as JSON in `UserDefaults`. The `DaemonConfig` and `FeishuConfig` models map their fields to environment variables (`ALADUO_*`, `FEISHU_*`) which are injected when starting the daemon or channels. Only non-default values are passed, preserving the daemon's own defaults.
 
+### Update state separation
+
+Update check results are kept separate from runtime status to avoid state inconsistencies during periodic refreshes. `DaemonViewModel` maintains a `latestVersions: [String: String]` dictionary (keyed by `"daemon"` or channel type) that is only written by `checkForUpdates()`. The `hasUpdate(type:installedVersion:)` method compares the current installed version against this dictionary. This way, `refreshStatus()` can freely replace `status` and `channels` without losing update information.
+
 ### Menu bar app lifecycle
 
-The app uses `NSStatusItem` + `NSPopover` with `.transient` behavior (click outside to close). `NSApp.setActivationPolicy(.accessory)` hides the dock icon. The SwiftUI `App` entry point uses an empty `Settings` scene to satisfy the lifecycle requirements.
+The app uses `NSStatusItem` + `NSPopover` with `.transient` behavior (click outside to close). `NSApp.setActivationPolicy(.accessory)` hides the dock icon. The SwiftUI `App` entry point uses a minimal `WindowGroup("")` with `EmptyView` that auto-closes on appear to satisfy the lifecycle requirements.
 
 ## Build & Packaging
 

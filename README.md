@@ -11,6 +11,10 @@ A macOS menu bar application for managing the [duoduo](https://github.com/opendu
 - **Version tracking** — Automatic checks for new releases via GitHub API and npm
 - **Internationalization** — English and Simplified Chinese, follows macOS system language
 
+## Screenshot
+
+![DuoduoManager screenshot](assets/screenshot.png)
+
 ## Installation
 
 ### From source

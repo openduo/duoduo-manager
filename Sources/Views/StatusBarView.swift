@@ -79,7 +79,8 @@ struct StatusBarView: View {
             iconBackground: Color.accentColor.opacity(0.7),
             name: "Daemon",
             version: viewModel.status.version,
-            hasUpdate: viewModel.status.hasUpdate,
+            hasUpdate: viewModel.hasUpdate(type: "daemon", installedVersion: viewModel.status.version),
+            latestVersion: viewModel.latestVersions["daemon"] ?? "",
             pid: viewModel.status.pid,
             isRunning: viewModel.status.isRunning,
             configButton: {
@@ -123,13 +124,15 @@ struct StatusBarView: View {
 
     // Installed channel card
     private func channelInstalledCard(_ channel: ChannelInfo) -> some View {
-        serviceCard(
+        let needsConfig = channel.type == "feishu" && !viewModel.feishuConfig.isConfigured
+
+        return serviceCard(
             icon: channel.icon,
             iconBackground: Color.accentColor,
             name: channel.displayName,
             version: channel.version,
-            hasUpdate: channel.hasUpdate,
-            latestVersion: channel.latestVersion,
+            hasUpdate: viewModel.hasUpdate(type: channel.type, installedVersion: channel.version),
+            latestVersion: viewModel.latestVersions[channel.type] ?? "",
             pid: channel.pid,
             isRunning: channel.isRunning,
             configButton: {
@@ -148,8 +151,8 @@ struct StatusBarView: View {
                 }
             },
             onStop: { viewModel.stopChannel(channel.type) },
-            onRestart: { viewModel.restartChannel(channel.type) },
-            onStart: { viewModel.startChannel(channel.type) }
+            onRestart: needsConfig ? { viewModel.showConfigRequired() } : { viewModel.restartChannel(channel.type) },
+            onStart: needsConfig ? { viewModel.showConfigRequired() } : { viewModel.startChannel(channel.type) }
         )
     }
 

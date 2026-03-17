@@ -85,6 +85,7 @@ enum L10n {
     enum Channel {
         static let feishuDisplayName = String(localized: "channel.feishuDisplayName", bundle: bundle)
         static let feishuConfigHint = String(localized: "channel.feishuConfigHint", bundle: bundle)
+        static let feishuConfigRequired = String(localized: "channel.feishuConfigRequired", bundle: bundle)
     }
 
     // MARK: - Error (with interpolation)

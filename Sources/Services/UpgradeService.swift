@@ -24,46 +24,43 @@ struct UpgradeService: Sendable {
     func upgrade(packages: [String]) async throws -> String {
         var output = ""
         for pkg in packages {
-            output += try await ShellService.runShell("npm install -g \(pkg)@latest")
+            print("[DuoduoManager] npm install -g \(pkg)@latest")
+            let result = try await ShellService.runShell("npm install -g \(pkg)@latest")
+            print("[DuoduoManager] npm result: \(result)")
+            output += result
         }
         return output
     }
 
-    /// Update all components: daemon + channels with new versions
+    /// Update all components: daemon + all channels
     /// - Parameters:
     ///   - channels: currently installed channel list
     ///   - extraEnv: closure to get extra env for a channel type
-    ///   - installChannel: closure to install a channel package
+    ///   - syncChannel: closure to sync a channel (duoduo channel install)
     ///   - startChannel: closure to start a channel (channel type + extraEnv)
     func upgradeAll(
         channels: [ChannelInfo],
         extraEnv: (String) -> [String: String],
-        installChannel: (String) async throws -> String,
+        syncChannel: (String) async throws -> String,
         startChannel: (String, [String: String]) async throws -> String
     ) async throws -> String {
         var output = ""
 
-        // 1. Update daemon
-        let versions = try await checkVersions()
-        let toUpgrade = versions.filter { $0.needsUpdate }.map { $0.name }
-        if !toUpgrade.isEmpty {
-            output += try await upgrade(packages: toUpgrade)
-        }
+        // 1. Always update daemon to latest
+        output += try await upgrade(packages: npmPackages)
 
-        // 2. Only update channels with new versions, record pre-update state for restore
+        // 2. Always sync all channels, record pre-update state for restore
         for channel in channels {
-            guard channel.hasUpdate else { continue }
+            print("[DuoduoManager] syncing channel: \(channel.type)")
             let wasRunning = channel.isRunning
             let pkg = ChannelRegistry.entry(for: channel.type, feishuConfig: FeishuConfig())?.packageName
                 ?? "@openduo/channel-\(channel.type)"
-            output += try await installChannel(pkg)
+            let syncResult = try await syncChannel(pkg)
+            print("[DuoduoManager] channel sync result: \(syncResult)")
+            output += syncResult
             if wasRunning {
                 output += try await startChannel(channel.type, extraEnv(channel.type))
             }
-        }
-
-        if output.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            output = L10n.Upgrade.allUpToDate
         }
 
         return output

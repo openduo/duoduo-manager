@@ -59,6 +59,7 @@
 /* Channel */
 "channel.feishuDisplayName" = "Feishu";
 "channel.feishuConfigHint" = "Feishu Settings";
+"channel.feishuConfigRequired" = "Please configure App ID and App Secret first";
 
 /* Error */
 "error.executionFailed %@" = "Execution failed: %@";
