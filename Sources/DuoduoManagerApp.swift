@@ -5,7 +5,17 @@ struct DuoduoManagerApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
-        // No window scenes needed — this is a menu bar app
+        WindowGroup("") {
+            EmptyView()
+                .onAppear {
+                    for window in NSApp.windows where window.title.isEmpty {
+                        window.close()
+                    }
+                }
+        }
+        .windowStyle(.hiddenTitleBar)
+        .windowResizability(.contentSize)
+        .defaultSize(width: 1, height: 1)
     }
 }
 
