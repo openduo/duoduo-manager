@@ -62,14 +62,10 @@ struct FeishuConfig: Codable, Sendable {
     private static let udKey = "feishu_channel_config_v1"
 
     static func load() -> FeishuConfig {
-        guard let data = UserDefaults.standard.data(forKey: udKey),
-              let config = try? JSONDecoder().decode(FeishuConfig.self, from: data)
-        else { return FeishuConfig() }
-        return config
+        ConfigStore.load(defaultValue: FeishuConfig(), forKey: udKey)
     }
 
     func save() {
-        guard let data = try? JSONEncoder().encode(self) else { return }
-        UserDefaults.standard.set(data, forKey: FeishuConfig.udKey)
+        ConfigStore.save(self, forKey: FeishuConfig.udKey)
     }
 }

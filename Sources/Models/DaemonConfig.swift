@@ -63,14 +63,10 @@ struct DaemonConfig: Codable, Sendable {
     private static let udKey = "daemon_config_v1"
 
     static func load() -> DaemonConfig {
-        guard let data = UserDefaults.standard.data(forKey: udKey),
-              let config = try? JSONDecoder().decode(DaemonConfig.self, from: data)
-        else { return DaemonConfig() }
-        return config
+        ConfigStore.load(defaultValue: DaemonConfig(), forKey: udKey)
     }
 
     func save() {
-        guard let data = try? JSONEncoder().encode(self) else { return }
-        UserDefaults.standard.set(data, forKey: DaemonConfig.udKey)
+        ConfigStore.save(self, forKey: DaemonConfig.udKey)
     }
 }

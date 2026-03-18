@@ -83,17 +83,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     // MARK: - Setup
 
     private func initViewModel() {
-        // Migrate legacy workDir from AppStorage to DaemonConfig
-        if let legacyWorkDir = UserDefaults.standard.string(forKey: "workDir"),
-           !legacyWorkDir.isEmpty {
-            var config = DaemonConfig.load()
-            if config.workDir.isEmpty {
-                config.workDir = legacyWorkDir
-                config.save()
-            }
-            UserDefaults.standard.removeObject(forKey: "workDir")
-        }
-
         viewModel = DaemonViewModel()
         viewModel?.updateStatusBarIcon = { [weak self] in
             self?.updateStatusBarIcon()
