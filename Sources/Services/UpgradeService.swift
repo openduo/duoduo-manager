@@ -34,22 +34,36 @@ struct UpgradeService: Sendable {
 
     /// Update all components: daemon + all channels
     /// - Parameters:
+    ///   - daemonWasRunning: whether daemon was running before upgrade
+    ///   - daemonConfig: env vars for daemon restart
     ///   - channels: currently installed channel list
     ///   - extraEnv: closure to get extra env for a channel type
     ///   - syncChannel: closure to sync a channel (duoduo channel install)
     ///   - startChannel: closure to start a channel (channel type + extraEnv)
+    ///   - restartDaemon: closure to restart daemon
     func upgradeAll(
+        daemonWasRunning: Bool,
+        daemonConfig: [String: String],
         channels: [ChannelInfo],
         extraEnv: (String) -> [String: String],
         syncChannel: (String) async throws -> String,
-        startChannel: (String, [String: String]) async throws -> String
+        startChannel: (String, [String: String]) async throws -> String,
+        restartDaemon: () async throws -> String
     ) async throws -> String {
         var output = ""
 
         // 1. Always update daemon to latest
         output += try await upgrade(packages: npmPackages)
 
-        // 2. Always sync all channels, record pre-update state for restore
+        // 2. Restart daemon if it was running, so new version takes effect
+        if daemonWasRunning {
+            print("[DuoduoManager] restarting daemon")
+            let restartOutput = try await restartDaemon()
+            print("[DuoduoManager] daemon restart result: \(restartOutput)")
+            output += restartOutput
+        }
+
+        // 3. Sync all channels, restart if was running
         for channel in channels {
             print("[DuoduoManager] syncing channel: \(channel.type)")
             let wasRunning = channel.isRunning

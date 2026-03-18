@@ -63,12 +63,17 @@ final class DaemonViewModel {
     /// Update all components: daemon + all channels
     func upgradeAll() {
         executeCommand {
-            try await self.upgradeService.upgradeAll(
+            let daemonWasRunning = self.status.isRunning
+            let result = try await self.upgradeService.upgradeAll(
+                daemonWasRunning: daemonWasRunning,
+                daemonConfig: self.daemonConfig.envVars,
                 channels: self.channels,
                 extraEnv: { type in self.extraEnv(for: type) },
                 syncChannel: { pkg in try await self.channelService.syncChannel(pkg) },
-                startChannel: { type, env in try await self.channelService.startChannel(type, extraEnv: env) }
+                startChannel: { type, env in try await self.channelService.startChannel(type, extraEnv: env) },
+                restartDaemon: { try await self.daemonService.restart(extraEnv: self.daemonConfig.envVars) }
             )
+            return result
         }
     }
 

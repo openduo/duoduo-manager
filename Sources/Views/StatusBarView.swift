@@ -38,6 +38,17 @@ struct StatusBarView: View {
             }
             Text("Duoduo Manager")
                 .font(.system(size: 14, weight: .bold))
+            Button {
+                if let url = URL(string: "http://127.0.0.1:\(viewModel.daemonConfig.port)/dashboard") {
+                    NSWorkspace.shared.open(url)
+                }
+            } label: {
+                Image(systemName: "square.grid.2x2")
+                    .font(.system(size: 11))
+                    .foregroundStyle(Color(nsColor: .secondaryLabelColor))
+            }
+            .buttonStyle(.plain)
+            .help("Dashboard")
             Spacer()
             if viewModel.isLoading {
                 ProgressView().scaleEffect(0.6).frame(width: 14, height: 14)
