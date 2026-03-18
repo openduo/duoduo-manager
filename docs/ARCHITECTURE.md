@@ -22,6 +22,7 @@ DuoduoManagerApp.swift (entry point, menu bar lifecycle)
 │   ├── UpgradeService.swift   (npm update orchestration)
 │   └── VersionService.swift   (GitHub/npm version queries)
 ├── Models/
+│   ├── ConfigStore.swift      (shared JSON persistence via UserDefaults)
 │   ├── DaemonConfig.swift     (daemon settings + env var mapping)
 │   ├── DaemonStatus.swift     (runtime status: running, version, pid)
 │   ├── FeishuConfig.swift     (Feishu channel settings + env var mapping)
@@ -54,13 +55,32 @@ The project uses SwiftPM (`swift build`), not Xcode's build system. String Catal
 
 The app needs localization to work both in `swift run` (development) and in the packaged `.app` bundle (production). The `L10n.bundle` static property checks whether `.lproj` directories exist in `Bundle.main` (`.app` case), falling back to `Bundle.module` (SPM case).
 
-### Config persistence
+### Dashboard access
 
-All configuration (daemon settings, Feishu channel settings) is stored as JSON in `UserDefaults`. The `DaemonConfig` and `FeishuConfig` models map their fields to environment variables (`ALADUO_*`, `FEISHU_*`) which are injected when starting the daemon or channels. Only non-default values are passed, preserving the daemon's own defaults.
+The daemon serves a dashboard at `GET /dashboard` on its configured port. The app header has a button that opens this URL in the browser. This only works when the daemon is running.
 
-### Update state separation
+### State management: two independent state flows
 
-Update check results are kept separate from runtime status to avoid state inconsistencies during periodic refreshes. `DaemonViewModel` maintains a `latestVersions: [String: String]` dictionary (keyed by `"daemon"` or channel type) that is only written by `checkForUpdates()`. The `hasUpdate(type:installedVersion:)` method compares the current installed version against this dictionary. This way, `refreshStatus()` can freely replace `status` and `channels` without losing update information.
+The app has two independent state flows that must not be mixed:
+
+1. **Runtime status** (`refreshStatus()`): daemon is running/stopped, PID, installed version, channel states. Fast — local shell commands only. Called periodically (30s) and after every user action.
+
+2. **Update check** (`checkForUpdates()`): latest available versions from npm registry. Slow — network requests. Called on popover open and then periodically.
+
+`DaemonViewModel` maintains:
+- `status: DaemonStatus` / `channels: [ChannelInfo]` — runtime state, written by `refreshStatus()`
+- `latestVersions: [String: String]` — update check results, keyed by `"daemon"` or channel type, written only by `checkForUpdates()`
+- `hasUpdate(type:installedVersion:)` — compares the two, used by views
+
+**Critical rule**: user actions (`executeCommand`) call `refreshStatus()` after completion, but **never** call `checkForUpdates()`. Update checking is handled solely by the periodic timer. Mixing them causes the loading spinner to linger (npm network calls are slow) and creates confusing UX where the user sees output but the UI is still "busy".
+
+### Working directory for daemon commands
+
+macOS GUI apps have `cwd = /`, but the duoduo daemon resolves paths relative to `process.cwd()` (e.g., `bootstrapDir` for dashboard.html). `DaemonService` resolves the npm package root via `which duoduo` on every command and sets it as `Process.currentDirectoryURL`. This ensures dashboard routes and other relative-path features work correctly when launched from the menu bar app.
+
+### Config persistence (ConfigStore)
+
+All configuration (daemon settings, Feishu channel settings) uses `ConfigStore` — a shared utility that serializes/deserializes `Codable` types as JSON in `UserDefaults`. This avoids duplicating persistence logic across config models. Only non-default values are mapped to environment variables when starting services.
 
 ### Menu bar app lifecycle
 
