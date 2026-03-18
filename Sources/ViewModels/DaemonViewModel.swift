@@ -125,7 +125,7 @@ final class DaemonViewModel {
         }
     }
 
-    // MARK: - Status Refresh
+    // MARK: - Status Refresh (periodic only)
 
     func refreshStatus() async {
         // Get daemon status and local version
@@ -217,6 +217,7 @@ final class DaemonViewModel {
 
     // MARK: - Private
 
+    /// Execute a command: show output, then refresh local status. Update checking is handled by periodic timer.
     private func executeCommand(_ operation: @escaping () async throws -> String) {
         guard !isLoading else { return }
 
@@ -226,21 +227,14 @@ final class DaemonViewModel {
 
         Task { [weak self] in
             guard let self else { return }
-
             do {
-                print("[DuoduoManager] upgrade started")
                 let output = try await operation()
-                print("[DuoduoManager] upgrade output: \(output)")
                 self.lastOutput = output
                 await self.refreshStatus()
-                await self.checkForUpdates()
-                self.updateStatusBarIcon?()
-                print("[DuoduoManager] upgrade done, hasUpdate=\(self.hasAnyUpdate), version=\(self.status.version), latest=\(self.latestVersions["daemon"] ?? "")")
             } catch {
-                print("[DuoduoManager] upgrade error: \(error)")
+                print("[DuoduoManager] command error: \(error)")
                 self.errorMessage = error.localizedDescription
             }
-
             self.isLoading = false
         }
     }

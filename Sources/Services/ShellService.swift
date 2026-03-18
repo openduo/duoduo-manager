@@ -15,7 +15,7 @@ enum ShellError: LocalizedError {
 }
 
 struct ShellService: Sendable {
-    static func run(_ executable: String, arguments: [String], environment: [String: String] = [:]) async throws -> String {
+    static func run(_ executable: String, arguments: [String], environment: [String: String] = [:], workingDirectory: String? = nil) async throws -> String {
         try await withCheckedThrowingContinuation { continuation in
             let process = Process()
             process.executableURL = URL(fileURLWithPath: executable)
@@ -26,6 +26,10 @@ struct ShellService: Sendable {
                 env[key] = value
             }
             process.environment = env
+
+            if let dir = workingDirectory {
+                process.currentDirectoryURL = URL(fileURLWithPath: dir)
+            }
 
             let outputPipe = Pipe()
             let errorPipe = Pipe()
@@ -54,7 +58,7 @@ struct ShellService: Sendable {
         }
     }
 
-    static func runShell(_ script: String, environment: [String: String] = [:]) async throws -> String {
+    static func runShell(_ script: String, environment: [String: String] = [:], workingDirectory: String? = nil) async throws -> String {
         // Explicitly source shell config files to load user environment (nvm/node, etc.)
         // GUI apps don't inherit shell PATH, so we need to load it manually
         let shell = ProcessInfo.processInfo.environment["SHELL"] ?? "/bin/zsh"
@@ -65,6 +69,6 @@ struct ShellService: Sendable {
             sourceCmd = "source ~/.bashrc 2>/dev/null || true; source ~/.bash_profile 2>/dev/null || true"
         }
         let fullScript = "\(sourceCmd); \(script)"
-        return try await run(shell, arguments: ["-c", fullScript], environment: environment)
+        return try await run(shell, arguments: ["-c", fullScript], environment: environment, workingDirectory: workingDirectory)
     }
 }

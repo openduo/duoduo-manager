@@ -1,6 +1,6 @@
 import Foundation
 
-struct DaemonService: Sendable {
+final class DaemonService: Sendable {
     let daemonURL: String
 
     init(daemonURL: String = "http://127.0.0.1:20233") {
@@ -14,22 +14,29 @@ struct DaemonService: Sendable {
         ]
     }
 
+    // MARK: - Package Directory
+
+    /// Resolve the duoduo npm package root via `which duoduo`.
+    private func getPackageDir() async throws -> String {
+        try await ShellService.runShell(
+            "dirname $(dirname $(realpath $(which duoduo)))"
+        ).trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     // MARK: - Daemon Commands
 
     func getStatus() async throws -> DaemonStatus {
-        let output = try await runDuoduo("daemon", "status")
+        let dir = try await getPackageDir()
+        let output = try await runDuoduo("daemon", "status", workingDirectory: dir)
         return parseStatusOutput(output)
     }
 
     func getVersion() async throws -> String {
-        // Locate package.json via duoduo binary path, avoiding npm list failures
-        // caused by incomplete PATH in GUI processes
+        let dir = try await getPackageDir()
         let output = try await ShellService.runShell(
-            "PKG=$(dirname $(which duoduo))/../lib/node_modules/@openduo/duoduo/package.json && "
-            + "grep '\"version\"' \"$PKG\" | head -1 | sed 's/.*\"version\": \"\\([^\"]*\\)\".*/\\1/'"
+            "grep '\"version\"' \"\(dir)/package.json\" | head -1 | sed 's/.*\"version\": \"\\([^\"]*\\)\".*/\\1/'"
         )
         let version = output.trimmingCharacters(in: .whitespacesAndNewlines)
-        // Validate version format (e.g. 0.3.0)
         guard version.range(of: #"^\d+\.\d+\.\d+"#, options: .regularExpression) != nil else {
             return ""
         }
@@ -37,16 +44,21 @@ struct DaemonService: Sendable {
     }
 
     func start(extraEnv: [String: String] = [:]) async throws -> String {
+        let dir = try await getPackageDir()
         if extraEnv.isEmpty {
-            return try await runDuoduo("daemon", "start")
+            return try await runDuoduo("daemon", "start", workingDirectory: dir)
         }
         var merged = env
         extraEnv.forEach { merged[$0] = $1 }
-        return try await ShellService.runShell("duoduo daemon start", environment: merged)
+        return try await ShellService.runShell(
+            "duoduo daemon start", environment: merged, workingDirectory: dir
+        )
     }
 
     func stop() async throws -> String {
-        try await runDuoduo("daemon", "stop")
+        let dir = try await getPackageDir()
+        _ = try await runDuoduo("daemon", "stop", workingDirectory: dir)
+        return ""
     }
 
     func restart(extraEnv: [String: String] = [:]) async throws -> String {
@@ -57,9 +69,11 @@ struct DaemonService: Sendable {
 
     // MARK: - Private
 
-    private func runDuoduo(_ args: String...) async throws -> String {
+    private func runDuoduo(_ args: String..., workingDirectory: String = "") async throws -> String {
         let command = ["duoduo"] + args
-        return try await ShellService.runShell(command.joined(separator: " "), environment: env)
+        return try await ShellService.runShell(
+            command.joined(separator: " "), environment: env, workingDirectory: workingDirectory.isEmpty ? nil : workingDirectory
+        )
     }
 
     private func parseStatusOutput(_ output: String) -> DaemonStatus {
