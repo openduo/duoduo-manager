@@ -36,25 +36,21 @@ struct EventsContentView: View {
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundStyle(DashboardTheme.textTertiary)
             Spacer()
-            followBadge
+            liveBadge
         }
         .padding(.horizontal, 16)
         .padding(.top, 12)
         .padding(.bottom, 8)
     }
 
-    private var followBadge: some View {
-        Button { autoFollow = true } label: {
-            HStack(spacing: 4) {
-                Text(autoFollow ? "●" : "○")
-                    .font(.system(size: 9, design: .monospaced))
-                Text(autoFollow ? "LIVE" : "PAUSED")
-                    .font(.system(size: 10, weight: .medium, design: .monospaced))
-            }
-            .foregroundStyle(autoFollow ? DashboardTheme.emerald : DashboardTheme.amber)
+    private var liveBadge: some View {
+        HStack(spacing: 4) {
+            Text("●")
+                .font(.system(size: 9, design: .monospaced))
+            Text("LIVE")
+                .font(.system(size: 10, weight: .medium, design: .monospaced))
         }
-        .buttonStyle(.plain)
-        .help("Click to resume auto-scroll")
+        .foregroundStyle(DashboardTheme.emerald)
     }
 
     // MARK: - Scroll Area
