@@ -5,6 +5,7 @@ import SwiftUI
 @MainActor
 struct StatusBarView: View {
     @Bindable var viewModel: DaemonViewModel
+    var openDashboard: (() -> Void)?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -39,9 +40,7 @@ struct StatusBarView: View {
             Text("Duoduo Manager")
                 .font(.system(size: 14, weight: .bold))
             Button {
-                if let url = URL(string: "http://127.0.0.1:\(viewModel.daemonConfig.port)/dashboard") {
-                    NSWorkspace.shared.open(url)
-                }
+                openDashboard?()
             } label: {
                 Image(systemName: "square.grid.2x2")
                     .font(.system(size: 11))

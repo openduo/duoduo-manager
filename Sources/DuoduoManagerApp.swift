@@ -20,11 +20,12 @@ struct DuoduoManagerApp: App {
 }
 
 @MainActor
-class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowDelegate {
     private var statusItem: NSStatusItem?
     private var viewModel: DaemonViewModel?
     private var popover: NSPopover?
     private var eventMonitor: Any?
+    private var dashboardPanel: NSPanel?
 
     nonisolated func applicationDidFinishLaunching(_ notification: Notification) {
         Task { @MainActor in
@@ -80,6 +81,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         viewModel?.endPeriodicRefresh()
     }
 
+    // MARK: - NSWindowDelegate
+
+    func windowWillClose(_ notification: Notification) {
+        if let window = notification.object as? NSWindow, window === dashboardPanel {
+            dashboardPanel = nil
+        }
+    }
+
     // MARK: - Setup
 
     private func initViewModel() {
@@ -96,7 +105,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
     private func updatePopoverContent() {
         guard let viewModel else { return }
-        popover?.contentViewController = NSHostingController(rootView: StatusBarView(viewModel: viewModel))
+        popover?.contentViewController = NSHostingController(rootView: StatusBarView(
+            viewModel: viewModel,
+            openDashboard: { [weak self] in self?.openDashboard() }
+        ))
         updateStatusBarIcon()
     }
 
@@ -123,5 +135,37 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         if let popover, popover.isShown {
             popover.performClose(nil)
         }
+    }
+
+    // MARK: - Dashboard
+
+    private func openDashboard() {
+        let port = viewModel?.daemonConfig.port ?? "20233"
+
+        // Reuse existing panel
+        if let panel = dashboardPanel, panel.isVisible {
+            panel.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+            return
+        }
+
+        let dashboardView = DashboardView(port: port)
+        let hostingController = NSHostingController(rootView: dashboardView)
+
+        let panel = NSPanel(contentViewController: hostingController)
+        panel.title = "Duoduo ATC"
+        panel.styleMask = [.titled, .closable, .resizable, .miniaturizable, .fullSizeContentView]
+        panel.titlebarAppearsTransparent = true
+        panel.titleVisibility = .hidden
+        panel.isMovableByWindowBackground = true
+        panel.isReleasedWhenClosed = false
+        panel.delegate = self
+        panel.minSize = NSSize(width: 680, height: 400)
+        panel.setFrame(NSRect(x: 100, y: 100, width: 860, height: 600), display: true)
+        panel.appearance = NSAppearance(named: .darkAqua)
+
+        self.dashboardPanel = panel
+        panel.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
     }
 }
