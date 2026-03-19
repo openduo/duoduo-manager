@@ -39,16 +39,23 @@ struct StatusBarView: View {
             }
             Text("Duoduo Manager")
                 .font(.system(size: 14, weight: .bold))
+            Spacer()
             Button {
                 openDashboard?()
             } label: {
-                Image(systemName: "square.grid.2x2")
-                    .font(.system(size: 11))
-                    .foregroundStyle(Color(nsColor: .secondaryLabelColor))
+                HStack(spacing: 4) {
+                    Image(systemName: "square.grid.2x2")
+                        .font(.system(size: 10))
+                    Text("ATC")
+                        .font(.system(size: 11, weight: .medium))
+                }
+                .foregroundStyle(Color(nsColor: .secondaryLabelColor))
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color(nsColor: .separatorColor).opacity(0.3))
+                .clipShape(RoundedRectangle(cornerRadius: 5))
             }
             .buttonStyle(.plain)
-            .help("Dashboard")
-            Spacer()
             if viewModel.isLoading {
                 ProgressView().scaleEffect(0.6).frame(width: 14, height: 14)
             }

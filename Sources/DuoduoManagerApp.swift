@@ -86,6 +86,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
     func windowWillClose(_ notification: Notification) {
         if let window = notification.object as? NSWindow, window === dashboardPanel {
             dashboardPanel = nil
+            // Restore accessory mode when no dashboard is open
+            NSApp.setActivationPolicy(.accessory)
         }
     }
 
@@ -165,6 +167,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
         panel.appearance = NSAppearance(named: .darkAqua)
 
         self.dashboardPanel = panel
+        // Promote to regular app so the panel stays visible when losing focus
+        NSApp.setActivationPolicy(.regular)
         panel.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
