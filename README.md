@@ -10,10 +10,13 @@ A macOS menu bar application for managing the [duoduo](https://github.com/opendu
 - **One-click upgrades** — Update daemon and all channels simultaneously
 - **Version tracking** — Automatic checks for new releases via GitHub API and npm
 - **Internationalization** — English and Simplified Chinese, follows macOS system language
+- **ATC Dashboard** — Real-time event stream, session monitoring, and job management
 
-## Screenshot
+## Screenshots
 
 ![DuoduoManager screenshot](assets/screenshot.png)
+
+![ATC Dashboard](assets/dashboard.png)
 
 ## Installation
 
