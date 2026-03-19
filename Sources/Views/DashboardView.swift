@@ -73,6 +73,7 @@ struct DashboardView: View {
         }
         .frame(minWidth: 680, minHeight: 500)
         .background(DashboardTheme.background)
+        .toolbarBackground(.hidden, for: .windowToolbar)
         .task { viewModel.startPolling() }
     }
 

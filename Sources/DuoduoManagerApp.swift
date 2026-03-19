@@ -5,17 +5,10 @@ struct DuoduoManagerApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
-        WindowGroup("") {
-            EmptyView()
-                .onAppear {
-                    for window in NSApp.windows where window.title.isEmpty {
-                        window.close()
-                    }
-                }
+        WindowGroup("Duoduo ATC", id: "atc") {
+            DashboardView()
         }
-        .windowStyle(.hiddenTitleBar)
-        .windowResizability(.contentSize)
-        .defaultSize(width: 1, height: 1)
+        .defaultSize(width: 860, height: 600)
     }
 }
 
@@ -25,16 +18,22 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
     private var viewModel: DaemonViewModel?
     private var popover: NSPopover?
     private var eventMonitor: Any?
-    private var dashboardPanel: NSPanel?
 
     nonisolated func applicationDidFinishLaunching(_ notification: Notification) {
         Task { @MainActor in
-            NSApp.setActivationPolicy(.accessory)
-
             // Load custom icon for app
             if let resourceURL = Bundle.main.url(forResource: "AppIcon", withExtension: "icns"),
                let icon = NSImage(contentsOf: resourceURL) {
                 NSApp.applicationIconImage = icon
+            }
+
+            // Hide the auto-created dashboard window and go menu-bar-only
+            NSApp.setActivationPolicy(.accessory)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                for window in NSApp.windows where window.title == "Duoduo ATC" {
+                    window.delegate = self
+                    window.orderOut(nil)
+                }
             }
 
             statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
@@ -83,12 +82,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
 
     // MARK: - NSWindowDelegate
 
-    func windowWillClose(_ notification: Notification) {
-        if let window = notification.object as? NSWindow, window === dashboardPanel {
-            dashboardPanel = nil
-            // Restore accessory mode when no dashboard is open
+    nonisolated func windowShouldClose(_ sender: NSWindow) -> Bool {
+        Task { @MainActor in
+            sender.orderOut(nil)
             NSApp.setActivationPolicy(.accessory)
         }
+        return false
     }
 
     // MARK: - Setup
@@ -142,34 +141,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
     // MARK: - Dashboard
 
     private func openDashboard() {
-        let port = viewModel?.daemonConfig.port ?? "20233"
+        closePopover()
 
-        // Reuse existing panel
-        if let panel = dashboardPanel, panel.isVisible {
-            panel.makeKeyAndOrderFront(nil)
+        if let window = NSApp.windows.first(where: { $0.title == "Duoduo ATC" }) {
+            window.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
-            return
         }
-
-        let dashboardView = DashboardView(port: port)
-        let hostingController = NSHostingController(rootView: dashboardView)
-
-        let panel = NSPanel(contentViewController: hostingController)
-        panel.title = "Duoduo ATC"
-        panel.styleMask = [.titled, .closable, .resizable, .miniaturizable, .fullSizeContentView]
-        panel.titlebarAppearsTransparent = true
-        panel.titleVisibility = .hidden
-        panel.isMovableByWindowBackground = true
-        panel.isReleasedWhenClosed = false
-        panel.delegate = self
-        panel.minSize = NSSize(width: 680, height: 400)
-        panel.setFrame(NSRect(x: 100, y: 100, width: 860, height: 600), display: true)
-        panel.appearance = NSAppearance(named: .darkAqua)
-
-        self.dashboardPanel = panel
-        // Promote to regular app so the panel stays visible when losing focus
-        NSApp.setActivationPolicy(.regular)
-        panel.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
     }
 }
