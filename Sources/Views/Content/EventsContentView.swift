@@ -92,12 +92,11 @@ struct EventsContentView: View {
     }
 
     private func row(for evt: SpineEvent) -> some View {
-        Button {
-            toggleExpand(evt.id)
-        } label: {
-            EventRowView(event: evt, isExpanded: expandedIDs.contains(evt.id))
-        }
-        .buttonStyle(.plain)
+        EventRowView(
+            event: evt,
+            isExpanded: expandedIDs.contains(evt.id),
+            onToggle: { toggleExpand(evt.id) }
+        )
         .contextMenu { contextMenu(for: evt) }
         .id(evt.id)
     }

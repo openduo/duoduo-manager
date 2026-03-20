@@ -5,35 +5,40 @@ import SwiftUI
 struct EventRowView: View {
     let event: SpineEvent
     let isExpanded: Bool
+    var onToggle: () -> Void = {}
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Log line: chevron | time | [type] | summary
-            HStack(alignment: .center, spacing: 8) {
-                // Expand indicator (visual only — click anywhere on the row to expand)
-                Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
-                    .font(.system(size: 8, weight: .medium))
-                    .foregroundStyle(isExpanded ? DashboardTheme.accent.opacity(0.6) : DashboardTheme.textTertiary.opacity(0.5))
-                    .frame(width: 16)
+            // Log line: chevron | time | [type] | summary — clickable to toggle expand
+            Button(action: onToggle) {
+                HStack(alignment: .center, spacing: 8) {
+                    // Expand indicator
+                    Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
+                        .font(.system(size: 8, weight: .medium))
+                        .foregroundStyle(isExpanded ? DashboardTheme.accent.opacity(0.6) : DashboardTheme.textTertiary.opacity(0.5))
+                        .frame(width: 16)
 
-                // Time
-                Text(timeString)
-                    .font(.system(size: 12, design: .monospaced))
-                    .foregroundStyle(DashboardTheme.textTertiary)
+                    // Time
+                    Text(timeString)
+                        .font(.system(size: 12, design: .monospaced))
+                        .foregroundStyle(DashboardTheme.textTertiary)
 
-                // [type]
-                typeTag
+                    // [type]
+                    typeTag
 
-                // Summary content
-                eventSummary
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
+                    // Summary content
+                    eventSummary
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                }
+                .padding(.top, 5)
+                .padding(.bottom, 4)
+                .contentShape(Rectangle())
             }
-            .padding(.top, 5)
-            .padding(.bottom, 4)
+            .buttonStyle(.plain)
 
-            // Expanded: raw JSON
+            // Expanded: raw JSON (not inside Button, so text selection works)
             if isExpanded {
                 HStack(spacing: 0) {
                     Rectangle()
