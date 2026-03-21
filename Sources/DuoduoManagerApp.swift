@@ -5,10 +5,9 @@ struct DuoduoManagerApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
-        WindowGroup("Duoduo ATC", id: "atc") {
-            DashboardView()
+        Settings {
+            EmptyView()
         }
-        .defaultSize(width: 860, height: 600)
     }
 }
 
@@ -18,28 +17,20 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
     private var viewModel: DaemonViewModel?
     private var popover: NSPopover?
     private var eventMonitor: Any?
+    private var dashboardWindow: NSPanel?
 
     nonisolated func applicationDidFinishLaunching(_ notification: Notification) {
         Task { @MainActor in
-            // Load custom icon for app
             if let resourceURL = Bundle.main.url(forResource: "AppIcon", withExtension: "icns"),
                let icon = NSImage(contentsOf: resourceURL) {
                 NSApp.applicationIconImage = icon
             }
 
-            // Hide the auto-created dashboard window and go menu-bar-only
             NSApp.setActivationPolicy(.accessory)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                for window in NSApp.windows where window.title == "Duoduo ATC" {
-                    window.delegate = self
-                    window.orderOut(nil)
-                }
-            }
 
             statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
 
             if let button = statusItem?.button {
-                // Use SF Symbols for auto light/dark mode support
                 if let sfImage = NSImage(systemSymbolName: "dog.fill", accessibilityDescription: "Duoduo") {
                     let config = NSImage.SymbolConfiguration(pointSize: 14, weight: .medium)
                     button.image = sfImage.withSymbolConfiguration(config)
@@ -54,7 +45,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
             popover.delegate = self
             self.popover = popover
 
-            // Add global click event monitor
             eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
                 Task { @MainActor in
                     self?.closePopover()
@@ -143,9 +133,26 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
     private func openDashboard() {
         closePopover()
 
-        if let window = NSApp.windows.first(where: { $0.title == "Duoduo ATC" }) {
-            window.makeKeyAndOrderFront(nil)
-            NSApp.activate(ignoringOtherApps: true)
+        if dashboardWindow == nil {
+            let dashboardView = DashboardView()
+            dashboardWindow = NSPanel(
+                contentRect: NSRect(x: 0, y: 0, width: 1100, height: 700),
+                styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
+                backing: .buffered,
+                defer: false
+            )
+            dashboardWindow?.title = "Duoduo ATC"
+            dashboardWindow?.titlebarAppearsTransparent = true
+            dashboardWindow?.contentViewController = NSHostingController(rootView: dashboardView)
+            dashboardWindow?.setContentSize(NSSize(width: 1100, height: 700))
+            dashboardWindow?.delegate = self
+            dashboardWindow?.minSize = NSSize(width: 680, height: 500)
+            dashboardWindow?.center()
+            dashboardWindow?.isReleasedWhenClosed = false
         }
+
+        dashboardWindow?.makeKeyAndOrderFront(nil)
+        NSApp.setActivationPolicy(.regular)
+        NSApp.activate(ignoringOtherApps: true)
     }
 }
