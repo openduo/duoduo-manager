@@ -5,12 +5,11 @@ A macOS menu bar application for managing the [duoduo](https://github.com/opendu
 ## Features
 
 - **Menu bar interface** — Unobtrusive status item with a popover for quick access
+- **Self-contained runtime** — Bundled Node.js, no system Node or npm required; duoduo auto-installed on first launch
 - **Daemon management** — Start, stop, restart, and configure the duoduo daemon
 - **Channel management** — Install, configure, and control messaging channels (currently Feishu)
-- **One-click upgrades** — Update daemon and all channels simultaneously
-- **Version tracking** — Automatic checks for new releases via GitHub API and npm
-- **Internationalization** — English and Simplified Chinese, follows macOS system language
-- **ATC Dashboard** — Real-time event stream, session monitoring, and job management
+- **Smart upgrades** — Version-aware: only updates and restarts components with newer versions
+- **ATC Dashboard** — Real-time event stream, session monitoring, and job management (Catppuccin Mocha theme)
 
 ## Screenshots
 
@@ -20,20 +19,28 @@ A macOS menu bar application for managing the [duoduo](https://github.com/opendu
 
 ## Installation
 
+### Download
+
+Download the DMG for your architecture from [Releases](https://github.com/openduo/duoduo-manager/releases):
+
+- `DuoduoManager-*-arm64.dmg` — Apple Silicon (M1/M2/M3/M4)
+- `DuoduoManager-*-x86_64.dmg` — Intel
+
 ### From source
 
 ```bash
 git clone https://github.com/openduo/duoduo-manager.git
 cd duoduo-manager
 make run        # Build and launch for development
-make app        # Build universal .app bundle
+make app        # Build arm64 + x86_64 .app bundles
 ```
 
 ### Prerequisites
 
 - macOS 14 (Sonoma) or later
 - Xcode Command Line Tools (`xcode-select --install`)
-- [duoduo CLI](https://github.com/openduo/duoduo) installed globally via npm
+
+No need to install Node.js, npm, or duoduo separately — everything is bundled.
 
 ## Development
 
@@ -49,8 +56,8 @@ make clean      # Clean build artifacts
 ### Release
 
 ```bash
-make app        # Build .app bundle (universal binary)
-make dmg        # Create DMG installer
+make app        # Build arm64 + x86_64 .app bundles (no signing)
+make dmg        # Create DMG installers for both architectures
 make release    # Full release: build + sign + notarize + DMG
 ```
 
@@ -63,7 +70,7 @@ make update-version NEW_VERSION=x.y.z
 
 ## Architecture
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
+See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation including runtime environment, daemon lifecycle, and upgrade flow.
 
 ## Localization
 
