@@ -6,7 +6,6 @@ struct UpgradeService: Sendable {
 
     func checkVersions() async throws -> [PackageVersion] {
         var versions: [PackageVersion] = []
-
         for pkg in npmPackages {
             let installed = try await versionService.getInstalledVersion(pkg)
             let latest = try await versionService.getNpmLatestVersion(pkg)
@@ -17,63 +16,68 @@ struct UpgradeService: Sendable {
                 needsUpdate: installed != latest && installed != nil
             ))
         }
-
         return versions
     }
 
-    func upgrade(packages: [String]) async throws -> String {
+    private func upgrade(packages: [String]) async throws -> String {
+        let npmPath = NodeRuntime.bundledBinDir.map { "\($0)/npm" } ?? "npm"
         var output = ""
         for pkg in packages {
-            print("[DuoduoManager] npm install -g \(pkg)@latest")
-            let result = try await ShellService.runShell("npm install -g \(pkg)@latest")
-            print("[DuoduoManager] npm result: \(result)")
+            let result = try await ShellService.run(npmPath, arguments: ["install", "-g", "\(pkg)@latest"])
             output += result
         }
         return output
     }
 
-    /// Update all components: daemon + all channels
-    /// - Parameters:
-    ///   - daemonWasRunning: whether daemon was running before upgrade
-    ///   - daemonConfig: env vars for daemon restart
-    ///   - channels: currently installed channel list
-    ///   - extraEnv: closure to get extra env for a channel type
-    ///   - syncChannel: closure to sync a channel (duoduo channel install)
-    ///   - startChannel: closure to start a channel (channel type + extraEnv)
-    ///   - restartDaemon: closure to restart daemon
+    /// Update only components that have newer versions available.
     func upgradeAll(
+        daemonInstalledVersion: String,
         daemonWasRunning: Bool,
-        daemonConfig: [String: String],
         channels: [ChannelInfo],
+        latestVersions: [String: String],
         extraEnv: (String) -> [String: String],
+        stopChannel: (String) async throws -> String,
         syncChannel: (String) async throws -> String,
         startChannel: (String, [String: String]) async throws -> String,
         restartDaemon: () async throws -> String
     ) async throws -> String {
         var output = ""
 
-        // 1. Always update daemon to latest
-        output += try await upgrade(packages: npmPackages)
+        // 1. Determine what needs updating
+        let daemonNeedsUpdate: Bool = {
+            guard let latest = latestVersions["daemon"], !latest.isEmpty, !daemonInstalledVersion.isEmpty
+            else { return false }
+            return daemonInstalledVersion.compare(latest, options: .numeric) == .orderedAscending
+        }()
 
-        // 2. Restart daemon if it was running, so new version takes effect
-        if daemonWasRunning {
-            print("[DuoduoManager] restarting daemon")
-            let restartOutput = try await restartDaemon()
-            print("[DuoduoManager] daemon restart result: \(restartOutput)")
-            output += restartOutput
+        let channelsToUpdate = channels.filter { ch in
+            guard let latest = latestVersions[ch.type], !latest.isEmpty, !ch.version.isEmpty
+            else { return false }
+            return ch.version.compare(latest, options: .numeric) == .orderedAscending
         }
 
-        // 3. Sync all channels, restart if was running
-        for channel in channels {
-            print("[DuoduoManager] syncing channel: \(channel.type)")
-            let wasRunning = channel.isRunning
-            let pkg = ChannelRegistry.entry(for: channel.type, feishuConfig: FeishuConfig())?.packageName
-                ?? "@openduo/channel-\(channel.type)"
-            let syncResult = try await syncChannel(pkg)
-            print("[DuoduoManager] channel sync result: \(syncResult)")
-            output += syncResult
-            if wasRunning {
-                output += try await startChannel(channel.type, extraEnv(channel.type))
+        guard daemonNeedsUpdate || !channelsToUpdate.isEmpty else { return "" }
+
+        // 2. Stop channels that need update (before daemon restart)
+        for ch in channelsToUpdate where ch.isRunning {
+            output += try await stopChannel(ch.type)
+        }
+
+        // 3. Update + restart daemon if needed
+        if daemonNeedsUpdate {
+            output += try await upgrade(packages: npmPackages)
+            if daemonWasRunning {
+                output += try await restartDaemon()
+            }
+        }
+
+        // 4. Update + restart channels
+        for ch in channelsToUpdate {
+            let pkg = ChannelRegistry.entry(for: ch.type, feishuConfig: FeishuConfig())?.packageName
+                ?? "@openduo/channel-\(ch.type)"
+            output += try await syncChannel(pkg)
+            if ch.isRunning {
+                output += try await startChannel(ch.type, extraEnv(ch.type))
             }
         }
 

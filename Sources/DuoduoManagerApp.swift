@@ -89,6 +89,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
         }
         updatePopoverContent()
         Task {
+            await viewModel?.ensureDuoduoInstalled()
             await viewModel?.refreshStatus()
             self.updateStatusBarIcon()
         }

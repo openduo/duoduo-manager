@@ -5,6 +5,9 @@
 .vscode/
 dist/
 
+# Node.js runtime cache (downloaded once, not committed)
+.node-cache/
+
 # Signing secrets
 .secret.env
 

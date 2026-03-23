@@ -33,6 +33,50 @@ DuoduoManagerApp.swift (entry point, menu bar lifecycle)
     └── L10n.swift             (type-safe localization keys)
 ```
 
+## Runtime Environment
+
+### Node.js and npm
+
+- **Bundled Node.js**: The app bundles a full Node.js runtime in `.app/Contents/Resources/node/` (matching the app's architecture: arm64 or x86_64, built separately, no universal binary)
+- **npm global packages**: Installed to `~/.duoduo-manager/` via `NPM_CONFIG_PREFIX`. This directory persists across app updates. The path must not contain spaces — duoduo's ESM self-invocation guard (`import.meta.url === file://${process.argv[1]}`) breaks when paths contain spaces because `import.meta.url` URL-encodes them but raw `process.argv[1]` does not
+- **Subprocess environment**: `ShellService.run()` sets `PATH` (bundled node bin → npm-global bin → system PATH), `NPM_CONFIG_PREFIX`, and `NODE_PATH` for every child process
+
+### Shared duoduo configuration
+
+- **Global config**: `~/.config/duoduo/config.json` — shared by all duoduo instances (bundled, homebrew, CLI). Contains `daemonUrl`, `workDir`, etc.
+- **Plugin directory**: `~/.aladuo/` — channel plugins are installed here by `duoduo channel install`, shared across all duoduo instances
+
+### Daemon lifecycle
+
+- **Startup**: App calls `ShellService.run()` to execute `~/.duoduo-manager/bin/duoduo daemon start` with `ALADUO_DAEMON_URL`, `ALADUO_LOG_LEVEL`, and user-defined config (port, workDir, etc.)
+- **Daemon process**: duoduo CLI forks a detached background process running `daemon.js`. Parent process is PID 1 (launchd). The daemon **survives app exit**
+- **Status**: `duoduo daemon status` queries the daemon via HTTP
+- **Version**: Read directly from `~/.duoduo-manager/lib/node_modules/@openduo/duoduo/package.json` `version` field
+
+### Channel lifecycle
+
+- **Registration**: `ChannelRegistry` defines supported channel types (currently: feishu). This is hardcoded, not discovered
+- **Status**: `duoduo channel <type> status` checks the shared plugin directory `~/.aladuo/`
+- **Start/Stop**: `duoduo channel <type> start/stop` sends commands to the daemon; the daemon spawns/manages channel processes using its inherited PATH (bundled node)
+- **Install**: `duoduo channel install <package>` fetches from npm registry and installs to `~/.aladuo/` — no separate `npm install -g` needed
+
+### Update checking
+
+- **Latest versions**: `npm view <package> version` (queries npm registry, network request)
+- **Installed versions**: daemon version from local `package.json`; channel versions parsed from `duoduo channel <type> status` output
+- **Timing**: Checked on popover open and periodically; status refreshes every 30s but does not re-check for updates
+
+### Upgrade flow (upgradeAll)
+
+Only performs actions for components that actually have newer versions available:
+
+| daemon update? | channel update? | Actions |
+|---|---|---|
+| No | No | Nothing |
+| Yes | No | `npm install -g @openduo/duoduo@latest` → restart daemon |
+| No | Yes | Stop updated channels → `duoduo channel install` → restart channels |
+| Yes | Yes | Stop updated channels → update + restart daemon → sync + restart channels |
+
 ## Key Decisions
 
 ### Why `@Observable` instead of `ObservableObject`?
@@ -90,10 +134,10 @@ The app uses `NSStatusItem` + `NSPopover` with `.transient` behavior (click outs
 
 The `build_app.sh` script handles:
 
-1. **Universal binary** — Compiles for arm64 and x86_64, merges with `lipo`
-2. **App bundle assembly** — Copies from `.app-template`, adds executable and resources
+1. **Separate arch builds** — Compiles for arm64 and x86_64 independently (no universal binary, no Rosetta). Each .app bundles the matching Node.js architecture
+2. **App bundle assembly** — Copies from `.app-template`, adds executable and resources. Node.js is extracted via `tar` to preserve symlinks
 3. **Code signing** — Developer ID signing with entitlements for sandbox access
 4. **Notarization** — Submits to Apple's notary service via `notarytool`
-5. **DMG creation** — Styled disk image using `create-dmg` (fallback to `hdiutil`)
+5. **DMG creation** — Two separate DMGs: `DuoduoManager-{version}-arm64.dmg` and `DuoduoManager-{version}-x86_64.dmg`
 
 Localization `.lproj` directories are copied into `Contents/Resources/` during app bundle assembly.

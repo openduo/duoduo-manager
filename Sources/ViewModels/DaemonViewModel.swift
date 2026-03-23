@@ -8,6 +8,7 @@ final class DaemonViewModel {
     private(set) var isLoading = false
     private(set) var lastOutput = ""
     private(set) var errorMessage: String?
+    private(set) var isSettingUp = false
 
     /// Update check results, keyed by "daemon" or channel type
     private(set) var latestVersions: [String: String] = [:]
@@ -24,6 +25,27 @@ final class DaemonViewModel {
         self.daemonConfig = config
         self.daemonService = DaemonService()
         self.channelService = ChannelService()
+    }
+
+    /// Ensure duoduo is installed; if not, auto-install it. Returns true when ready.
+    func ensureDuoduoInstalled() async {
+        guard !NodeRuntime.isDuoduoInstalled else { return }
+        isSettingUp = true
+        lastOutput = L10n.Setup.installingDuoduo
+        do {
+            let output = try await NodeRuntime.installDuoduo()
+            if NodeRuntime.isDuoduoInstalled {
+                lastOutput = L10n.Setup.installSuccess
+            } else {
+                lastOutput = L10n.Setup.installFailed + "\n" + output
+                errorMessage = L10n.Setup.installFailed
+            }
+        } catch {
+            print("[DuoduoManager] duoduo install error: \(error)")
+            lastOutput = L10n.Error.prefix(error.localizedDescription)
+            errorMessage = error.localizedDescription
+        }
+        isSettingUp = false
     }
 
     // MARK: - Update Check Helpers
@@ -65,10 +87,12 @@ final class DaemonViewModel {
         executeCommand {
             let daemonWasRunning = self.status.isRunning
             let result = try await self.upgradeService.upgradeAll(
+                daemonInstalledVersion: self.status.version,
                 daemonWasRunning: daemonWasRunning,
-                daemonConfig: self.daemonConfig.envVars,
                 channels: self.channels,
+                latestVersions: self.latestVersions,
                 extraEnv: { type in self.extraEnv(for: type) },
+                stopChannel: { type in try await self.channelService.stopChannel(type) },
                 syncChannel: { pkg in try await self.channelService.syncChannel(pkg) },
                 startChannel: { type, env in try await self.channelService.startChannel(type, extraEnv: env) },
                 restartDaemon: { try await self.daemonService.restart(extraEnv: self.daemonConfig.envVars) }

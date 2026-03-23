@@ -14,51 +14,40 @@ final class DaemonService: Sendable {
         ]
     }
 
-    // MARK: - Package Directory
-
-    /// Resolve the duoduo npm package root via `which duoduo`.
-    private func getPackageDir() async throws -> String {
-        try await ShellService.runShell(
-            "dirname $(dirname $(realpath $(which duoduo)))"
-        ).trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
     // MARK: - Daemon Commands
 
     func getStatus() async throws -> DaemonStatus {
-        let dir = try await getPackageDir()
-        let output = try await runDuoduo("daemon", "status", workingDirectory: dir)
+        guard let dir = NodeRuntime.duoduoPackageDir else {
+            return DaemonStatus()
+        }
+        let output = try await runDuoduo(["daemon", "status"], workingDirectory: dir)
         return parseStatusOutput(output)
     }
 
     func getVersion() async throws -> String {
-        let dir = try await getPackageDir()
-        let output = try await ShellService.runShell(
-            "grep '\"version\"' \"\(dir)/package.json\" | head -1 | sed 's/.*\"version\": \"\\([^\"]*\\)\".*/\\1/'"
-        )
-        let version = output.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard version.range(of: #"^\d+\.\d+\.\d+"#, options: .regularExpression) != nil else {
-            return ""
-        }
+        guard let dir = NodeRuntime.duoduoPackageDir else { return "" }
+        let pkgJsonURL = URL(fileURLWithPath: dir).appendingPathComponent("package.json")
+        guard let data = FileManager.default.contents(atPath: pkgJsonURL.path),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let version = json["version"] as? String
+        else { return "" }
         return version
     }
 
     func start(extraEnv: [String: String] = [:]) async throws -> String {
-        let dir = try await getPackageDir()
-        if extraEnv.isEmpty {
-            return try await runDuoduo("daemon", "start", workingDirectory: dir)
+        guard let dir = NodeRuntime.duoduoPackageDir else {
+            return "duoduo not installed"
         }
         var merged = env
         extraEnv.forEach { merged[$0] = $1 }
-        return try await ShellService.runShell(
-            "duoduo daemon start", environment: merged, workingDirectory: dir
-        )
+        return try await runDuoduo(["daemon", "start"], environment: merged, workingDirectory: dir)
     }
 
     func stop() async throws -> String {
-        let dir = try await getPackageDir()
-        _ = try await runDuoduo("daemon", "stop", workingDirectory: dir)
-        return ""
+        guard let dir = NodeRuntime.duoduoPackageDir else {
+            return ""
+        }
+        return try await runDuoduo(["daemon", "stop"], workingDirectory: dir)
     }
 
     func restart(extraEnv: [String: String] = [:]) async throws -> String {
@@ -69,10 +58,12 @@ final class DaemonService: Sendable {
 
     // MARK: - Private
 
-    private func runDuoduo(_ args: String..., workingDirectory: String = "") async throws -> String {
-        let command = ["duoduo"] + args
-        return try await ShellService.runShell(
-            command.joined(separator: " "), environment: env, workingDirectory: workingDirectory.isEmpty ? nil : workingDirectory
+    private func runDuoduo(_ arguments: [String], environment: [String: String] = [:], workingDirectory: String? = nil) async throws -> String {
+        try await ShellService.run(
+            NodeRuntime.duoduoPath,
+            arguments: arguments,
+            environment: environment.merging(env) { _, new in new },
+            workingDirectory: workingDirectory
         )
     }
 
@@ -82,7 +73,6 @@ final class DaemonService: Sendable {
         status.isRunning = output.contains("healthy: yes") || output.contains("pid_alive: yes")
         status.lastUpdated = .now
 
-        // Parse PID
         if let pidRange = output.range(of: "pid: ([0-9]+)", options: .regularExpression) {
             let pidString = String(output[pidRange])
             status.pid = pidString.replacingOccurrences(of: "pid: ", with: "")

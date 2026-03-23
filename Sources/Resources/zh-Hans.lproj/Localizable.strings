@@ -69,3 +69,8 @@
 /* Upgrade */
 "upgrade.allUpToDate" = "所有组件已是最新版本";
 
+/* Setup */
+"setup.installingDuoduo" = "正在首次安装 duoduo...";
+"setup.installSuccess" = "Duoduo 安装成功";
+"setup.installFailed" = "Duoduo 安装失败";
+

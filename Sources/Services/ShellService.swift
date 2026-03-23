@@ -1,28 +1,56 @@
 import Foundation
 
 enum ShellError: LocalizedError {
-    case executionFailed(String)
-    case processNotFound(String)
+    case executionFailed(String, exitCode: Int32)
 
     var errorDescription: String? {
         switch self {
-        case .executionFailed(let message):
+        case .executionFailed(let message, _):
             return L10n.Error.executionFailed(message)
-        case .processNotFound(let cmd):
-            return L10n.Error.commandNotFound(cmd)
         }
     }
 }
 
 struct ShellService: Sendable {
-    static func run(_ executable: String, arguments: [String], environment: [String: String] = [:], workingDirectory: String? = nil) async throws -> String {
-        try await withCheckedThrowingContinuation { continuation in
+    private static let logFile = "\(NSHomeDirectory())/Library/Application Support/\(Bundle.main.bundleIdentifier!)/debug.log"
+    private static let logQueue = DispatchQueue(label: "com.duoduo.shell.log")
+
+    private static func writeLog(_ message: String) {
+        logQueue.async {
+            let timestamp = DateFormatter.localizedString(from: Date(), dateStyle: .medium, timeStyle: .medium)
+            let line = "[\(timestamp)] \(message)\n"
+            guard let data = line.data(using: .utf8) else { return }
+            if FileManager.default.fileExists(atPath: logFile) {
+                if let handle = try? FileHandle(forWritingTo: URL(fileURLWithPath: logFile)) {
+                    handle.seekToEndOfFile()
+                    handle.write(data)
+                }
+            } else {
+                FileManager.default.createFile(atPath: logFile, contents: data)
+            }
+        }
+    }
+
+    /// Run a subprocess directly — no shell intermediate.
+    static func run(
+        _ executable: String,
+        arguments: [String],
+        environment overrides: [String: String] = [:],
+        workingDirectory: String? = nil
+    ) async throws -> String {
+        let cmdDesc = "\(executable) \(arguments.joined(separator: " "))"
+        writeLog(">>> \(cmdDesc)")
+        if let dir = workingDirectory {
+            writeLog("    cwd: \(dir)")
+        }
+
+        return try await withCheckedThrowingContinuation { continuation in
             let process = Process()
             process.executableURL = URL(fileURLWithPath: executable)
             process.arguments = arguments
 
-            var env = ProcessInfo.processInfo.environment
-            for (key, value) in environment {
+            var env = NodeRuntime.environment
+            for (key, value) in overrides {
                 env[key] = value
             }
             process.environment = env
@@ -46,29 +74,20 @@ struct ShellService: Sendable {
                 if process.terminationStatus != 0 {
                     let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
                     let errorOutput = String(data: errorData, encoding: .utf8) ?? ""
+                    writeLog("<<< exit \(process.terminationStatus)\n\(output)\n[stderr]\n\(errorOutput)")
                     if !errorOutput.isEmpty {
                         output += "\n[stderr]\n" + errorOutput
                     }
+                    continuation.resume(throwing: ShellError.executionFailed(output, exitCode: process.terminationStatus))
+                    return
                 }
 
+                writeLog("<<< exit 0\n\(output)")
                 continuation.resume(returning: output)
             } catch {
-                continuation.resume(throwing: ShellError.executionFailed(error.localizedDescription))
+                writeLog("<<< FAILED: \(error)")
+                continuation.resume(throwing: ShellError.executionFailed(error.localizedDescription, exitCode: -1))
             }
         }
-    }
-
-    static func runShell(_ script: String, environment: [String: String] = [:], workingDirectory: String? = nil) async throws -> String {
-        // Explicitly source shell config files to load user environment (nvm/node, etc.)
-        // GUI apps don't inherit shell PATH, so we need to load it manually
-        let shell = ProcessInfo.processInfo.environment["SHELL"] ?? "/bin/zsh"
-        let sourceCmd: String
-        if shell.contains("zsh") {
-            sourceCmd = "source ~/.zshrc 2>/dev/null || true; source ~/.zprofile 2>/dev/null || true"
-        } else {
-            sourceCmd = "source ~/.bashrc 2>/dev/null || true; source ~/.bash_profile 2>/dev/null || true"
-        }
-        let fullScript = "\(sourceCmd); \(script)"
-        return try await run(shell, arguments: ["-c", fullScript], environment: environment, workingDirectory: workingDirectory)
     }
 }

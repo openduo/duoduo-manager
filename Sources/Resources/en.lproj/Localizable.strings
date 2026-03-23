@@ -69,3 +69,8 @@
 /* Upgrade */
 "upgrade.allUpToDate" = "All components are up to date";
 
+/* Setup */
+"setup.installingDuoduo" = "Installing duoduo for the first time...";
+"setup.installSuccess" = "Duoduo installed successfully";
+"setup.installFailed" = "Failed to install duoduo";
+
