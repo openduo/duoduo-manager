@@ -3,8 +3,8 @@ import Foundation
 struct DashboardRPCService: Sendable {
     let baseURL: String
 
-    init(port: String = "20233") {
-        self.baseURL = "http://127.0.0.1:\(port)"
+    init(daemonURL: String) {
+        self.baseURL = daemonURL
     }
 
     func systemStatus() async throws -> SystemStatus {

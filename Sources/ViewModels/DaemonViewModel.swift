@@ -23,8 +23,8 @@ final class DaemonViewModel {
         let config = DaemonConfig.load()
         self.feishuConfig = FeishuConfig.load()
         self.daemonConfig = config
-        self.daemonService = DaemonService()
-        self.channelService = ChannelService()
+        self.daemonService = DaemonService(daemonURL: config.daemonURL)
+        self.channelService = ChannelService(daemonURL: config.daemonURL)
     }
 
     /// Ensure duoduo is installed; if not, auto-install it. Returns true when ready.

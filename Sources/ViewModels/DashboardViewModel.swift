@@ -3,6 +3,7 @@ import Foundation
 @MainActor
 @Observable
 final class DashboardViewModel {
+    let daemonURL: String
     private(set) var sessions: [SessionInfo] = []
     private(set) var health: HealthInfo?
     private(set) var subconscious: SubconsciousInfo?
@@ -24,8 +25,9 @@ final class DashboardViewModel {
 
     private let maxEvents = 2000
 
-    init(port: String = "20233") {
-        self.rpc = DashboardRPCService(port: port)
+    init(daemonURL: String) {
+        self.daemonURL = daemonURL
+        self.rpc = DashboardRPCService(daemonURL: daemonURL)
     }
 
     func startPolling() {

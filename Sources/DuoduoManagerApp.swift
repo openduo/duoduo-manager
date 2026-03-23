@@ -134,8 +134,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
     private func openDashboard() {
         closePopover()
 
+        let dashboardURL = viewModel?.daemonConfig.daemonURL ?? "http://127.0.0.1:20233"
+
         if dashboardWindow == nil {
-            let dashboardView = DashboardView()
+            let dashboardView = DashboardView(daemonURL: dashboardURL)
             dashboardWindow = NSPanel(
                 contentRect: NSRect(x: 0, y: 0, width: 1100, height: 700),
                 styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],

@@ -10,6 +10,13 @@ struct DaemonConfig: Codable, Sendable {
     // MARK: - Network
     /// Listen port
     var port: String = "20233"
+    /// Daemon host (default: 127.0.0.1)
+    var host: String = "127.0.0.1"
+
+    /// Computed daemon URL from host + port
+    var daemonURL: String {
+        "http://\(host):\(port)"
+    }
 
     // MARK: - Logging
     /// debug | info | warn | error
@@ -36,6 +43,7 @@ struct DaemonConfig: Codable, Sendable {
     /// Whether any value differs from defaults
     var isCustomized: Bool {
         port != "20233"
+            || host != "127.0.0.1"
             || logLevel != "debug"
             || permissionMode != "default"
             || maxConcurrent != "10"
@@ -49,6 +57,7 @@ struct DaemonConfig: Codable, Sendable {
         var env: [String: String] = [:]
         if !workDir.isEmpty                      { env["ALADUO_WORK_DIR"] = workDir }
         if port != "20233"                       { env["ALADUO_PORT"] = port }
+        if host != "127.0.0.1"                   { env["ALADUO_HOST"] = host }
         if logLevel != "debug"                   { env["ALADUO_LOG_LEVEL"] = logLevel }
         if permissionMode != "default"           { env["ALADUO_PERMISSION_MODE"] = permissionMode }
         if maxConcurrent != "10"                 { env["ALADUO_SESSION_MAX_CONCURRENT"] = maxConcurrent }

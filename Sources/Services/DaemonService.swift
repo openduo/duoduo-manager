@@ -3,7 +3,7 @@ import Foundation
 final class DaemonService: Sendable {
     let daemonURL: String
 
-    init(daemonURL: String = "http://127.0.0.1:20233") {
+    init(daemonURL: String) {
         self.daemonURL = daemonURL
     }
 

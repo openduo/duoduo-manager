@@ -30,8 +30,8 @@ struct DashboardView: View {
     @State private var selectedEntry: SidebarEntry = .sessionGroup(key: "")
     @State private var expandedGroups: Set<String> = []
 
-    init(port: String = "20233") {
-        _viewModel = State(initialValue: DashboardViewModel(port: port))
+    init(daemonURL: String) {
+        _viewModel = State(initialValue: DashboardViewModel(daemonURL: daemonURL))
     }
 
     /// Extract unique session_keys from events, sorted by most recent activity
@@ -111,6 +111,15 @@ struct DashboardView: View {
                 .padding(.top, 4)
                 .padding(.bottom, 8)
             }
+
+            // Bottom: daemon URL
+            Text(viewModel.daemonURL)
+                .font(.system(size: 9, design: .monospaced))
+                .foregroundStyle(DashboardTheme.sidebarHeaderText)
+                .lineLimit(1)
+                .truncationMode(.middle)
+                .padding(.horizontal, 10)
+                .padding(.bottom, 6)
         }
         .frame(width: 200)
         .background(
