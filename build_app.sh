@@ -67,10 +67,13 @@ extract_node() {
     local NODE_FULL_VERSION
     NODE_FULL_VERSION=$(ls "${NODE_CACHE_DIR}"/node-v*-darwin-arm64.tar.gz 2>/dev/null | head -1 | xargs -I{} basename {} | sed -E 's/node-v([0-9]+\.[0-9]+\.[0-9]+)-.*/\1/')
 
+    local ARCH_SUFFIX="x64"
+    [ "$ARCH" = "arm64" ] && ARCH_SUFFIX="arm64"
+
     local EXTRACT_DIR="${NODE_CACHE_DIR}/.extract-${ARCH}"
     rm -rf "$EXTRACT_DIR"
     mkdir -p "$EXTRACT_DIR"
-    tar -xzf "${NODE_CACHE_DIR}/node-v${NODE_FULL_VERSION}-darwin-${ARCH}.tar.gz" -C "$EXTRACT_DIR" --strip-components=1
+    tar -xzf "${NODE_CACHE_DIR}/node-v${NODE_FULL_VERSION}-darwin-${ARCH_SUFFIX}.tar.gz" -C "$EXTRACT_DIR" --strip-components=1
     echo "$EXTRACT_DIR"
 }
 
