@@ -114,12 +114,12 @@ struct DashboardView: View {
 
             // Bottom: daemon URL
             Text(viewModel.daemonURL)
-                .font(.system(size: 9, design: .monospaced))
-                .foregroundStyle(DashboardTheme.sidebarHeaderText)
+                .font(.system(size: 10, design: .monospaced))
+                .foregroundStyle(DashboardTheme.textSecondary)
                 .lineLimit(1)
                 .truncationMode(.middle)
-                .padding(.horizontal, 10)
-                .padding(.bottom, 6)
+                .padding(.horizontal, 14)
+                .padding(.bottom, 10)
         }
         .frame(width: 200)
         .background(

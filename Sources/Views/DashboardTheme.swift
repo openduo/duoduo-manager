@@ -1,32 +1,32 @@
 import SwiftUI
 
 enum DashboardTheme {
-    // Backgrounds
-    static let background = Color(red: 17/255, green: 17/255, blue: 17/255)
-    static let sidebarBackground = Color(red: 13/255, green: 13/255, blue: 13/255)
-    static let cardBackground = Color(red: 22/255, green: 22/255, blue: 22/255)
+    // Backgrounds — Catppuccin Mocha inspired, layered with warm undertones
+    static let background = Color(red: 24/255, green: 24/255, blue: 37/255)
+    static let sidebarBackground = Color(red: 17/255, green: 17/255, blue: 27/255)
+    static let cardBackground = Color(red: 30/255, green: 30/255, blue: 46/255)
 
-    // Borders / dividers
-    static let border = Color(red: 34/255, green: 34/255, blue: 34/255)
-    static let sidebarDivider = Color(red: 26/255, green: 26/255, blue: 26/255)
+    // Borders / dividers — warm-tinted, very subtle
+    static let border = Color(red: 69/255, green: 71/255, blue: 90/255).opacity(0.5)
+    static let sidebarDivider = Color(red: 69/255, green: 71/255, blue: 90/255).opacity(0.3)
 
-    // Text
-    static let text = Color(red: 232/255, green: 232/255, blue: 232/255)
-    static let textSecondary = Color(red: 136/255, green: 136/255, blue: 136/255)
-    static let textTertiary = Color(red: 68/255, green: 68/255, blue: 68/255)
-    static let sidebarHeaderText = Color(red: 51/255, green: 51/255, blue: 51/255)
-    static let sidebarItemText = Color(red: 119/255, green: 119/255, blue: 119/255)
+    // Text — proper hierarchy, all readable on dark bg
+    static let text = Color(red: 205/255, green: 214/255, blue: 244/255)
+    static let textSecondary = Color(red: 166/255, green: 173/255, blue: 200/255)
+    static let textTertiary = Color(red: 88/255, green: 91/255, blue: 112/255)
+    static let sidebarHeaderText = Color(red: 108/255, green: 112/255, blue: 134/255)
+    static let sidebarItemText = Color(red: 147/255, green: 153/255, blue: 178/255)
 
-    // Neon highlights
-    static let accent = Color(red: 0, green: 212/255, blue: 170/255)        // #00d4aa cyan-green
-    static let emerald = Color(red: 0, green: 255/255, blue: 159/255)       // #00ff9f
-    static let amber = Color(red: 255/255, green: 140/255, blue: 0)         // #ff8c00
-    static let red = Color(red: 255/255, green: 68/255, blue: 68/255)       // #ff4444
-    static let blue = Color(red: 77/255, green: 159/255, blue: 255/255)     // #4d9fff
-    static let fuchsia = Color(red: 204/255, green: 68/255, blue: 255/255)  // #cc44ff
+    // Accents — Catppuccin Mocha pastels, soft and distinctive
+    static let accent = Color(red: 148/255, green: 226/255, blue: 213/255)       // Teal
+    static let emerald = Color(red: 166/255, green: 227/255, blue: 161/255)       // Green
+    static let amber = Color(red: 249/255, green: 226/255, blue: 175/255)         // Yellow
+    static let red = Color(red: 243/255, green: 139/255, blue: 168/255)           // Red
+    static let blue = Color(red: 137/255, green: 180/255, blue: 250/255)          // Blue
+    static let fuchsia = Color(red: 203/255, green: 166/255, blue: 247/255)       // Mauve
 
     // Sidebar selected
-    static let sidebarActive = Color(red: 0, green: 212/255, blue: 170/255).opacity(0.12)
+    static let sidebarActive = Color(red: 49/255, green: 50/255, blue: 68/255)
 
     // MARK: - Formatting
 
