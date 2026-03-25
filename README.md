@@ -4,18 +4,33 @@ A macOS menu bar application for managing the [duoduo](https://github.com/opendu
 
 ## Features
 
-- **Menu bar interface** — Unobtrusive status item with a popover for quick access
+- **Menu bar interface** — Unobtrusive status item with a popover for quick access to daemon controls, channel status, and version updates
 - **Self-contained runtime** — Bundled Node.js, no system Node or npm required; duoduo auto-installed on first launch
-- **Daemon management** — Start, stop, restart, and configure the duoduo daemon
+- **Daemon management** — Start, stop, restart, and configure the duoduo daemon directly from the popover
 - **Channel management** — Install, configure, and control messaging channels (currently Feishu)
 - **Smart upgrades** — Version-aware: only updates and restarts components with newer versions
-- **ATC Dashboard** — Real-time event stream, session monitoring, and job management (Catppuccin Mocha theme)
+- **ATC Dashboard** — Real-time event stream, session monitoring, and job management in a native panel (Catppuccin Mocha theme)
+- **CC Reader** — Embedded [cc-reader](https://github.com/kuaner/cc-reader) for browsing Claude Code session history, with timeline rendering, syntax highlighting, and multi-pane layout
 
 ## Screenshots
 
+### Menu Bar Popover
+
+Quick access to daemon status, channel controls, and one-click actions. The footer provides shortcuts to open ATC Dashboard, CC Reader, or quit the app.
+
 ![DuoduoManager screenshot](assets/screenshot.png)
 
+### ATC Dashboard
+
+Real-time event stream, active sessions, and job queue. Built with a Catppuccin Mocha dark theme for comfortable monitoring.
+
 ![ATC Dashboard](assets/dashboard.png)
+
+### CC Reader
+
+Browse and search Claude Code conversation history with markdown rendering, syntax highlighting, and session management. Toolbar items (working directory, resume, refresh) are integrated into the title bar.
+
+![CC Reader](assets/reader.png)
 
 ## Installation
 
