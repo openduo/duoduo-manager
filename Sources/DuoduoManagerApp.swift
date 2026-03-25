@@ -1,13 +1,23 @@
 import SwiftUI
+import CCReaderKit
 
 @main
 struct DuoduoManagerApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
-        Settings {
+        // Dummy scene: satisfies SwiftUI's Scene requirement, auto-closes on appear.
+        WindowGroup("") {
             EmptyView()
+                .onAppear {
+                    for window in NSApp.windows where window.title.isEmpty {
+                        window.close()
+                    }
+                }
         }
+        .windowStyle(.hiddenTitleBar)
+        .windowResizability(.contentSize)
+        .defaultSize(width: 1, height: 1)
     }
 }
 
@@ -18,6 +28,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
     private var popover: NSPopover?
     private var eventMonitor: Any?
     private var dashboardWindow: NSPanel?
+    private var readerWindow: NSWindow?
+    private var windowCloseObserver: Any?
 
     nonisolated func applicationDidFinishLaunching(_ notification: Notification) {
         Task { @MainActor in
@@ -27,6 +39,22 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
             }
 
             NSApp.setActivationPolicy(.accessory)
+
+            // Switch back to .accessory when all titled windows are closed
+            windowCloseObserver = NotificationCenter.default.addObserver(
+                forName: NSWindow.willCloseNotification,
+                object: nil,
+                queue: .main
+            ) { _ in
+                DispatchQueue.main.async {
+                    let hasVisibleWindow = NSApp.windows.contains {
+                        $0.isVisible && $0.styleMask.contains(.titled) && !$0.title.isEmpty
+                    }
+                    if !hasVisibleWindow {
+                        NSApp.setActivationPolicy(.accessory)
+                    }
+                }
+            }
 
             statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
 
@@ -61,7 +89,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
             if let monitor = eventMonitor {
                 NSEvent.removeMonitor(monitor)
             }
+            if let observer = windowCloseObserver {
+                NotificationCenter.default.removeObserver(observer)
+            }
         }
+    }
+
+    nonisolated func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        return false
     }
 
     // MARK: - NSPopoverDelegate
@@ -75,7 +110,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
     nonisolated func windowShouldClose(_ sender: NSWindow) -> Bool {
         Task { @MainActor in
             sender.orderOut(nil)
-            NSApp.setActivationPolicy(.accessory)
+            let hasOtherVisibleWindow = NSApp.windows.contains {
+                $0.isVisible && $0 != sender && $0.styleMask.contains(.titled) && !$0.title.isEmpty
+            }
+            if !hasOtherVisibleWindow {
+                NSApp.setActivationPolicy(.accessory)
+            }
         }
         return false
     }
@@ -99,7 +139,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
         guard let viewModel else { return }
         popover?.contentViewController = NSHostingController(rootView: StatusBarView(
             viewModel: viewModel,
-            openDashboard: { [weak self] in self?.openDashboard() }
+            openDashboard: { [weak self] in self?.openDashboard() },
+            openReader: { [weak self] in self?.openReader() }
         ))
         updateStatusBarIcon()
     }
@@ -159,6 +200,41 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
         NSApp.activate(ignoringOtherApps: true)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
             self?.dashboardWindow?.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+        }
+    }
+
+    // MARK: - CC Reader
+
+    private func openReader() {
+        closePopover()
+
+        if readerWindow == nil {
+            let readerView = CCReaderKit.makeView()
+            readerWindow = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 1200, height: 800),
+                styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
+                backing: .buffered,
+                defer: false
+            )
+            readerWindow?.title = "CC Reader"
+            let toolbar = NSToolbar(identifier: "CCReaderToolbar")
+            toolbar.displayMode = .iconOnly
+            readerWindow?.toolbar = toolbar
+            readerWindow?.toolbarStyle = .unified
+            readerWindow?.contentViewController = NSHostingController(rootView: readerView)
+            readerWindow?.setContentSize(NSSize(width: 1200, height: 800))
+            readerWindow?.delegate = self
+            readerWindow?.minSize = NSSize(width: 680, height: 500)
+            readerWindow?.center()
+            readerWindow?.isReleasedWhenClosed = false
+            readerWindow?.collectionBehavior = [.managed, .participatesInCycle, .fullScreenAllowsTiling]
+        }
+
+        NSApp.setActivationPolicy(.regular)
+        NSApp.activate(ignoringOtherApps: true)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
+            self?.readerWindow?.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
         }
     }

@@ -12,7 +12,7 @@ enum ShellError: LocalizedError {
 }
 
 struct ShellService: Sendable {
-    private static let logFile = "\(NSHomeDirectory())/Library/Application Support/\(Bundle.main.bundleIdentifier!)/debug.log"
+    private static let logFile = "\(NSHomeDirectory())/Library/Application Support/\(Bundle.main.bundleIdentifier ?? "ai.openduo.manager")/debug.log"
     private static let logQueue = DispatchQueue(label: "com.duoduo.shell.log")
 
     private static func writeLog(_ message: String) {

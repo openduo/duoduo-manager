@@ -13,10 +13,15 @@ let package = Package(
             targets: ["DuoduoManager"]
         )
     ],
-    dependencies: [],
+    dependencies: [
+        .package(url: "https://github.com/kuaner/cc-reader.git", from: "0.2.3"),
+    ],
     targets: [
         .executableTarget(
             name: "DuoduoManager",
+            dependencies: [
+                .product(name: "CCReaderKit", package: "cc-reader"),
+            ],
             path: "Sources",
             resources: [
                 .process("Resources/en.lproj"),

@@ -1,4 +1,5 @@
 import SwiftUI
+import CCReaderKit
 
 // MARK: - Root
 
@@ -6,6 +7,7 @@ import SwiftUI
 struct StatusBarView: View {
     @Bindable var viewModel: DaemonViewModel
     var openDashboard: (() -> Void)?
+    var openReader: (() -> Void)?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -40,22 +42,6 @@ struct StatusBarView: View {
             Text("Duoduo Manager")
                 .font(.system(size: 14, weight: .bold))
             Spacer()
-            Button {
-                openDashboard?()
-            } label: {
-                HStack(spacing: 4) {
-                    Image(systemName: "square.grid.2x2")
-                        .font(.system(size: 10))
-                    Text("ATC")
-                        .font(.system(size: 11, weight: .medium))
-                }
-                .foregroundStyle(Color(nsColor: .secondaryLabelColor))
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color(nsColor: .separatorColor).opacity(0.3))
-                .clipShape(RoundedRectangle(cornerRadius: 5))
-            }
-            .buttonStyle(.plain)
             if viewModel.isLoading {
                 ProgressView().scaleEffect(0.6).frame(width: 14, height: 14)
             }
@@ -240,30 +226,75 @@ struct StatusBarView: View {
     // MARK: - App Footer
 
     private var appFooter: some View {
-        HStack(spacing: 6) {
-            if let error = viewModel.errorMessage {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.system(size: 10)).foregroundStyle(.red)
-                Text(error)
-                    .font(.system(size: 10)).foregroundStyle(.red).lineLimit(1)
-                Button(L10n.Status.clear) { viewModel.clearOutput() }
-                    .buttonStyle(.plain).font(.system(size: 10)).foregroundStyle(.tertiary)
-            } else if !viewModel.lastOutput.isEmpty {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 10)).foregroundStyle(.green)
-                Text(viewModel.lastOutput)
-                    .font(.system(size: 10)).foregroundStyle(.secondary).lineLimit(1)
-                Button(L10n.Status.clear) { viewModel.clearOutput() }
-                    .buttonStyle(.plain).font(.system(size: 10)).foregroundStyle(.tertiary)
+        VStack(spacing: 0) {
+            // Message row
+            if viewModel.errorMessage != nil || !viewModel.lastOutput.isEmpty {
+                HStack(spacing: 6) {
+                    if let error = viewModel.errorMessage {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.system(size: 10)).foregroundStyle(.red)
+                        Text(error)
+                            .font(.system(size: 10)).foregroundStyle(.red).lineLimit(1)
+                        Spacer()
+                        Button(L10n.Status.clear) { viewModel.clearOutput() }
+                            .buttonStyle(.plain).font(.system(size: 10)).foregroundStyle(.tertiary)
+                    } else if !viewModel.lastOutput.isEmpty {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 10)).foregroundStyle(.green)
+                        Text(viewModel.lastOutput)
+                            .font(.system(size: 10)).foregroundStyle(.secondary).lineLimit(1)
+                        Spacer()
+                        Button(L10n.Status.clear) { viewModel.clearOutput() }
+                            .buttonStyle(.plain).font(.system(size: 10)).foregroundStyle(.tertiary)
+                    }
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 6)
+                Divider()
             }
-            Spacer()
-            Button(L10n.Status.quit) { NSApplication.shared.terminate(nil) }
+            // Actions row
+            HStack(spacing: 8) {
+                Button {
+                    openDashboard?()
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "square.grid.2x2")
+                            .font(.system(size: 10))
+                        Text("ATC")
+                            .font(.system(size: 11, weight: .medium))
+                    }
+                    .foregroundStyle(Color(nsColor: .secondaryLabelColor))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color(nsColor: .separatorColor).opacity(0.3))
+                    .clipShape(RoundedRectangle(cornerRadius: 5))
+                }
                 .buttonStyle(.plain)
-                .font(.system(size: 11))
-                .foregroundStyle(.secondary)
+                Button {
+                    openCCReader()
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "book.fill")
+                            .font(.system(size: 10))
+                        Text("Reader")
+                            .font(.system(size: 11, weight: .medium))
+                    }
+                    .foregroundStyle(Color(nsColor: .secondaryLabelColor))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color(nsColor: .separatorColor).opacity(0.3))
+                    .clipShape(RoundedRectangle(cornerRadius: 5))
+                }
+                .buttonStyle(.plain)
+                Spacer()
+                Button(L10n.Status.quit) { NSApplication.shared.terminate(nil) }
+                    .buttonStyle(.plain)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 9)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 9)
     }
 
     // MARK: - Shared
@@ -336,6 +367,12 @@ struct StatusBarView: View {
         }
         .padding(12)
         .card()
+    }
+
+    // MARK: - Open CC Reader
+
+    private func openCCReader() {
+        openReader?()
     }
 
     // MARK: - Config Panel Helper

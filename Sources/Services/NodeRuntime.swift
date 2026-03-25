@@ -3,7 +3,7 @@ import Foundation
 struct NodeRuntime: Sendable {
 
     /// Bundle identifier from Info.plist
-    private static let bundleIdentifier: String = Bundle.main.bundleIdentifier!
+    private static let bundleIdentifier: String = Bundle.main.bundleIdentifier ?? "ai.openduo.manager"
 
     /// npm global packages install directory (user-writable, persists across app updates)
     /// Note: must not contain spaces — duoduo's ESM self-invocation guard compares
