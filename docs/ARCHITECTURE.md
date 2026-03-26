@@ -2,142 +2,166 @@
 
 ## Overview
 
-DuoduoManager follows a standard SwiftUI MVVM pattern:
+DuoduoManager is a macOS menu bar app (SwiftUI + AppKit) for controlling duoduo runtime components and exposing two desktop tools:
+
+- **Status popover** for daemon/channel operations and upgrades
+- **ATC Dashboard panel** for real-time session/job/event monitoring
+- **CC Reader window** for browsing Claude Code histories via `CCReaderKit`
+
+The app follows a layered MVVM-style architecture:
 
 ```
-Views → ViewModels → Services → Models
+Views -> ViewModels -> Services -> Models
 ```
 
 ```
-DuoduoManagerApp.swift (entry point, menu bar lifecycle)
-├── StatusBarView.swift        (popover UI)
-│   ├── DaemonConfigView.swift (daemon settings panel)
-│   ├── FeishuConfigView.swift (Feishu channel settings panel)
-│   └── ConfigLayout.swift     (shared config row components)
-├── DaemonViewModel.swift      (single @Observable view model)
+DuoduoManagerApp.swift (entry point + NSStatusItem/NSPopover lifecycle)
+├── StatusBarView.swift          (menu bar popover)
+│   ├── DaemonConfigView.swift   (daemon config panel)
+│   ├── FeishuConfigView.swift   (channel config panel)
+│   └── ConfigLayout.swift       (shared form rows)
+├── DashboardView.swift          (ATC Dashboard panel root)
+│   ├── Content/EventsContentView.swift
+│   ├── Content/SessionsContentView.swift
+│   ├── Content/JobsContentView.swift
+│   └── EventStreamView.swift
+├── ViewModels/
+│   ├── DaemonViewModel.swift    (popover orchestration + update logic)
+│   └── DashboardViewModel.swift (RPC polling + aggregated metrics)
 ├── Services/
-│   ├── ShellService.swift     (process execution, PATH loading)
-│   ├── DaemonService.swift    (duoduo daemon CLI wrapper)
-│   ├── ChannelService.swift   (duoduo channel CLI wrapper)
-│   ├── UpgradeService.swift   (npm update orchestration)
-│   └── VersionService.swift   (GitHub/npm version queries)
+│   ├── NodeRuntime.swift        (runtime paths/env/bootstrap install)
+│   ├── ShellService.swift       (subprocess execution + debug logging)
+│   ├── DaemonService.swift      (duoduo daemon CLI wrapper)
+│   ├── ChannelService.swift     (duoduo channel CLI wrapper)
+│   ├── DashboardRPCService.swift(JSON-RPC client: /rpc)
+│   ├── VersionService.swift     (npm latest version lookup)
+│   ├── UpgradeService.swift     (version-aware upgrade orchestration)
+│   └── AppUpdateService.swift   (GitHub release check for app updates)
 ├── Models/
-│   ├── ConfigStore.swift      (shared JSON persistence via UserDefaults)
-│   ├── DaemonConfig.swift     (daemon settings + env var mapping)
-│   ├── DaemonStatus.swift     (runtime status: running, version, pid)
-│   ├── FeishuConfig.swift     (Feishu channel settings + env var mapping)
-│   ├── ChannelInfo.swift      (installed channel runtime info: type, version, pid, running)
-│   ├── ChannelRegistry.swift  (channel type registry)
-│   └── PackageVersion.swift   (npm package version info)
+│   ├── ConfigStore.swift
+│   ├── DaemonConfig.swift
+│   ├── FeishuConfig.swift
+│   ├── DaemonStatus.swift
+│   ├── ChannelInfo.swift
+│   ├── ChannelRegistry.swift
+│   ├── PackageVersion.swift
+│   └── DashboardModels.swift    (JSON-RPC response models)
 └── Localization/
-    └── L10n.swift             (type-safe localization keys)
+    └── L10n.swift
 ```
 
 ## Runtime Environment
 
-### Node.js and npm
+### Node.js and npm strategy
 
-- **Bundled Node.js**: The app bundles a full Node.js runtime in `.app/Contents/Resources/node/` (matching the app's architecture: arm64 or x86_64, built separately, no universal binary)
-- **npm global packages**: Installed to `~/.duoduo-manager/` via `NPM_CONFIG_PREFIX`. This directory persists across app updates. The path must not contain spaces — duoduo's ESM self-invocation guard (`import.meta.url === file://${process.argv[1]}`) breaks when paths contain spaces because `import.meta.url` URL-encodes them but raw `process.argv[1]` does not
-- **Subprocess environment**: `ShellService.run()` sets `PATH` (bundled node bin → npm-global bin → system PATH), `NPM_CONFIG_PREFIX`, and `NODE_PATH` for every child process
+- **Bundled Node.js runtime**: packaged under `.app/Contents/Resources/node/`, architecture-specific (arm64/x86_64 built separately)
+- **Global npm prefix**: `~/.duoduo-manager` (`NodeRuntime.npmGlobalDir`) for writable persistence across app upgrades
+- **duoduo binary path**: `~/.duoduo-manager/bin/duoduo` (`NodeRuntime.duoduoPath`)
+- **Subprocess env assembly**: `NodeRuntime.environment` builds `PATH` as:
+  1) bundled `node/bin`
+  2) npm global `bin`
+  3) merged current PATH + login-shell PATH (`$SHELL -l -c "echo $PATH"`)
+- **Install bootstrap**: if duoduo is missing, `DaemonViewModel.ensureDuoduoInstalled()` runs `npm install -g @openduo/duoduo` automatically
 
-### Shared duoduo configuration
+### Shared duoduo state
 
-- **Global config**: `~/.config/duoduo/config.json` — shared by all duoduo instances (bundled, homebrew, CLI). Contains `daemonUrl`, `workDir`, etc.
-- **Plugin directory**: `~/.aladuo/` — channel plugins are installed here by `duoduo channel install`, shared across all duoduo instances
+- **duoduo global config**: `~/.config/duoduo/config.json` (shared by all duoduo entrypoints)
+- **channel plugin directory**: `~/.aladuo/` (managed by `duoduo channel install`)
 
 ### Daemon lifecycle
 
-- **Startup**: App calls `ShellService.run()` to execute `~/.duoduo-manager/bin/duoduo daemon start` with `ALADUO_DAEMON_URL`, `ALADUO_LOG_LEVEL`, and user-defined config (port, workDir, etc.)
-- **Daemon process**: duoduo CLI forks a detached background process running `daemon.js`. Parent process is PID 1 (launchd). The daemon **survives app exit**
-- **Status**: `duoduo daemon status` queries the daemon via HTTP
-- **Version**: Read directly from `~/.duoduo-manager/lib/node_modules/@openduo/duoduo/package.json` `version` field
+- **Start/stop/restart**: `DaemonService` executes `duoduo daemon <cmd>` with:
+  - `ALADUO_DAEMON_URL`
+  - `ALADUO_LOG_LEVEL=debug`
+  - extra env from `DaemonConfig`
+- **Working directory rule**: commands run in `NodeRuntime.duoduoPackageDir` (resolved from symlinked duoduo bin) to keep daemon relative-path assets resolvable
+- **Status/version**:
+  - running status via `duoduo daemon status`
+  - installed version via local package `package.json`
+- **Process model**: daemon is detached/background-managed by duoduo and can survive app quit
 
 ### Channel lifecycle
 
-- **Registration**: `ChannelRegistry` defines supported channel types (currently: feishu). This is hardcoded, not discovered
-- **Status**: `duoduo channel <type> status` checks the shared plugin directory `~/.aladuo/`
-- **Start/Stop**: `duoduo channel <type> start/stop` sends commands to the daemon; the daemon spawns/manages channel processes using its inherited PATH (bundled node)
-- **Install**: `duoduo channel install <package>` fetches from npm registry and installs to `~/.aladuo/` — no separate `npm install -g` needed
+- **Registry**: `ChannelRegistry` is explicit (currently `feishu`)
+- **Install/sync**: uses `duoduo channel install <package>`
+- **Start/stop**: uses `duoduo channel <type> start|stop` with per-channel extra env (for Feishu from `FeishuConfig`)
+- **Status**: parsed from `duoduo channel <type> status`
 
-### Update checking
+### ATC Dashboard lifecycle
 
-- **Latest versions**: `npm view <package> version` (queries npm registry, network request)
-- **Installed versions**: daemon version from local `package.json`; channel versions parsed from `duoduo channel <type> status` output
-- **Timing**: Checked on popover open and periodically; status refreshes every 30s but does not re-check for updates
+- **Window creation**: launched from popover footer ("ATC"), hosted in `NSPanel`
+- **Data transport**: `DashboardRPCService` calls daemon JSON-RPC endpoint `POST <daemonURL>/rpc`
+- **Polled methods**:
+  - `system.status` (sessions, health, subconscious, cadence)
+  - `usage.get` (token/cost/tool aggregates)
+  - `job.list` (jobs + run state)
+  - `spine.tail` (incremental event stream with `after_id`)
+- **Polling cadence (`DashboardViewModel`)**:
+  - events: every 3s
+  - status/usage/jobs: every 5s
+- **Event retention**: in-memory cap at 2000 entries
 
-### Upgrade flow (upgradeAll)
+### App update lifecycle
 
-Only performs actions for components that actually have newer versions available:
+- **Source**: GitHub Releases API (`/repos/openduo/duoduo-manager/releases/latest`)
+- **State**: `DaemonViewModel.appLatestVersion` + `appLatestReleaseURL`
+- **UI signal**: status bar icon switches to update badge when a newer app version exists
 
-| daemon update? | channel update? | Actions |
-|---|---|---|
-| No | No | Nothing |
-| Yes | No | `npm install -g @openduo/duoduo@latest` → restart daemon |
-| No | Yes | Stop updated channels → `duoduo channel install` → restart channels |
-| Yes | Yes | Stop updated channels → update + restart daemon → sync + restart channels |
+## State Flows
 
-## Key Decisions
+`DaemonViewModel` intentionally separates two flows:
 
-### Why `@Observable` instead of `ObservableObject`?
+1. **Runtime refresh (`refreshStatus`)**
+   - daemon running state / pid / installed version
+   - installed channel list + per-channel runtime state
+   - fast local operations, called after command execution
 
-The app targets macOS 14+ and uses Swift 5.9's `@Observable` macro for simpler, more performant observation without `@Published` property wrappers.
+2. **Update refresh (`checkForUpdates`)**
+   - npm latest version for daemon/channels
+   - latest app release from GitHub
+   - slower network operations, called on periodic refresh start and manual check
 
-### Why manual shell sourcing in `ShellService`?
+This separation keeps operational actions responsive while still exposing update information in the header.
 
-macOS GUI apps do not inherit the user's shell profile (`.zshrc`, `.zprofile`). Tools like `nvm`, `fnm`, or custom PATH entries would be missing. `ShellService.runShell()` explicitly sources these files before executing commands.
+## Key Design Decisions
 
-### Why no external dependencies?
+### Why `@Observable` (macOS 14+)?
 
-The app uses only Foundation and SwiftUI from the standard library. No SPM packages are needed — all functionality is achieved through shell command execution and macOS system APIs.
+The project targets modern Swift observation to reduce boilerplate and avoid `ObservableObject` + `@Published` ceremony.
 
-### Why `.strings` files instead of `.xcstrings`?
+### Why `NodeRuntime` as a dedicated service?
 
-The project uses SwiftPM (`swift build`), not Xcode's build system. String Catalogs (`.xcstrings`) require Xcode's build pipeline. Traditional `.lproj/Localizable.strings` with `String(localized:bundle:)` works natively with SwiftPM.
+A menu bar app does not reliably inherit terminal shell environment. Centralizing PATH/NPM/NODE setup in `NodeRuntime` ensures all subprocesses behave the same regardless of launch context.
 
-### Bundle resolution
+### Why direct CLI + JSON-RPC instead of embedded daemon logic?
 
-The app needs localization to work both in `swift run` (development) and in the packaged `.app` bundle (production). The `L10n.bundle` static property checks whether `.lproj` directories exist in `Bundle.main` (`.app` case), falling back to `Bundle.module` (SPM case).
+duoduo remains the single source of truth for process lifecycle and event/state APIs. The app acts as a control/monitoring client, reducing duplicated runtime logic.
 
-### Dashboard access
+### Why keep channel registry explicit?
 
-The daemon serves a dashboard at `GET /dashboard` on its configured port. The app header has a button that opens this URL in the browser. This only works when the daemon is running.
+Static registration (`ChannelRegistry`) gives predictable UI behavior, localized labels/icons, and controlled env mapping without runtime plugin discovery complexity.
 
-### State management: two independent state flows
+### Why `.strings` over `.xcstrings`?
 
-The app has two independent state flows that must not be mixed:
+The project builds with SwiftPM (`swift build`). `.lproj/Localizable.strings` works in both SPM runtime and packaged `.app` without Xcode-only catalog tooling.
 
-1. **Runtime status** (`refreshStatus()`): daemon is running/stopped, PID, installed version, channel states. Fast — local shell commands only. Called periodically (30s) and after every user action.
+### Why mixed AppKit + SwiftUI?
 
-2. **Update check** (`checkForUpdates()`): latest available versions from npm registry. Slow — network requests. Called on popover open and then periodically.
+- AppKit handles menu bar primitives (`NSStatusItem`, `NSPopover`, `NSPanel`, activation policy).
+- SwiftUI handles all content rendering and state binding.
 
-`DaemonViewModel` maintains:
-- `status: DaemonStatus` / `channels: [ChannelInfo]` — runtime state, written by `refreshStatus()`
-- `latestVersions: [String: String]` — update check results, keyed by `"daemon"` or channel type, written only by `checkForUpdates()`
-- `hasUpdate(type:installedVersion:)` — compares the two, used by views
+This hybrid model keeps native menu bar behavior while preserving SwiftUI development ergonomics.
 
-**Critical rule**: user actions (`executeCommand`) call `refreshStatus()` after completion, but **never** call `checkForUpdates()`. Update checking is handled solely by the periodic timer. Mixing them causes the loading spinner to linger (npm network calls are slow) and creates confusing UX where the user sees output but the UI is still "busy".
+## Build and Packaging
 
-### Working directory for daemon commands
+`build_app.sh` drives release artifacts:
 
-macOS GUI apps have `cwd = /`, but the duoduo daemon resolves paths relative to `process.cwd()` (e.g., `bootstrapDir` for dashboard.html). `DaemonService` resolves the npm package root via `which duoduo` on every command and sets it as `Process.currentDirectoryURL`. This ensures dashboard routes and other relative-path features work correctly when launched from the menu bar app.
-
-### Config persistence (ConfigStore)
-
-All configuration (daemon settings, Feishu channel settings) uses `ConfigStore` — a shared utility that serializes/deserializes `Codable` types as JSON in `UserDefaults`. This avoids duplicating persistence logic across config models. Only non-default values are mapped to environment variables when starting services.
-
-### Menu bar app lifecycle
-
-The app uses `NSStatusItem` + `NSPopover` with `.transient` behavior (click outside to close). `NSApp.setActivationPolicy(.accessory)` hides the dock icon. The SwiftUI `App` entry point uses a minimal `WindowGroup("")` with `EmptyView` that auto-closes on appear to satisfy the lifecycle requirements.
-
-## Build & Packaging
-
-The `build_app.sh` script handles:
-
-1. **Separate arch builds** — Compiles for arm64 and x86_64 independently (no universal binary, no Rosetta). Each .app bundles the matching Node.js architecture
-2. **App bundle assembly** — Copies from `.app-template`, adds executable and resources. Node.js is extracted via `tar` to preserve symlinks
-3. **Code signing** — Developer ID signing with entitlements for sandbox access
-4. **Notarization** — Submits to Apple's notary service via `notarytool`
-5. **DMG creation** — Two separate DMGs: `DuoduoManager-{version}-arm64.dmg` and `DuoduoManager-{version}-x86_64.dmg`
-
-Localization `.lproj` directories are copied into `Contents/Resources/` during app bundle assembly.
+1. Detect latest Node.js 24 LTS patch and cache arm64/x64 tarballs in `.node-cache`
+2. Build separate Swift binaries for `arm64` and `x86_64`
+3. Assemble `.app` from `DuoduoManager.app-template`
+4. Copy localized `.lproj` resources into app bundle
+5. Extract matching-arch Node runtime into `Contents/Resources/node` (tar-based to preserve symlinks)
+6. Optional signing/notarization (if `.secret.env` exists)
+7. Generate per-arch DMGs:
+   - `DuoduoManager-{version}-arm64.dmg`
+   - `DuoduoManager-{version}-x86_64.dmg`
