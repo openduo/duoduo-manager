@@ -66,12 +66,29 @@ struct NodeRuntime: Sendable {
         // npm global bin (contains duoduo, channel binaries)
         paths.append(npmBinDir)
 
-        // System PATH
-        if let existing = env["PATH"] {
-            paths.append(contentsOf: existing.components(separatedBy: ":"))
-        } else {
-            paths.append(contentsOf: ["/usr/local/bin", "/usr/bin", "/bin"])
-        }
+        // System PATH: merge current process PATH + login shell PATH
+        let existingPaths = env["PATH"].map { Set($0.components(separatedBy: ":")) } ?? []
+        var merged = existingPaths
+
+        // Query the user's login shell for its PATH (loads .zprofile/.zshrc/etc.)
+        let shell = env["SHELL"] ?? "/bin/zsh"
+        let proc = Process()
+        proc.executableURL = URL(fileURLWithPath: shell)
+        proc.arguments = ["-l", "-c", "echo $PATH"]
+        let pipe = Pipe()
+        proc.standardOutput = pipe
+        proc.standardError = FileHandle.nullDevice
+        do {
+            try proc.run()
+            proc.waitUntilExit()
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            let loginShellPath = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            if !loginShellPath.isEmpty {
+                merged.formUnion(loginShellPath.components(separatedBy: ":"))
+            }
+        } catch { /* fallback to existing paths only */ }
+
+        paths.append(contentsOf: merged)
 
         env["PATH"] = paths.joined(separator: ":")
         env["NPM_CONFIG_PREFIX"] = npmGlobalDir
