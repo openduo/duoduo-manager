@@ -14,7 +14,7 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/kuaner/cc-reader.git", from: "0.2.3"),
+        .package(url: "https://github.com/kuaner/cc-reader.git", from: "1.0.0"),
     ],
     targets: [
         .executableTarget(
