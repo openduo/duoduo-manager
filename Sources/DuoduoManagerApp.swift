@@ -147,6 +147,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
 
     private func updateStatusBarIcon() {
         guard let viewModel else { return }
+        let icon: String
+        if viewModel.hasAppUpdate {
+            icon = "dot.radiowaves.left.and.badge.plus"
+        } else {
+            icon = "dog.fill"
+        }
+        if let button = statusItem?.button,
+           let sfImage = NSImage(systemSymbolName: icon, accessibilityDescription: "Duoduo") {
+            let config = NSImage.SymbolConfiguration(pointSize: 14, weight: .medium)
+            button.image = sfImage.withSymbolConfiguration(config)
+        }
         statusItem?.button?.toolTip = "Duoduo Manager - \(viewModel.status.isRunning ? L10n.Status.running : L10n.Status.stopped)"
     }
 

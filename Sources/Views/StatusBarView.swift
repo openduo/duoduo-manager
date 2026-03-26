@@ -42,12 +42,31 @@ struct StatusBarView: View {
             Text("Duoduo Manager")
                 .font(.system(size: 14, weight: .bold))
             Spacer()
+            // App update badge
+            if viewModel.hasAppUpdate {
+                Button {
+                    viewModel.openReleasesPage()
+                } label: {
+                    HStack(spacing: 3) {
+                        Image(systemName: "arrow.up.bin.fill")
+                            .font(.system(size: 11))
+                        Text(L10n.Status.appUpdate(viewModel.appLatestVersion ?? ""))
+                            .font(.system(size: 10, weight: .medium))
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 3)
+                    .background(.orange)
+                    .clipShape(RoundedRectangle(cornerRadius: 5))
+                }
+                .buttonStyle(.plain)
+            }
             if viewModel.isLoading {
                 ProgressView().scaleEffect(0.6).frame(width: 14, height: 14)
             }
             // Update button: check for updates if none found, upgrade if updates detected
             Button {
-                if viewModel.hasAnyUpdate {
+                if viewModel.hasDuoduoUpdate {
                     viewModel.upgradeAll()
                 } else {
                     viewModel.checkForUpdatesWithFeedback()
@@ -55,17 +74,17 @@ struct StatusBarView: View {
             } label: {
                 HStack(spacing: 3) {
                     Image(
-                        systemName: viewModel.hasAnyUpdate
+                        systemName: viewModel.hasDuoduoUpdate
                             ? "arrow.up.circle.fill" : "arrow.up.circle"
                     )
                     .font(.system(size: 12))
-                    if viewModel.hasAnyUpdate {
+                    if viewModel.hasDuoduoUpdate {
                         Text(L10n.Status.hasUpdate)
                             .font(.system(size: 11, weight: .medium))
                     }
                 }
                 .foregroundStyle(
-                    viewModel.hasAnyUpdate ? .orange : Color(nsColor: .secondaryLabelColor))
+                    viewModel.hasDuoduoUpdate ? .orange : Color(nsColor: .secondaryLabelColor))
             }
             .buttonStyle(.plain)
             .disabled(viewModel.isLoading)

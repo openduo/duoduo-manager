@@ -16,6 +16,9 @@ enum L10n {
         static let running = String(localized: "status.running", bundle: bundle)
         static let stopped = String(localized: "status.stopped", bundle: bundle)
         static let hasUpdate = String(localized: "status.hasUpdate", bundle: bundle)
+        static func appUpdate(_ version: String) -> String {
+            String(localized: "status.appUpdate \(version)", bundle: bundle)
+        }
         static let configure = String(localized: "status.configure", bundle: bundle)
         static let install = String(localized: "status.install", bundle: bundle)
         static let clear = String(localized: "status.clear", bundle: bundle)

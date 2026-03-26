@@ -13,10 +13,15 @@ final class DaemonViewModel {
     /// Update check results, keyed by "daemon" or channel type
     private(set) var latestVersions: [String: String] = [:]
 
+    /// Latest app version from GitHub releases (nil = not checked yet)
+    private(set) var appLatestVersion: String?
+    private(set) var appLatestReleaseURL: URL?
+
     private var daemonService: DaemonService!
     private var channelService: ChannelService!
     private let versionService = VersionService()
     private let upgradeService = UpgradeService()
+    private let appUpdateService = AppUpdateService()
     private var refreshTask: Task<Void, Never>?
 
     init() {
@@ -57,9 +62,15 @@ final class DaemonViewModel {
         return installedVersion.compare(latest, options: .numeric) == .orderedAscending
     }
 
-    var hasAnyUpdate: Bool {
+    /// Whether daemon or any channel has an update (not including the app itself)
+    var hasDuoduoUpdate: Bool {
         hasUpdate(type: "daemon", installedVersion: status.version)
             || channels.contains { hasUpdate(type: $0.type, installedVersion: $0.version) }
+    }
+
+    var hasAppUpdate: Bool {
+        guard let latest = appLatestVersion else { return false }
+        return AppUpdateService.currentVersion.compare(latest, options: .numeric) == .orderedAscending
     }
 
     // MARK: - Daemon Commands
@@ -175,6 +186,12 @@ final class DaemonViewModel {
     }
 
     func checkForUpdates() async {
+        // Check latest app version via GitHub releases
+        if let result = await appUpdateService.fetchLatestRelease() {
+            appLatestVersion = result.version
+            appLatestReleaseURL = result.url
+        }
+
         // Check latest daemon version via npm
         if let latest = try? await versionService.getNpmLatestVersion("@openduo/duoduo") {
             latestVersions["daemon"] = latest
@@ -199,7 +216,7 @@ final class DaemonViewModel {
         Task { [weak self] in
             await self?.checkForUpdates()
             self?.isLoading = false
-            if let self, !self.hasAnyUpdate {
+            if let self, !self.hasDuoduoUpdate {
                 self.lastOutput = L10n.Upgrade.allUpToDate
             }
         }
@@ -208,6 +225,10 @@ final class DaemonViewModel {
     func clearOutput() {
         lastOutput = ""
         errorMessage = nil
+    }
+
+    func openReleasesPage() {
+        AppUpdateService.openReleasesPage()
     }
 
     func showConfigRequired() {
