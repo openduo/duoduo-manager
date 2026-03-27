@@ -20,10 +20,13 @@ struct UpgradeService: Sendable {
     }
 
     private func upgrade(packages: [String]) async throws -> String {
-        let npmPath = NodeRuntime.bundledBinDir.map { "\($0)/npm" } ?? "npm"
         var output = ""
         for pkg in packages {
-            let result = try await ShellService.run(npmPath, arguments: ["install", "-g", "\(pkg)@latest"])
+            let result = try await ShellService.run(
+                "npm",
+                arguments: ["install", "-g", "\(pkg)@latest"],
+                environment: NodeRuntime.environment
+            )
             output += result
         }
         return output

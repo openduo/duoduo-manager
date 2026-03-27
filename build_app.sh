@@ -22,6 +22,8 @@ VERSION=$(grep -A1 "CFBundleShortVersionString" "$INFO_PLIST" | grep "<string>" 
 
 # Output directories
 DIST_DIR="dist"
+WITH_NODE_SUFFIX="with-nodejs"
+UNIVERSAL_LITE_VARIANT="universal-lite"
 
 # Node.js config
 NODE_VERSION="24"
@@ -90,22 +92,29 @@ check_signing_config() {
     fi
 }
 
-# Build app bundle for a specific arch
-build_for_arch() {
-    local ARCH="$1"
-    local APP_PATH="${DIST_DIR}/${APP_NAME}-${ARCH}/${APP_BUNDLE}"
+# Build app bundle for a variant
+build_variant() {
+    local VARIANT="$1"
+    local BINARY_PATH="$2"
+    local INCLUDE_NODE="$3"
+    local NODE_ARCH="$4"
+    local APP_PATH="${DIST_DIR}/${APP_NAME}-${VARIANT}/${APP_BUNDLE}"
 
-    echo -e "${GREEN}Building ${ARCH}...${NC}"
-
-    swift build -c release --arch "$ARCH"
+    echo -e "${GREEN}Building ${VARIANT}...${NC}"
 
     mkdir -p "$(dirname "$APP_PATH")"
     cp -r "${TEMPLATE_DIR}" "$APP_PATH"
 
-    local BINARY=".build/${ARCH}-apple-macosx/release/${APP_NAME}"
-    cp "$BINARY" "${APP_PATH}/Contents/MacOS/"
+    cp "$BINARY_PATH" "${APP_PATH}/Contents/MacOS/${APP_NAME}"
     chmod +x "${APP_PATH}/Contents/MacOS/${APP_NAME}"
     echo -n "APPL????" > "${APP_PATH}/Contents/PkgInfo"
+
+    # Mark runtime mode in Info.plist so app logic doesn't rely on stale files.
+    local INFO_PLIST_PATH="${APP_PATH}/Contents/Info.plist"
+    local RUNTIME_MODE="system"
+    [ "$INCLUDE_NODE" = "yes" ] && RUNTIME_MODE="bundled"
+    /usr/libexec/PlistBuddy -c "Delete :DuoduoNodeRuntimeMode" "$INFO_PLIST_PATH" >/dev/null 2>&1 || true
+    /usr/libexec/PlistBuddy -c "Add :DuoduoNodeRuntimeMode string $RUNTIME_MODE" "$INFO_PLIST_PATH"
 
     mkdir -p "${APP_PATH}/Contents/Resources"
     cp -r Sources/Resources/*.lproj "${APP_PATH}/Contents/Resources/"
@@ -121,31 +130,47 @@ build_for_arch() {
     fi
 
     # Bundle matching-arch Node.js runtime (use tar to preserve symlinks)
-    local NODE_DIR
-    NODE_DIR=$(extract_node "$ARCH")
-    mkdir -p "${APP_PATH}/Contents/Resources/node"
-    tar -cf - -C "$NODE_DIR" . | tar -xf - -C "${APP_PATH}/Contents/Resources/node"
-    rm -rf "$NODE_DIR"
+    if [ "$INCLUDE_NODE" = "yes" ]; then
+        local NODE_DIR
+        NODE_DIR=$(extract_node "$NODE_ARCH")
+        mkdir -p "${APP_PATH}/Contents/Resources/node"
+        tar -cf - -C "$NODE_DIR" . | tar -xf - -C "${APP_PATH}/Contents/Resources/node"
+        rm -rf "$NODE_DIR"
+    fi
 
-    echo -e "${GREEN}${ARCH} bundle created: ${APP_PATH}${NC}"
+    echo -e "${GREEN}${VARIANT} bundle created: ${APP_PATH}${NC}"
 }
 
-# Build both architectures
+# Build both architectures + universal-lite
 build_all() {
     rm -rf "${DIST_DIR}"
     mkdir -p "${DIST_DIR}"
 
     ensure_node
-    build_for_arch arm64
-    build_for_arch x86_64
+    swift build -c release --arch arm64
+    swift build -c release --arch x86_64
+
+    local ARM64_BINARY=".build/arm64-apple-macosx/release/${APP_NAME}"
+    local X64_BINARY=".build/x86_64-apple-macosx/release/${APP_NAME}"
+    local ARM64_VARIANT="arm64-${WITH_NODE_SUFFIX}"
+    local X64_VARIANT="x86_64-${WITH_NODE_SUFFIX}"
+    local UNIVERSAL_APP_PATH="${DIST_DIR}/${APP_NAME}-${UNIVERSAL_LITE_VARIANT}/${APP_BUNDLE}"
+
+    build_variant "$ARM64_VARIANT" "$ARM64_BINARY" "yes" "arm64"
+    build_variant "$X64_VARIANT" "$X64_BINARY" "yes" "x86_64"
+
+    build_variant "$UNIVERSAL_LITE_VARIANT" "$ARM64_BINARY" "no" "arm64"
+    lipo -create "$ARM64_BINARY" "$X64_BINARY" -output "${UNIVERSAL_APP_PATH}/Contents/MacOS/${APP_NAME}"
+    chmod +x "${UNIVERSAL_APP_PATH}/Contents/MacOS/${APP_NAME}"
+    echo -e "${GREEN}${UNIVERSAL_LITE_VARIANT} binary merged with lipo${NC}"
 }
 
-# Sign app for a specific arch
-sign_app_arch() {
-    local ARCH="$1"
-    local APP_PATH="${DIST_DIR}/${APP_NAME}-${ARCH}/${APP_BUNDLE}"
+# Sign app for a variant
+sign_app_variant() {
+    local VARIANT="$1"
+    local APP_PATH="${DIST_DIR}/${APP_NAME}-${VARIANT}/${APP_BUNDLE}"
 
-    echo -e "${GREEN}Signing ${ARCH}...${NC}"
+    echo -e "${GREEN}Signing ${VARIANT}...${NC}"
     xattr -cr "$APP_PATH"
 
     codesign --force --options runtime \
@@ -154,24 +179,24 @@ sign_app_arch() {
         --deep "$APP_PATH"
 
     if [ $? -eq 0 ]; then
-        echo -e "${GREEN}${ARCH} signing succeeded${NC}"
+        echo -e "${GREEN}${VARIANT} signing succeeded${NC}"
     else
-        echo -e "${RED}${ARCH} signing failed${NC}"
+        echo -e "${RED}${VARIANT} signing failed${NC}"
         exit 1
     fi
 }
 
-# Notarize app for a specific arch
-notarize_app_arch() {
-    local ARCH="$1"
-    local APP_PATH="${DIST_DIR}/${APP_NAME}-${ARCH}/${APP_BUNDLE}"
-    local ZIP_PATH="${DIST_DIR}/${APP_NAME}-${ARCH}.zip"
+# Notarize app for a variant
+notarize_app_variant() {
+    local VARIANT="$1"
+    local APP_PATH="${DIST_DIR}/${APP_NAME}-${VARIANT}/${APP_BUNDLE}"
+    local ZIP_PATH="${DIST_DIR}/${APP_NAME}-${VARIANT}.zip"
 
-    echo -e "${GREEN}Notarizing ${ARCH}...${NC}"
+    echo -e "${GREEN}Notarizing ${VARIANT}...${NC}"
 
     ditto -c -k --keepParent "$APP_PATH" "$ZIP_PATH"
 
-    echo "Submitting ${ARCH} notarization request (may take a few minutes)..."
+    echo "Submitting ${VARIANT} notarization request (may take a few minutes)..."
     xcrun notarytool submit "$ZIP_PATH" \
         --wait \
         --apple-id "${APPLE_ID}" \
@@ -179,37 +204,37 @@ notarize_app_arch() {
         --team-id "${APPLE_TEAM_ID}"
 
     if [ $? -eq 0 ]; then
-        echo -e "${GREEN}${ARCH} notarization succeeded${NC}"
+        echo -e "${GREEN}${VARIANT} notarization succeeded${NC}"
         xcrun stapler staple "$APP_PATH"
-        echo -e "${GREEN}${ARCH} staple attached${NC}"
+        echo -e "${GREEN}${VARIANT} staple attached${NC}"
     else
-        echo -e "${RED}${ARCH} notarization failed${NC}"
+        echo -e "${RED}${VARIANT} notarization failed${NC}"
         exit 1
     fi
 
     rm "$ZIP_PATH"
 }
 
-# Create DMG for a specific arch
-create_dmg_arch() {
-    local ARCH="$1"
-    local APP_PATH="${DIST_DIR}/${APP_NAME}-${ARCH}/${APP_BUNDLE}"
-    local DMG_PATH="${DIST_DIR}/${APP_NAME}-${VERSION}-${ARCH}.dmg"
+# Create DMG for a variant
+create_dmg_variant() {
+    local VARIANT="$1"
+    local APP_PATH="${DIST_DIR}/${APP_NAME}-${VARIANT}/${APP_BUNDLE}"
+    local DMG_PATH="${DIST_DIR}/${APP_NAME}-${VERSION}-${VARIANT}.dmg"
 
-    echo -e "${GREEN}Creating ${ARCH} DMG...${NC}"
+    echo -e "${GREEN}Creating ${VARIANT} DMG...${NC}"
 
-    local TEMP_DIR="${DIST_DIR}/temp_dmg_${ARCH}"
+    local TEMP_DIR="${DIST_DIR}/temp_dmg_${VARIANT}"
     mkdir -p "$TEMP_DIR"
     cp -r "$APP_PATH" "$TEMP_DIR/"
 
     if command -v create-dmg &> /dev/null; then
-        echo "Using create-dmg for styled ${ARCH} DMG..."
+        echo "Using create-dmg for styled ${VARIANT} DMG..."
 
         [ -f "$DMG_PATH" ] && rm "$DMG_PATH"
 
         create-dmg \
             --text-size 13 \
-            --volname "${APP_NAME}-${VERSION}-${ARCH}" \
+            --volname "${APP_NAME}-${VERSION}-${VARIANT}" \
             --volicon "${APP_PATH}/Contents/Resources/AppIcon.icns" \
             --window-pos 200 120 \
             --window-size 600 400 \
@@ -222,43 +247,46 @@ create_dmg_arch() {
             "$TEMP_DIR" || {
             echo -e "${YELLOW}create-dmg failed, falling back to simple mode${NC}"
             ln -sf /Applications "$TEMP_DIR/Applications"
-            hdiutil create -volname "${APP_NAME}-${VERSION}-${ARCH}" \
+            hdiutil create -volname "${APP_NAME}-${VERSION}-${VARIANT}" \
                 -srcfolder "$TEMP_DIR" \
                 -ov -format UDZO "$DMG_PATH"
         }
     else
         echo "Using simple DMG mode..."
         ln -sf /Applications "$TEMP_DIR/Applications"
-        hdiutil create -volname "${APP_NAME}-${VERSION}-${ARCH}" \
+        hdiutil create -volname "${APP_NAME}-${VERSION}-${VARIANT}" \
             -srcfolder "$TEMP_DIR" \
             -ov -format UDZO "$DMG_PATH"
     fi
 
     rm -rf "$TEMP_DIR"
 
-    echo -e "${GREEN}${ARCH} DMG: ${DMG_PATH}${NC}"
+    echo -e "${GREEN}${VARIANT} DMG: ${DMG_PATH}${NC}"
 }
 
 # Build only (no signing)
 build_only() {
     build_all
     echo -e "${GREEN}Build complete${NC}"
-    echo "  arm64:  ${DIST_DIR}/${APP_NAME}-arm64/${APP_BUNDLE}"
-    echo "  x86_64: ${DIST_DIR}/${APP_NAME}-x86_64/${APP_BUNDLE}"
+    echo "  arm64-with-nodejs:  ${DIST_DIR}/${APP_NAME}-arm64-${WITH_NODE_SUFFIX}/${APP_BUNDLE}"
+    echo "  x86_64-with-nodejs: ${DIST_DIR}/${APP_NAME}-x86_64-${WITH_NODE_SUFFIX}/${APP_BUNDLE}"
+    echo "  universal-lite:     ${DIST_DIR}/${APP_NAME}-${UNIVERSAL_LITE_VARIANT}/${APP_BUNDLE}"
 }
 
 # Full release flow
 release() {
     if check_signing_config; then
         build_all
-        for ARCH in arm64 x86_64; do
-            sign_app_arch "$ARCH"
-            notarize_app_arch "$ARCH"
-            create_dmg_arch "$ARCH"
+        local variants=("arm64-${WITH_NODE_SUFFIX}" "x86_64-${WITH_NODE_SUFFIX}" "${UNIVERSAL_LITE_VARIANT}")
+        for variant in "${variants[@]}"; do
+            sign_app_variant "$variant"
+            notarize_app_variant "$variant"
+            create_dmg_variant "$variant"
         done
         echo -e "${GREEN}=== Release complete ===${NC}"
-        echo "  arm64 DMG:  ${DIST_DIR}/${APP_NAME}-${VERSION}-arm64.dmg"
-        echo "  x86_64 DMG: ${DIST_DIR}/${APP_NAME}-${VERSION}-x86_64.dmg"
+        echo "  arm64-with-nodejs DMG:  ${DIST_DIR}/${APP_NAME}-${VERSION}-arm64-${WITH_NODE_SUFFIX}.dmg"
+        echo "  x86_64-with-nodejs DMG: ${DIST_DIR}/${APP_NAME}-${VERSION}-x86_64-${WITH_NODE_SUFFIX}.dmg"
+        echo "  universal-lite DMG:     ${DIST_DIR}/${APP_NAME}-${VERSION}-${UNIVERSAL_LITE_VARIANT}.dmg"
     else
         echo -e "${RED}Signing config required for release${NC}"
         exit 1
@@ -270,10 +298,10 @@ show_help() {
     echo "Usage: $0 <command>"
     echo ""
     echo "Commands:"
-    echo "  build     - Build arm64 + x86_64 app bundles (no signing)"
-    echo "  release   - Full release flow (build + sign + notarize + DMG for both archs)"
+    echo "  build     - Build arm64/x86_64(with-nodejs) + universal-lite(no-node) app bundles"
+    echo "  release   - Full release flow (build + sign + notarize + DMG for all variants)"
     echo "  sign      - Sign existing app bundles"
-    echo "  dmg       - Create DMGs for both architectures"
+    echo "  dmg       - Create DMGs for all variants"
     echo "  node      - Download Node.js 24 LTS to cache (no build)"
     echo "  help      - Show this help"
 }
@@ -288,13 +316,15 @@ case "${1:-build}" in
         ;;
     sign)
         check_signing_config
-        for ARCH in arm64 x86_64; do
-            sign_app_arch "$ARCH"
+        variants=("arm64-${WITH_NODE_SUFFIX}" "x86_64-${WITH_NODE_SUFFIX}" "${UNIVERSAL_LITE_VARIANT}")
+        for variant in "${variants[@]}"; do
+            sign_app_variant "$variant"
         done
         ;;
     dmg)
-        for ARCH in arm64 x86_64; do
-            create_dmg_arch "$ARCH"
+        variants=("arm64-${WITH_NODE_SUFFIX}" "x86_64-${WITH_NODE_SUFFIX}" "${UNIVERSAL_LITE_VARIANT}")
+        for variant in "${variants[@]}"; do
+            create_dmg_variant "$variant"
         done
         ;;
     node)

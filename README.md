@@ -5,7 +5,7 @@ A macOS menu bar application for managing the [duoduo](https://github.com/opendu
 ## Features
 
 - **Menu bar interface** — Unobtrusive status item with a popover for quick access to daemon controls, channel status, and version updates
-- **Self-contained runtime** — Bundled Node.js, no system Node or npm required; duoduo auto-installed on first launch
+- **Flexible runtime options** — Choose bundled Node.js builds or a universal-lite build that uses system Node.js
 - **Daemon management** — Start, stop, restart, and configure the duoduo daemon directly from the popover
 - **Channel management** — Install, configure, and control messaging channels (currently Feishu)
 - **Smart upgrades** — Version-aware: only updates and restarts components with newer versions
@@ -38,8 +38,9 @@ Browse and search Claude Code conversation history with markdown rendering, synt
 
 Download the DMG for your architecture from [Releases](https://github.com/openduo/duoduo-manager/releases):
 
-- `DuoduoManager-*-arm64.dmg` — Apple Silicon (M1/M2/M3/M4)
-- `DuoduoManager-*-x86_64.dmg` — Intel
+- `DuoduoManager-*-arm64-with-nodejs.dmg` — Apple Silicon (bundled Node.js, no extra setup)
+- `DuoduoManager-*-x86_64-with-nodejs.dmg` — Intel (bundled Node.js, no extra setup)
+- `DuoduoManager-*-universal-lite.dmg` — Universal binary, uses system Node.js (Node.js 24+ required)
 
 ### From source
 
@@ -55,7 +56,8 @@ make app        # Build arm64 + x86_64 .app bundles
 - macOS 14 (Sonoma) or later
 - Xcode Command Line Tools (`xcode-select --install`)
 
-No need to install Node.js, npm, or duoduo separately — everything is bundled.
+For `*-with-nodejs` builds, no extra runtime setup is required.
+For `*-universal-lite` builds, install Node.js 24+ on your system.
 
 ## Development
 
@@ -71,8 +73,8 @@ make clean      # Clean build artifacts
 ### Release
 
 ```bash
-make app        # Build arm64 + x86_64 .app bundles (no signing)
-make dmg        # Create DMG installers for both architectures
+make app        # Build 3 .app bundles: arm64/x86_64 with-nodejs + universal-lite
+make dmg        # Create 3 DMGs with unified naming
 make release    # Full release: build + sign + notarize + DMG
 ```
 

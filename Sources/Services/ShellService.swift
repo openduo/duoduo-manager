@@ -20,8 +20,11 @@ struct ShellService: Sendable {
             let timestamp = DateFormatter.localizedString(from: Date(), dateStyle: .medium, timeStyle: .medium)
             let line = "[\(timestamp)] \(message)\n"
             guard let data = line.data(using: .utf8) else { return }
+            let logURL = URL(fileURLWithPath: logFile)
+            let logDirURL = logURL.deletingLastPathComponent()
+            try? FileManager.default.createDirectory(at: logDirURL, withIntermediateDirectories: true)
             if FileManager.default.fileExists(atPath: logFile) {
-                if let handle = try? FileHandle(forWritingTo: URL(fileURLWithPath: logFile)) {
+                if let handle = try? FileHandle(forWritingTo: logURL) {
                     handle.seekToEndOfFile()
                     handle.write(data)
                 }
@@ -46,8 +49,14 @@ struct ShellService: Sendable {
 
         return try await withCheckedThrowingContinuation { continuation in
             let process = Process()
-            process.executableURL = URL(fileURLWithPath: executable)
-            process.arguments = arguments
+            if executable.contains("/") {
+                process.executableURL = URL(fileURLWithPath: executable)
+                process.arguments = arguments
+            } else {
+                // Resolve command via PATH (e.g. `duoduo`, `npm`).
+                process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+                process.arguments = [executable] + arguments
+            }
 
             var env = NodeRuntime.environment
             for (key, value) in overrides {

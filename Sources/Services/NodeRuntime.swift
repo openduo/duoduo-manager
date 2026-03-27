@@ -1,76 +1,57 @@
 import Foundation
 
 struct NodeRuntime: Sendable {
+    private enum RuntimeMode: String {
+        case bundled
+        case system
+    }
 
-    /// Bundle identifier from Info.plist
-    private static let bundleIdentifier: String = Bundle.main.bundleIdentifier ?? "ai.openduo.manager"
-
-    /// npm global packages install directory (user-writable, persists across app updates)
-    /// Note: must not contain spaces — duoduo's ESM self-invocation guard compares
-    /// import.meta.url (URL-encoded) against file://${process.argv[1]} (raw), and spaces break it.
     static let npmGlobalDir: String = {
         FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent(".duoduo-manager")
             .path
     }()
 
-    /// Bundled node binary path inside the .app bundle
     static let bundledNodePath: String? = {
         Bundle.main.resourceURL?.appendingPathComponent("node/bin/node").path
     }()
 
-    /// Whether bundled Node.js exists
-    static var hasBundledNode: Bool {
-        guard let path = bundledNodePath else { return false }
-        return FileManager.default.isExecutableFile(atPath: path)
+    private static var runtimeMode: RuntimeMode {
+        let raw = (Bundle.main.object(forInfoDictionaryKey: "DuoduoNodeRuntimeMode") as? String)?.lowercased()
+        return RuntimeMode(rawValue: raw ?? "") ?? .bundled
     }
 
-    /// Bundled node/bin directory (contains node, npm, npx symlinks)
-    static var bundledBinDir: String? {
-        bundledNodePath.map { ($0 as NSString).deletingLastPathComponent }
+    private static var runtime: RuntimeProvider.Type {
+        runtimeMode == .bundled ? BundledRuntime.self : SystemRuntime.self
     }
 
-    /// npm bin directory (where duoduo and other global binaries live)
-    static let npmBinDir: String = "\(npmGlobalDir)/bin"
+    static var hasBundledNode: Bool { runtime.hasBundledNode }
+    static var bundledBinDir: String? { runtime.bundledBinDir }
+    static var npmBinDir: String { runtime.npmBinDir }
+    static var duoduoPath: String { "duoduo" }
+    static var duoduoPackageDir: String? { runtime.duoduoPackageDir }
+    static var environment: [String: String] { runtime.environment }
+    static var isDuoduoInstalled: Bool { runtime.isDuoduoInstalled }
+    static func installDuoduo() async throws -> String { try await runtime.installDuoduo() }
 
-    /// duoduo script path
-    static let duoduoPath: String = "\(npmBinDir)/duoduo"
+    static var hasSystemNode: Bool { SystemRuntime.hasSystemNode }
+    static var hasSystemDuoduo: Bool { SystemRuntime.hasSystemDuoduo }
 
-    /// duoduo npm package root directory
-    static var duoduoPackageDir: String? {
-        let path = duoduoPath
+    // MARK: - Shared helpers
+
+    private static func packageDir(fromDuoduoExecutablePath path: String) -> String? {
         let binDir = (path as NSString).deletingLastPathComponent
-        // Resolve symlink: duoduo -> ../lib/node_modules/@openduo/duoduo/bin/duoduo
         let resolved: String
         if let real = try? FileManager.default.destinationOfSymbolicLink(atPath: path) {
             resolved = URL(fileURLWithPath: binDir).appendingPathComponent(real).standardizedFileURL.path
         } else {
             resolved = path
         }
-        // resolved is .../duoduo/bin/duoduo, package dir is two levels up
-        let packageDir = ((resolved as NSString).deletingLastPathComponent as NSString).deletingLastPathComponent
-        return packageDir
+        return ((resolved as NSString).deletingLastPathComponent as NSString).deletingLastPathComponent
     }
 
-    /// Environment variables for subprocess (PATH + NPM_CONFIG_PREFIX + NODE_PATH)
-    static var environment: [String: String] {
-        var env = ProcessInfo.processInfo.environment
-
-        var paths: [String] = []
-
-        // Bundled node/bin first (contains node, npm, npx)
-        if let binDir = bundledBinDir {
-            paths.append(binDir)
-        }
-
-        // npm global bin (contains duoduo, channel binaries)
-        paths.append(npmBinDir)
-
-        // System PATH: merge current process PATH + login shell PATH
-        let existingPaths = env["PATH"].map { Set($0.components(separatedBy: ":")) } ?? []
-        var merged = existingPaths
-
-        // Query the user's login shell for its PATH (loads .zprofile/.zshrc/etc.)
+    private static func mergedSystemPaths(baseEnvironment env: [String: String]) -> [String] {
+        var merged = Set(env["PATH"]?.components(separatedBy: ":") ?? [])
         let shell = env["SHELL"] ?? "/bin/zsh"
         let proc = Process()
         proc.executableURL = URL(fileURLWithPath: shell)
@@ -82,36 +63,122 @@ struct NodeRuntime: Sendable {
             try proc.run()
             proc.waitUntilExit()
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            let loginShellPath = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            let loginShellPath = String(data: data, encoding: .utf8)?
+                .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             if !loginShellPath.isEmpty {
                 merged.formUnion(loginShellPath.components(separatedBy: ":"))
             }
-        } catch { /* fallback to existing paths only */ }
+        } catch { /* fallback */ }
+        return Array(merged).filter { !$0.isEmpty }
+    }
 
-        paths.append(contentsOf: merged)
+    private static func resolveExecutable(named name: String, paths: [String]) -> String? {
+        for path in paths {
+            let executable = URL(fileURLWithPath: path).appendingPathComponent(name).path
+            if FileManager.default.isExecutableFile(atPath: executable) {
+                return executable
+            }
+        }
+        return nil
+    }
 
-        env["PATH"] = paths.joined(separator: ":")
-        env["NPM_CONFIG_PREFIX"] = npmGlobalDir
+    private protocol RuntimeProvider {
+        static var hasBundledNode: Bool { get }
+        static var bundledBinDir: String? { get }
+        static var npmBinDir: String { get }
+        static var duoduoPackageDir: String? { get }
+        static var environment: [String: String] { get }
+        static var isDuoduoInstalled: Bool { get }
+        static func installDuoduo() async throws -> String
+    }
 
-        if let bundledDir = Bundle.main.resourceURL?.appendingPathComponent("node").path {
-            env["NODE_PATH"] = "\(bundledDir)/lib/node_modules"
+    private enum BundledRuntime: RuntimeProvider {
+        static var hasBundledNode: Bool {
+            guard let path = bundledNodePath else { return false }
+            return FileManager.default.isExecutableFile(atPath: path)
         }
 
-        return env
+        static var bundledBinDir: String? {
+            guard hasBundledNode else { return nil }
+            return bundledNodePath.map { ($0 as NSString).deletingLastPathComponent }
+        }
+
+        static var npmBinDir: String { "\(npmGlobalDir)/bin" }
+
+        static var duoduoPackageDir: String? {
+            let path = "\(npmBinDir)/duoduo"
+            guard FileManager.default.isExecutableFile(atPath: path) else { return nil }
+            return packageDir(fromDuoduoExecutablePath: path)
+        }
+
+        static var environment: [String: String] {
+            var env = ProcessInfo.processInfo.environment
+            var paths: [String] = []
+            if let binDir = bundledBinDir {
+                paths.append(binDir)
+            }
+            paths.append(npmBinDir)
+            paths.append(contentsOf: mergedSystemPaths(baseEnvironment: env))
+            env["PATH"] = paths.joined(separator: ":")
+            env["NPM_CONFIG_PREFIX"] = npmGlobalDir
+            if hasBundledNode,
+               let bundledDir = Bundle.main.resourceURL?.appendingPathComponent("node").path {
+                env["NODE_PATH"] = "\(bundledDir)/lib/node_modules"
+            } else {
+                env.removeValue(forKey: "NODE_PATH")
+            }
+            return env
+        }
+
+        static var isDuoduoInstalled: Bool {
+            FileManager.default.isExecutableFile(atPath: "\(npmBinDir)/duoduo")
+        }
+
+        static func installDuoduo() async throws -> String {
+            return try await ShellService.run(
+                "npm",
+                arguments: ["install", "-g", "@openduo/duoduo"],
+                environment: environment
+            )
+        }
     }
 
-    /// Check if duoduo is installed in our npm global dir
-    static var isDuoduoInstalled: Bool {
-        FileManager.default.isExecutableFile(atPath: duoduoPath)
-    }
+    private enum SystemRuntime: RuntimeProvider {
+        static var hasBundledNode: Bool { false }
+        static var bundledBinDir: String? { nil }
+        static var npmBinDir: String { "" }
 
-    /// Install duoduo via npm into our global dir
-    static func installDuoduo() async throws -> String {
-        let npmPath = bundledBinDir.map { "\($0)/npm" } ?? "npm"
-        return try await ShellService.run(
-            npmPath,
-            arguments: ["install", "-g", "@openduo/duoduo"],
-            environment: environment
-        )
+        private static var resolvedSystemDuoduoPath: String? {
+            resolveExecutable(named: "duoduo", paths: mergedSystemPaths(baseEnvironment: ProcessInfo.processInfo.environment))
+        }
+
+        static var hasSystemNode: Bool {
+            resolveExecutable(named: "node", paths: mergedSystemPaths(baseEnvironment: ProcessInfo.processInfo.environment)) != nil
+        }
+
+        static var hasSystemDuoduo: Bool {
+            resolvedSystemDuoduoPath != nil
+        }
+
+        static var duoduoPackageDir: String? {
+            guard let path = resolvedSystemDuoduoPath else { return nil }
+            return packageDir(fromDuoduoExecutablePath: path)
+        }
+
+        static var environment: [String: String] {
+            var env = ProcessInfo.processInfo.environment
+            env["PATH"] = mergedSystemPaths(baseEnvironment: env).joined(separator: ":")
+            return env
+        }
+
+        static var isDuoduoInstalled: Bool { hasSystemDuoduo }
+
+        static func installDuoduo() async throws -> String {
+            try await ShellService.run(
+                "npm",
+                arguments: ["install", "-g", "@openduo/duoduo"],
+                environment: environment
+            )
+        }
     }
 }

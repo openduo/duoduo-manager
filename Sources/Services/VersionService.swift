@@ -3,10 +3,10 @@ import Foundation
 struct VersionService: Sendable {
 
     func getInstalledVersion(_ pkg: String) async throws -> String? {
-        let npmPath = NodeRuntime.bundledBinDir.map { "\($0)/npm" } ?? "npm"
         let output = try await ShellService.run(
-            npmPath,
-            arguments: ["list", "-g", pkg, "--depth=0", "--json"]
+            "npm",
+            arguments: ["list", "-g", pkg, "--depth=0", "--json"],
+            environment: NodeRuntime.environment
         )
         // Parse json output for version
         guard let data = output.data(using: .utf8),
@@ -19,10 +19,10 @@ struct VersionService: Sendable {
     }
 
     func getNpmLatestVersion(_ pkg: String) async throws -> String {
-        let npmPath = NodeRuntime.bundledBinDir.map { "\($0)/npm" } ?? "npm"
         let output = try await ShellService.run(
-            npmPath,
-            arguments: ["view", pkg, "version"]
+            "npm",
+            arguments: ["view", pkg, "version"],
+            environment: NodeRuntime.environment
         )
         return output.trimmingCharacters(in: .whitespacesAndNewlines)
     }

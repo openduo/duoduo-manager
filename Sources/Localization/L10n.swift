@@ -117,6 +117,8 @@ enum L10n {
         static let installingDuoduo = String(localized: "setup.installingDuoduo", bundle: bundle)
         static let installSuccess = String(localized: "setup.installSuccess", bundle: bundle)
         static let installFailed = String(localized: "setup.installFailed", bundle: bundle)
+        static let systemNodeMissingTitle = String(localized: "setup.systemNodeMissingTitle", bundle: bundle)
+        static let systemNodeMissing = String(localized: "setup.systemNodeMissing", bundle: bundle)
     }
 
 }

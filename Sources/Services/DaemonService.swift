@@ -62,7 +62,7 @@ final class DaemonService: Sendable {
         try await ShellService.run(
             NodeRuntime.duoduoPath,
             arguments: arguments,
-            environment: environment.merging(env) { _, new in new },
+            environment: env.merging(environment) { _, new in new },
             workingDirectory: workingDirectory
         )
     }

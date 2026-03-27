@@ -18,6 +18,9 @@ struct ChannelService: Sendable {
 
     func getChannelStatus(_ channelType: String) async throws -> ChannelInfo {
         let output = try await runDuoduo(["channel", channelType, "status"])
+        if isChannelNotInstalled(output, channelType: channelType) {
+            throw ShellError.executionFailed(output, exitCode: 0)
+        }
         return parseChannelStatus(channelType, output)
     }
 
@@ -52,7 +55,7 @@ struct ChannelService: Sendable {
         try await ShellService.run(
             NodeRuntime.duoduoPath,
             arguments: arguments,
-            environment: environment.merging(env) { _, new in new }
+            environment: env.merging(environment) { _, new in new }
         )
     }
 
@@ -75,5 +78,14 @@ struct ChannelService: Sendable {
         }
 
         return info
+    }
+
+    private func isChannelNotInstalled(_ output: String, channelType: String) -> Bool {
+        let lower = output.lowercased()
+        let type = channelType.lowercased()
+        return lower.contains("(no channel plugins installed)")
+            || lower.contains("\(type): not installed")
+            || lower.contains("\(type) not installed")
+            || lower.contains("channel not installed")
     }
 }

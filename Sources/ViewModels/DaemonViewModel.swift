@@ -35,6 +35,11 @@ final class DaemonViewModel {
     /// Ensure duoduo is installed; if not, auto-install it. Returns true when ready.
     func ensureDuoduoInstalled() async {
         guard !NodeRuntime.isDuoduoInstalled else { return }
+        guard NodeRuntime.hasBundledNode || NodeRuntime.hasSystemNode else {
+            lastOutput = L10n.Setup.systemNodeMissing
+            errorMessage = L10n.Setup.systemNodeMissingTitle
+            return
+        }
         isSettingUp = true
         lastOutput = L10n.Setup.installingDuoduo
         do {
