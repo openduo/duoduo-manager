@@ -35,6 +35,13 @@ jobs:
       - name: Create DMG
         run: make dmg
 
+      - name: Upload DMG artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: duoduo-manager-dmg-${{ github.run_id }}
+          path: dist/*.dmg
+          if-no-files-found: error
+
       - name: Create GitHub Release (tag push)
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
