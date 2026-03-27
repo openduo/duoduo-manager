@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+  repository_dispatch:
+    types:
+      - cc-reader-released
 
 permissions:
   contents: write
@@ -24,8 +27,18 @@ jobs:
       - name: Create DMG
         run: make dmg
 
-      - name: Create GitHub Release
+      - name: Create GitHub Release (tag push)
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
+          files: dist/*.dmg
+          generate_release_notes: true
+
+      - name: Create GitHub Release (cc-reader sync)
+        if: github.event_name == 'repository_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: sync-${{ github.event.client_payload.cc_reader_tag }}
+          name: Sync with cc-reader ${{ github.event.client_payload.cc_reader_tag }}
           files: dist/*.dmg
           generate_release_notes: true
