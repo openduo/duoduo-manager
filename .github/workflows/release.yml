@@ -21,6 +21,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Select Xcode 26.3
+        run: sudo xcode-select -s /Applications/Xcode_26.3.app
+
+      - name: Print Xcode and SDK versions
+        run: |
+          xcodebuild -version
+          xcrun --sdk macosx --show-sdk-version
+
       - name: Build .app bundle
         run: make app
 
