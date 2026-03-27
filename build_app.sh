@@ -110,6 +110,16 @@ build_for_arch() {
     mkdir -p "${APP_PATH}/Contents/Resources"
     cp -r Sources/Resources/*.lproj "${APP_PATH}/Contents/Resources/"
 
+    # Bundle CCReaderKit resources where SwiftPM's generated accessor looks them up.
+    local CC_READER_RESOURCES_DIR=".build/checkouts/cc-reader/CCReader/Resources"
+    local CC_READER_BUNDLE_DIR="${APP_PATH}/CCReaderKit_CCReaderKit.bundle"
+    if [ -d "${CC_READER_RESOURCES_DIR}" ]; then
+        mkdir -p "${CC_READER_BUNDLE_DIR}"
+        cp -R "${CC_READER_RESOURCES_DIR}/"* "${CC_READER_BUNDLE_DIR}/"
+    else
+        echo -e "${YELLOW}Warning: CCReaderKit resources not found at ${CC_READER_RESOURCES_DIR}${NC}"
+    fi
+
     # Bundle matching-arch Node.js runtime (use tar to preserve symlinks)
     local NODE_DIR
     NODE_DIR=$(extract_node "$ARCH")
