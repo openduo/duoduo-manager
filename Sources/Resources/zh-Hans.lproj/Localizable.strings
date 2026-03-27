@@ -75,5 +75,5 @@
 "setup.installSuccess" = "Duoduo 安装成功";
 "setup.installFailed" = "Duoduo 安装失败";
 "setup.systemNodeMissingTitle" = "未找到系统 Node.js";
-"setup.systemNodeMissing" = "universal-lite 版本依赖系统 Node.js。请先安装 Node.js 24+ 后重新打开 DuoduoManager。";
+"setup.systemNodeMissing" = "universal-lite 版本依赖系统 Node.js。请先安装 Node.js 22+ 后重新打开 DuoduoManager。";
 

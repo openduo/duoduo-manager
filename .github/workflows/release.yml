@@ -48,6 +48,17 @@ jobs:
         with:
           files: dist/*.dmg
           generate_release_notes: true
+          body: |
+            ## Build Variants
+
+            - `*-arm64-with-nodejs.dmg`: Apple Silicon (M1/M2/M3/M4), bundled Node.js, ready to use.
+            - `*-x86_64-with-nodejs.dmg`: Intel Macs, bundled Node.js, ready to use.
+            - `*-universal-lite.dmg`: Universal binary without bundled Node.js, requires system Node.js 22+.
+
+            ## Notes
+
+            - Prefer `with-nodejs` builds for zero-setup usage.
+            - Choose `universal-lite` only if you explicitly want to use your system Node.js.
 
       - name: Create GitHub Release (cc-reader sync)
         if: github.event_name == 'repository_dispatch'
@@ -55,5 +66,18 @@ jobs:
         with:
           tag_name: sync-${{ github.event.client_payload.cc_reader_tag }}
           name: Sync with cc-reader ${{ github.event.client_payload.cc_reader_tag }}
+          prerelease: true
           files: dist/*.dmg
           generate_release_notes: true
+          body: |
+            ## Build Variants
+
+            - `*-arm64-with-nodejs.dmg`: Apple Silicon (M1/M2/M3/M4), bundled Node.js, ready to use.
+            - `*-x86_64-with-nodejs.dmg`: Intel Macs, bundled Node.js, ready to use.
+            - `*-universal-lite.dmg`: Universal binary without bundled Node.js, requires system Node.js 22+.
+
+            ## Notes
+
+            - This is an automated sync build triggered by a `cc-reader` release.
+            - Prefer `with-nodejs` builds for zero-setup usage.
+            - Choose `universal-lite` only if you explicitly want to use your system Node.js.

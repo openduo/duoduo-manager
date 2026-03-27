@@ -40,7 +40,7 @@ Download the DMG for your architecture from [Releases](https://github.com/opendu
 
 - `DuoduoManager-*-arm64-with-nodejs.dmg` — Apple Silicon (bundled Node.js, no extra setup)
 - `DuoduoManager-*-x86_64-with-nodejs.dmg` — Intel (bundled Node.js, no extra setup)
-- `DuoduoManager-*-universal-lite.dmg` — Universal binary, uses system Node.js (Node.js 24+ required)
+- `DuoduoManager-*-universal-lite.dmg` — Universal binary, uses system Node.js (Node.js 22+ required)
 
 ### From source
 
@@ -57,7 +57,7 @@ make app        # Build arm64 + x86_64 .app bundles
 - Xcode Command Line Tools (`xcode-select --install`)
 
 For `*-with-nodejs` builds, no extra runtime setup is required.
-For `*-universal-lite` builds, install Node.js 24+ on your system.
+For `*-universal-lite` builds, install Node.js 22+ on your system.
 
 ## Development
 

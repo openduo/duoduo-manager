@@ -75,5 +75,5 @@
 "setup.installSuccess" = "Duoduo installed successfully";
 "setup.installFailed" = "Failed to install duoduo";
 "setup.systemNodeMissingTitle" = "System Node.js not found";
-"setup.systemNodeMissing" = "System Node.js is required for the universal-lite build. Install Node.js 24+ and reopen DuoduoManager.";
+"setup.systemNodeMissing" = "System Node.js is required for the universal-lite build. Install Node.js 22+ and reopen DuoduoManager.";
 
