@@ -305,6 +305,24 @@ struct StatusBarView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 5))
                 }
                 .buttonStyle(.plain)
+                Button {
+                    showConfigPanel(title: L10n.ClaudeConfig.title) {
+                        ClaudeConfigView()
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "slider.horizontal.3")
+                            .font(.system(size: 10))
+                        Text("Claude")
+                            .font(.system(size: 11, weight: .medium))
+                    }
+                    .foregroundStyle(Color(nsColor: .secondaryLabelColor))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color(nsColor: .separatorColor).opacity(0.3))
+                    .clipShape(RoundedRectangle(cornerRadius: 5))
+                }
+                .buttonStyle(.plain)
                 Spacer()
                 Button(L10n.Status.quit) { NSApplication.shared.terminate(nil) }
                     .buttonStyle(.plain)
@@ -401,6 +419,9 @@ struct StatusBarView: View {
         let panel = NSPanel(contentViewController: hostingController)
         panel.title = title
         panel.styleMask = [.titled, .closable]
+        panel.hidesOnDeactivate = false
+        panel.becomesKeyOnlyIfNeeded = false
+        panel.isFloatingPanel = false
         panel.isReleasedWhenClosed = false
         hostingController.view.layoutSubtreeIfNeeded()
         let size = hostingController.view.fittingSize

@@ -31,6 +31,47 @@ enum L10n {
         static let save = String(localized: "config.save", bundle: bundle)
     }
 
+    // MARK: - Claude Config
+
+    enum ClaudeConfig {
+        static let title = String(localized: "claudeConfig.title", bundle: bundle)
+        static let actions = String(localized: "claudeConfig.actions", bundle: bundle)
+        static let tabBasic = String(localized: "claudeConfig.tabBasic", bundle: bundle)
+        static let tabAdvanced = String(localized: "claudeConfig.tabAdvanced", bundle: bundle)
+        static let flowSwitch = String(localized: "claudeConfig.flowSwitch", bundle: bundle)
+        static let flowCreate = String(localized: "claudeConfig.flowCreate", bundle: bundle)
+        static let presets = String(localized: "claudeConfig.presets", bundle: bundle)
+        static let newPreset = String(localized: "claudeConfig.newPreset", bundle: bundle)
+        static let newPresetName = String(localized: "claudeConfig.newPresetName", bundle: bundle)
+        static let createPresetAction = String(localized: "claudeConfig.createPresetAction", bundle: bundle)
+        static let deletePreset = String(localized: "claudeConfig.deletePreset", bundle: bundle)
+        static let presetName = String(localized: "claudeConfig.presetName", bundle: bundle)
+        static let commonFields = String(localized: "claudeConfig.commonFields", bundle: bundle)
+        static let modelGroup = String(localized: "claudeConfig.modelGroup", bundle: bundle)
+        static let finalJSON = String(localized: "claudeConfig.finalJSON", bundle: bundle)
+        static let applyToFile = String(localized: "claudeConfig.applyToFile", bundle: bundle)
+        static let pathLabel = String(localized: "claudeConfig.pathLabel", bundle: bundle)
+        static let lastStatus = String(localized: "claudeConfig.lastStatus", bundle: bundle)
+        static let localSaved = String(localized: "claudeConfig.localSaved", bundle: bundle)
+        static let applied = String(localized: "claudeConfig.applied", bundle: bundle)
+        static let savedShort = String(localized: "claudeConfig.savedShort", bundle: bundle)
+        static let appliedShort = String(localized: "claudeConfig.appliedShort", bundle: bundle)
+        static let saving = String(localized: "claudeConfig.saving", bundle: bundle)
+        static let applying = String(localized: "claudeConfig.applying", bundle: bundle)
+        static let saveFailed = String(localized: "claudeConfig.saveFailed", bundle: bundle)
+        static let applyFailed = String(localized: "claudeConfig.applyFailed", bundle: bundle)
+        static let exportPresets = String(localized: "claudeConfig.exportPresets", bundle: bundle)
+        static let importPresets = String(localized: "claudeConfig.importPresets", bundle: bundle)
+        static let exportHint = String(localized: "claudeConfig.exportHint", bundle: bundle)
+        static let importHint = String(localized: "claudeConfig.importHint", bundle: bundle)
+        static let exported = String(localized: "claudeConfig.exported", bundle: bundle)
+        static let imported = String(localized: "claudeConfig.imported", bundle: bundle)
+        static let importEmpty = String(localized: "claudeConfig.importEmpty", bundle: bundle)
+        static let invalidJSON = String(localized: "claudeConfig.invalidJSON", bundle: bundle)
+        static let newFromTemplate = String(localized: "claudeConfig.newFromTemplate", bundle: bundle)
+        static let advancedToggle = String(localized: "claudeConfig.advancedToggle", bundle: bundle)
+    }
+
     // MARK: - Daemon Config
 
     enum DaemonConfig {

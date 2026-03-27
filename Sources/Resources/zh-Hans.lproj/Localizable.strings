@@ -11,6 +11,44 @@
 /* Config */
 "config.save" = "保存";
 
+/* Claude Config */
+"claudeConfig.title" = "Claude 配置";
+"claudeConfig.actions" = "操作";
+"claudeConfig.tabBasic" = "基础";
+"claudeConfig.tabAdvanced" = "高级";
+"claudeConfig.flowSwitch" = "切换配置";
+"claudeConfig.flowCreate" = "新建配置";
+"claudeConfig.newPresetName" = "新配置名称";
+"claudeConfig.createPresetAction" = "创建";
+"claudeConfig.invalidJSON" = "JSON 格式错误";
+"claudeConfig.newFromTemplate" = "从模板新建";
+"claudeConfig.advancedToggle" = "高级 JSON";
+"claudeConfig.presets" = "配置集";
+"claudeConfig.newPreset" = "新建";
+"claudeConfig.deletePreset" = "删除";
+"claudeConfig.presetName" = "名称";
+"claudeConfig.commonFields" = "常用字段";
+"claudeConfig.modelGroup" = "模型字段";
+"claudeConfig.finalJSON" = "最终 JSON";
+"claudeConfig.applyToFile" = "应用到文件";
+"claudeConfig.pathLabel" = "目标路径";
+"claudeConfig.lastStatus" = "状态";
+"claudeConfig.localSaved" = "已保存到应用本地";
+"claudeConfig.applied" = "已应用到 ~/.claude/kuaner.json";
+"claudeConfig.savedShort" = "已保存";
+"claudeConfig.appliedShort" = "已应用";
+"claudeConfig.saving" = "保存中...";
+"claudeConfig.applying" = "应用中...";
+"claudeConfig.saveFailed" = "保存失败";
+"claudeConfig.applyFailed" = "应用失败";
+"claudeConfig.exportPresets" = "导出预设";
+"claudeConfig.importPresets" = "导入预设";
+"claudeConfig.exportHint" = "导出当前应用内的 Claude 配置预设";
+"claudeConfig.importHint" = "从 JSON 文件导入 Claude 配置预设";
+"claudeConfig.exported" = "预设导出成功";
+"claudeConfig.imported" = "预设导入成功";
+"claudeConfig.importEmpty" = "导入文件中没有可用预设";
+
 /* Daemon Config */
 "daemonConfig.title" = "Daemon 配置";
 "daemonConfig.workDir" = "工作目录";

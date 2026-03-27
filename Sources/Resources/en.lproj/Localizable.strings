@@ -11,6 +11,44 @@
 /* Config */
 "config.save" = "Save";
 
+/* Claude Config */
+"claudeConfig.title" = "Claude Config";
+"claudeConfig.actions" = "Actions";
+"claudeConfig.tabBasic" = "Basic";
+"claudeConfig.tabAdvanced" = "Advanced";
+"claudeConfig.flowSwitch" = "Switch Preset";
+"claudeConfig.flowCreate" = "Create Preset";
+"claudeConfig.newPresetName" = "New Preset Name";
+"claudeConfig.createPresetAction" = "Create";
+"claudeConfig.invalidJSON" = "Invalid JSON";
+"claudeConfig.newFromTemplate" = "New From Template";
+"claudeConfig.advancedToggle" = "Advanced JSON";
+"claudeConfig.presets" = "Presets";
+"claudeConfig.newPreset" = "New";
+"claudeConfig.deletePreset" = "Delete";
+"claudeConfig.presetName" = "Name";
+"claudeConfig.commonFields" = "Common Fields";
+"claudeConfig.modelGroup" = "Model Fields";
+"claudeConfig.finalJSON" = "Final JSON";
+"claudeConfig.applyToFile" = "Apply to File";
+"claudeConfig.pathLabel" = "Target Path";
+"claudeConfig.lastStatus" = "Status";
+"claudeConfig.localSaved" = "Saved locally";
+"claudeConfig.applied" = "Applied to ~/.claude/kuaner.json";
+"claudeConfig.savedShort" = "Saved";
+"claudeConfig.appliedShort" = "Applied";
+"claudeConfig.saving" = "Saving...";
+"claudeConfig.applying" = "Applying...";
+"claudeConfig.saveFailed" = "Save Failed";
+"claudeConfig.applyFailed" = "Apply Failed";
+"claudeConfig.exportPresets" = "Export Presets";
+"claudeConfig.importPresets" = "Import Presets";
+"claudeConfig.exportHint" = "Export Claude config presets stored in this app";
+"claudeConfig.importHint" = "Import Claude config presets from a JSON file";
+"claudeConfig.exported" = "Presets exported";
+"claudeConfig.imported" = "Presets imported";
+"claudeConfig.importEmpty" = "No presets found in the imported file";
+
 /* Daemon Config */
 "daemonConfig.title" = "Daemon Settings";
 "daemonConfig.workDir" = "Working Directory";
