@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
   workflow_dispatch:
   repository_dispatch:
     types:
@@ -23,11 +23,6 @@ jobs:
 
       - name: Select Xcode 26.3
         run: sudo xcode-select -s /Applications/Xcode_26.3.app
-
-      - name: Print Xcode and SDK versions
-        run: |
-          xcodebuild -version
-          xcrun --sdk macosx --show-sdk-version
 
       - name: Build .app bundle
         run: make app
