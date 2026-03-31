@@ -27,7 +27,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
     private var viewModel: DaemonViewModel?
     private var popover: NSPopover?
     private var eventMonitor: Any?
-    private var dashboardWindow: NSPanel?
+    private var dashboardWindow: NSWindow?
     private var readerWindow: NSWindow?
     private var windowCloseObserver: Any?
 
@@ -190,7 +190,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
 
         if dashboardWindow == nil {
             let dashboardView = DashboardView(daemonURL: dashboardURL)
-            dashboardWindow = NSPanel(
+            dashboardWindow = NSWindow(
                 contentRect: NSRect(x: 0, y: 0, width: 1100, height: 700),
                 styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
                 backing: .buffered,
@@ -202,6 +202,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
             dashboardWindow?.setContentSize(NSSize(width: 1100, height: 700))
             dashboardWindow?.delegate = self
             dashboardWindow?.minSize = NSSize(width: 680, height: 500)
+            dashboardWindow?.hidesOnDeactivate = false
             dashboardWindow?.center()
             dashboardWindow?.isReleasedWhenClosed = false
             dashboardWindow?.collectionBehavior = [.managed, .participatesInCycle, .fullScreenAllowsTiling]
