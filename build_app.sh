@@ -223,7 +223,13 @@ create_dmg_variant() {
 
     echo -e "${GREEN}Creating ${VARIANT} DMG...${NC}"
 
+    local VOLNAME="${APP_NAME}-${VERSION}-${VARIANT}"
+
+    # Unmount any previously mounted volume with the same name
+    hdiutil detach "/Volumes/${VOLNAME}" >/dev/null 2>&1 || true
+
     local TEMP_DIR="${DIST_DIR}/temp_dmg_${VARIANT}"
+    rm -rf "$TEMP_DIR"
     mkdir -p "$TEMP_DIR"
     cp -r "$APP_PATH" "$TEMP_DIR/"
 
@@ -234,7 +240,7 @@ create_dmg_variant() {
 
         create-dmg \
             --text-size 13 \
-            --volname "${APP_NAME}-${VERSION}-${VARIANT}" \
+            --volname "${VOLNAME}" \
             --volicon "${APP_PATH}/Contents/Resources/AppIcon.icns" \
             --window-pos 200 120 \
             --window-size 600 400 \
@@ -254,7 +260,7 @@ create_dmg_variant() {
     else
         echo "Using simple DMG mode..."
         ln -sf /Applications "$TEMP_DIR/Applications"
-        hdiutil create -volname "${APP_NAME}-${VERSION}-${VARIANT}" \
+        hdiutil create -volname "${VOLNAME}" \
             -srcfolder "$TEMP_DIR" \
             -ov -format UDZO "$DMG_PATH"
     fi
