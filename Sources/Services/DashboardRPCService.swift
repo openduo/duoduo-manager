@@ -25,6 +25,10 @@ struct DashboardRPCService: Sendable {
         return try await call("spine.tail", params: params)
     }
 
+    func systemConfig() async throws -> SystemConfig {
+        try await call("system.config")
+    }
+
     // MARK: - Private
 
     private func call<T: Decodable>(_ method: String, params: [String: Any]? = nil) async throws -> T {

@@ -7,6 +7,7 @@ enum SidebarEntry: Identifiable, Hashable {
     /// Static pages
     case sessions
     case jobs
+    case config
     /// System events (no session_key)
     case system
     /// Dynamic session_key group (top-level expandable)
@@ -18,6 +19,7 @@ enum SidebarEntry: Identifiable, Hashable {
         switch self {
         case .sessions: return "__sessions__"
         case .jobs: return "__jobs__"
+        case .config: return "__config__"
         case .system: return "__system__"
         case .sessionGroup(let key): return key
         case .sessionTypeItem(let key, let type): return "\(key)__\(type)"
@@ -74,6 +76,9 @@ struct DashboardView: View {
         .frame(minWidth: 680, minHeight: 500)
         .background(DashboardTheme.background.ignoresSafeArea(edges: .top))
         .task { viewModel.startPolling() }
+        .onChange(of: selectedEntry) { _, new in
+            if new == .config { Task { await viewModel.fetchConfig() } }
+        }
     }
 
     // MARK: - Sidebar
@@ -107,6 +112,7 @@ struct DashboardView: View {
                     }
                     staticItem(.sessions)
                     staticItem(.jobs)
+                    staticItem(.config)
                 }
                 .padding(.top, 4)
                 .padding(.bottom, 8)
@@ -269,6 +275,7 @@ struct DashboardView: View {
         switch entry {
         case .sessions: label = "sessions"
         case .jobs: label = "jobs"
+        case .config: label = "config"
         default: label = ""
         }
 
@@ -336,6 +343,8 @@ struct DashboardView: View {
         switch selectedEntry {
         case .sessions:
             SessionsContentView(sessions: viewModel.sessions)
+        case .config:
+            ConfigContentView(config: viewModel.config)
         case .jobs:
             JobsContentView(jobs: viewModel.jobs, isJobRunning: viewModel.isJobRunning)
         case .system:

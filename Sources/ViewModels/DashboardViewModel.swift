@@ -14,6 +14,7 @@ final class DashboardViewModel {
     private(set) var totalTokens: Int = 0
     private(set) var totalTools: Int = 0
     private(set) var autoFollow = true
+    private(set) var config: SystemConfig?
 
     private var rpc: DashboardRPCService
     private var lastEventId: String?
@@ -129,6 +130,10 @@ final class DashboardViewModel {
         if let jobsResp = try? await jobsReq {
             jobs = jobsResp.jobs
         }
+    }
+
+    func fetchConfig() async {
+        config = try? await rpc.systemConfig()
     }
 
     private func parseDate(_ s: String) -> Date {

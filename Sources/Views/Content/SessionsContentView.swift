@@ -107,6 +107,22 @@ struct SessionsContentView: View {
                             .font(.system(size: 10, design: .monospaced))
                             .foregroundStyle(DashboardTheme.textTertiary)
                     }
+
+                    if let cwd = s.cwd {
+                        Text("cwd:\(cwd)")
+                            .font(.system(size: 10, design: .monospaced))
+                            .foregroundStyle(DashboardTheme.textTertiary)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                    }
+                }
+
+                if let lastError = s.last_error {
+                    Text("err: \(lastError)")
+                        .font(.system(size: 10, design: .monospaced))
+                        .foregroundStyle(DashboardTheme.red)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
                 }
             }
             .padding(.horizontal, 12)

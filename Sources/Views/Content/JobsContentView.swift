@@ -90,6 +90,10 @@ struct JobsContentView: View {
                         Text("  •  runs:\(count)")
                             .foregroundStyle(DashboardTheme.textTertiary)
                     }
+                    if let cwdRel = j.frontmatter?.cwd_rel {
+                        Text("  •  cwd:\(cwdRel)")
+                            .foregroundStyle(DashboardTheme.textTertiary)
+                    }
                 }
                 .font(.system(size: 10, design: .monospaced))
             }

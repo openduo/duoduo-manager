@@ -95,4 +95,17 @@ enum DashboardTheme {
         else { return "{}" }
         return str
     }
+
+    // MARK: - Duration
+
+    static func formatDuration(_ ms: Double?) -> String {
+        guard let ms, ms.isFinite else { return String(describing: ms) }
+        if ms < 1000 { return "\(Int(ms))ms" }
+        let s = ms / 1000
+        if s < 60 { return "\(s == s.rounded() ? String(Int(s)) : String(format: "%.1f", s))s (\(Int(ms).formatted())ms)" }
+        let m = s / 60
+        if m < 60 { return "\(m == m.rounded() ? String(Int(m)) : String(format: "%.1f", m))min (\(Int(ms).formatted())ms)" }
+        let h = m / 60
+        return "\(h == h.rounded() ? String(Int(h)) : String(format: "%.1f", h))h (\(Int(ms).formatted())ms)"
+    }
 }
