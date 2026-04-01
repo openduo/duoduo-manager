@@ -17,7 +17,8 @@ struct NodeRuntime: Sendable {
     }()
 
     private static var runtimeMode: RuntimeMode {
-        let raw = (Bundle.main.object(forInfoDictionaryKey: "DuoduoNodeRuntimeMode") as? String)?.lowercased()
+        let raw = (Bundle.main.object(forInfoDictionaryKey: "DuoduoNodeRuntimeMode") as? String)?
+            .lowercased()
         return RuntimeMode(rawValue: raw ?? "") ?? .bundled
     }
 
@@ -43,11 +44,13 @@ struct NodeRuntime: Sendable {
         let binDir = (path as NSString).deletingLastPathComponent
         let resolved: String
         if let real = try? FileManager.default.destinationOfSymbolicLink(atPath: path) {
-            resolved = URL(fileURLWithPath: binDir).appendingPathComponent(real).standardizedFileURL.path
+            resolved =
+                URL(fileURLWithPath: binDir).appendingPathComponent(real).standardizedFileURL.path
         } else {
             resolved = path
         }
-        return ((resolved as NSString).deletingLastPathComponent as NSString).deletingLastPathComponent
+        return ((resolved as NSString).deletingLastPathComponent as NSString)
+            .deletingLastPathComponent
     }
 
     private static func mergedSystemPaths(baseEnvironment env: [String: String]) -> [String] {
@@ -55,7 +58,7 @@ struct NodeRuntime: Sendable {
         let shell = env["SHELL"] ?? "/bin/zsh"
         let proc = Process()
         proc.executableURL = URL(fileURLWithPath: shell)
-        proc.arguments = ["-l", "-c", "echo $PATH"]
+        proc.arguments = ["-l", "-i", "-c", "echo $PATH"]
         let pipe = Pipe()
         proc.standardOutput = pipe
         proc.standardError = FileHandle.nullDevice
@@ -63,12 +66,13 @@ struct NodeRuntime: Sendable {
             try proc.run()
             proc.waitUntilExit()
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            let loginShellPath = String(data: data, encoding: .utf8)?
+            let loginShellPath =
+                String(data: data, encoding: .utf8)?
                 .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             if !loginShellPath.isEmpty {
                 merged.formUnion(loginShellPath.components(separatedBy: ":"))
             }
-        } catch { /* fallback */ }
+        } catch { /* fallback */  }
         return Array(merged).filter { !$0.isEmpty }
     }
 
@@ -122,7 +126,8 @@ struct NodeRuntime: Sendable {
             env["PATH"] = paths.joined(separator: ":")
             env["NPM_CONFIG_PREFIX"] = npmGlobalDir
             if hasBundledNode,
-               let bundledDir = Bundle.main.resourceURL?.appendingPathComponent("node").path {
+                let bundledDir = Bundle.main.resourceURL?.appendingPathComponent("node").path
+            {
                 env["NODE_PATH"] = "\(bundledDir)/lib/node_modules"
             } else {
                 env.removeValue(forKey: "NODE_PATH")
@@ -149,11 +154,16 @@ struct NodeRuntime: Sendable {
         static var npmBinDir: String { "" }
 
         private static var resolvedSystemDuoduoPath: String? {
-            resolveExecutable(named: "duoduo", paths: mergedSystemPaths(baseEnvironment: ProcessInfo.processInfo.environment))
+            resolveExecutable(
+                named: "duoduo",
+                paths: mergedSystemPaths(baseEnvironment: ProcessInfo.processInfo.environment))
         }
 
         static var hasSystemNode: Bool {
-            resolveExecutable(named: "node", paths: mergedSystemPaths(baseEnvironment: ProcessInfo.processInfo.environment)) != nil
+            resolveExecutable(
+                named: "node",
+                paths: mergedSystemPaths(baseEnvironment: ProcessInfo.processInfo.environment))
+                != nil
         }
 
         static var hasSystemDuoduo: Bool {
