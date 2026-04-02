@@ -24,7 +24,7 @@ Quick access to daemon status, channel controls, and one-click actions. The foot
 
 Real-time event stream, active sessions, and job queue. Built with a Catppuccin Mocha dark theme for comfortable monitoring.
 
-![ATC Dashboard](assets/dashboard.png)
+![ATC Dashboard](assets/dashboard.avif)
 
 ### CC Reader
 
