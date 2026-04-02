@@ -30,7 +30,7 @@ Real-time event stream, active sessions, and job queue. Built with a Catppuccin 
 
 Browse and search Claude Code conversation history with markdown rendering, syntax highlighting, and session management. Toolbar items (working directory, resume, refresh) are integrated into the title bar.
 
-![CC Reader](assets/reader.png)
+![CC Reader](assets/reader.avif)
 
 ## Installation
 
