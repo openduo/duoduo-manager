@@ -1,5 +1,4 @@
 import SwiftUI
-import CCReaderKit
 
 @main
 struct DuoduoManagerApp: App {
@@ -22,14 +21,10 @@ struct DuoduoManagerApp: App {
 }
 
 @MainActor
-class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowDelegate {
-    private var statusItem: NSStatusItem?
+class AppDelegate: NSObject, NSApplicationDelegate {
     private var store: AppStore?
-    private var popover: NSPopover?
-    private var eventMonitor: Any?
-    private var dashboardWindow: NSWindow?
-    private var readerWindow: NSWindow?
-    private var windowCloseObserver: Any?
+    private var statusController: AppStatusController?
+    private var windowController: AppWindowController?
 
     nonisolated func applicationDidFinishLaunching(_ notification: Notification) {
         Task { @MainActor in
@@ -39,46 +34,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
             }
 
             NSApp.setActivationPolicy(.accessory)
-
-            // Switch back to .accessory when all titled windows are closed
-            windowCloseObserver = NotificationCenter.default.addObserver(
-                forName: NSWindow.willCloseNotification,
-                object: nil,
-                queue: .main
-            ) { _ in
-                DispatchQueue.main.async {
-                    let hasVisibleWindow = NSApp.windows.contains {
-                        $0.isVisible && $0.styleMask.contains(.titled) && !$0.title.isEmpty
-                    }
-                    if !hasVisibleWindow {
-                        NSApp.setActivationPolicy(.accessory)
-                    }
-                }
-            }
-
-            statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-
-            if let button = statusItem?.button {
-                if let sfImage = NSImage(systemSymbolName: "dog.fill", accessibilityDescription: "Duoduo") {
-                    let config = NSImage.SymbolConfiguration(pointSize: 14, weight: .medium)
-                    button.image = sfImage.withSymbolConfiguration(config)
-                }
-                button.action = #selector(togglePopover)
-                button.target = self
-            }
-
-            let popover = NSPopover()
-            popover.behavior = .transient
-            popover.animates = true
-            popover.delegate = self
-            self.popover = popover
-
-            eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
-                Task { @MainActor in
-                    self?.closePopover()
-                }
-            }
-
+            statusController = AppStatusController()
+            windowController = AppWindowController()
             initViewModel()
         }
     }
@@ -86,40 +43,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
     nonisolated func applicationWillTerminate(_ notification: Notification) {
         Task { @MainActor in
             store?.shutdown()
-            if let monitor = eventMonitor {
-                NSEvent.removeMonitor(monitor)
-            }
-            if let observer = windowCloseObserver {
-                NotificationCenter.default.removeObserver(observer)
-            }
+            statusController?.shutdown()
+            windowController?.shutdown()
         }
     }
 
     nonisolated func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-        return false
-    }
-
-    // MARK: - NSPopoverDelegate
-
-    func popoverWillClose(_ notification: Notification) {
-        store?.setPopoverVisible(false)
-    }
-
-    // MARK: - NSWindowDelegate
-
-    nonisolated func windowShouldClose(_ sender: NSWindow) -> Bool {
-        Task { @MainActor in
-            if sender == self.dashboardWindow {
-                self.store?.setDashboardVisible(false)
-            }
-            sender.orderOut(nil)
-            let hasOtherVisibleWindow = NSApp.windows.contains {
-                $0.isVisible && $0 != sender && $0.styleMask.contains(.titled) && !$0.title.isEmpty
-            }
-            if !hasOtherVisibleWindow {
-                NSApp.setActivationPolicy(.accessory)
-            }
-        }
         return false
     }
 
@@ -130,13 +59,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
         store?.updateStatusBarIcon = { [weak self] in
             self?.updateStatusBarIcon()
         }
+        statusController?.onPopoverVisibilityChanged = { [weak self] isVisible in
+            self?.store?.setPopoverVisible(isVisible)
+        }
+        windowController?.onDashboardVisibilityChanged = { [weak self] isVisible in
+            self?.store?.setDashboardVisible(isVisible)
+        }
         updatePopoverContent()
         updateStatusBarIcon()
     }
 
     private func updatePopoverContent() {
         guard let store else { return }
-        popover?.contentViewController = NSHostingController(rootView: StatusBarView(
+        statusController?.setPopoverContent(StatusBarView(
             store: store,
             openDashboard: { [weak self] in self?.openDashboard() },
             openReader: { [weak self] in self?.openReader() }
@@ -146,107 +81,24 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
 
     private func updateStatusBarIcon() {
         guard let store else { return }
-        let icon: String
-        if store.hasAppUpdate {
-            icon = "dot.radiowaves.left.and.badge.plus"
-        } else {
-            icon = "dog.fill"
-        }
-        if let button = statusItem?.button,
-           let sfImage = NSImage(systemSymbolName: icon, accessibilityDescription: "Duoduo") {
-            let config = NSImage.SymbolConfiguration(pointSize: 14, weight: .medium)
-            button.image = sfImage.withSymbolConfiguration(config)
-        }
-        statusItem?.button?.toolTip = "Duoduo Manager - \(store.runtime.status.isRunning ? L10n.Status.running : L10n.Status.stopped)"
-    }
-
-    // MARK: - Popover
-
-    @objc private func togglePopover() {
-        guard let button = statusItem?.button else { return }
-
-        if let popover, popover.isShown {
-            popover.performClose(nil)
-        } else if let popover {
-            store?.setPopoverVisible(true)
-            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
-            NSApp.activate(ignoringOtherApps: true)
-        }
-    }
-
-    private func closePopover() {
-        if let popover, popover.isShown {
-            popover.performClose(nil)
-        }
+        statusController?.updateStatusIcon(
+            hasAppUpdate: store.hasAppUpdate,
+            isRuntimeRunning: store.runtime.status.isRunning
+        )
     }
 
     // MARK: - Dashboard
 
     private func openDashboard() {
-        closePopover()
-
-        if dashboardWindow == nil {
-            guard let store else { return }
-            let dashboardView = DashboardView(store: store)
-            dashboardWindow = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 1100, height: 700),
-                styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
-                backing: .buffered,
-                defer: false
-            )
-            dashboardWindow?.title = "Duoduo ATC"
-            dashboardWindow?.titlebarAppearsTransparent = true
-            dashboardWindow?.contentViewController = NSHostingController(rootView: dashboardView)
-            dashboardWindow?.setContentSize(NSSize(width: 1100, height: 700))
-            dashboardWindow?.delegate = self
-            dashboardWindow?.minSize = NSSize(width: 680, height: 500)
-            dashboardWindow?.hidesOnDeactivate = false
-            dashboardWindow?.center()
-            dashboardWindow?.isReleasedWhenClosed = false
-            dashboardWindow?.collectionBehavior = [.managed, .participatesInCycle, .fullScreenAllowsTiling]
-        }
-
-        store?.setDashboardVisible(true)
-        NSApp.setActivationPolicy(.regular)
-        NSApp.activate(ignoringOtherApps: true)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
-            self?.dashboardWindow?.makeKeyAndOrderFront(nil)
-            NSApp.activate(ignoringOtherApps: true)
-        }
+        statusController?.dismissPopover()
+        guard let store else { return }
+        windowController?.showDashboard(store: store)
     }
 
     // MARK: - CC Reader
 
     private func openReader() {
-        closePopover()
-
-        if readerWindow == nil {
-            let readerView = CCReaderKit.makeView()
-            readerWindow = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 1200, height: 800),
-                styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
-                backing: .buffered,
-                defer: false
-            )
-            readerWindow?.title = "CC Reader"
-            let toolbar = NSToolbar(identifier: "CCReaderToolbar")
-            toolbar.displayMode = .iconOnly
-            readerWindow?.toolbar = toolbar
-            readerWindow?.toolbarStyle = .unified
-            readerWindow?.contentViewController = NSHostingController(rootView: readerView)
-            readerWindow?.setContentSize(NSSize(width: 1200, height: 800))
-            readerWindow?.delegate = self
-            readerWindow?.minSize = NSSize(width: 680, height: 500)
-            readerWindow?.center()
-            readerWindow?.isReleasedWhenClosed = false
-            readerWindow?.collectionBehavior = [.managed, .participatesInCycle, .fullScreenAllowsTiling]
-        }
-
-        NSApp.setActivationPolicy(.regular)
-        NSApp.activate(ignoringOtherApps: true)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
-            self?.readerWindow?.makeKeyAndOrderFront(nil)
-            NSApp.activate(ignoringOtherApps: true)
-        }
+        statusController?.dismissPopover()
+        windowController?.showReader()
     }
 }
