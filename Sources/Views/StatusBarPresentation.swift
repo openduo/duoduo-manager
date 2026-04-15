@@ -54,6 +54,7 @@ struct StatusExecutionPresentation {
 }
 
 struct StatusFooterPresentation {
-    let sessionLoad: Int
+    let loadLabel: String
+    let loadValue: String
     let eventFlow: Int
 }

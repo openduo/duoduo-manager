@@ -85,7 +85,8 @@ struct StatusExecutionPanel: View {
 }
 
 struct StatusFooterBar: View {
-    let sessionLoad: Int
+    let loadLabel: String
+    let loadValue: String
     let eventFlow: Int
     let onDashboard: () -> Void
     let onReader: () -> Void
@@ -96,7 +97,7 @@ struct StatusFooterBar: View {
             HStack(spacing: 0) {
                 footerMetric(title: "AI ENGINE", value: "assistant runtime")
                 footerDivider
-                footerMetric(title: "SESSION LOAD", value: "\(sessionLoad)")
+                footerMetric(title: loadLabel, value: loadValue)
                 footerDivider
                 footerMetric(title: "EVENT FLOW", value: "\(eventFlow)")
             }

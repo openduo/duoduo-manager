@@ -81,7 +81,8 @@ extension StatusBarView {
 
     var footerPresentation: StatusFooterPresentation {
         StatusFooterPresentation(
-            sessionLoad: activeSessionCount + runningJobCount,
+            loadLabel: "ACTIVE LOAD",
+            loadValue: "\(activeSessionCount)s / \(runningJobCount)j",
             eventFlow: recentEvents.count
         )
     }
@@ -132,6 +133,10 @@ extension StatusBarView {
 extension StatusBarView {
     var activeSessionCount: Int {
         dashboardViewModel?.sessions.filter { $0.status == "active" }.count ?? 0
+    }
+
+    var totalSessionCount: Int {
+        dashboardViewModel?.sessions.count ?? 0
     }
 
     var runningJobCount: Int {

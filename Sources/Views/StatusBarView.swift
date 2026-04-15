@@ -11,6 +11,8 @@ struct StatusBarView: View {
 
     let panelWidth: CGFloat = 568
     let panelHeight: CGFloat = 734
+    let panelInset: CGFloat = 14
+    let overviewSpacing: CGFloat = 14
 
     var body: some View {
         VStack(spacing: 0) {
@@ -36,19 +38,20 @@ struct StatusBarView: View {
 
             ScrollView {
                 VStack(spacing: 14) {
-                    topologyPanel
-                    controlPanel
+                    overviewRow
+                    subconsciousPanel
                     streamPanel
                     executionPanel
                     transientOutputPanel
                 }
-                .padding(14)
+                .padding(panelInset)
             }
 
             Divider().overlay(ConsolePalette.divider)
 
             StatusFooterBar(
-                sessionLoad: footerPresentation.sessionLoad,
+                loadLabel: footerPresentation.loadLabel,
+                loadValue: footerPresentation.loadValue,
                 eventFlow: footerPresentation.eventFlow,
                 onDashboard: { openDashboard?() },
                 onReader: { openCCReader() },
@@ -72,27 +75,60 @@ struct StatusBarView: View {
         }
     }
 
-    private var topologyPanel: some View {
+    private var overviewRow: some View {
+        HStack(alignment: .top, spacing: 14) {
+            controlPanel
+                .frame(width: overviewControlWidth)
+
+            topologySummaryPanel
+                .frame(width: overviewTopologyWidth)
+        }
+    }
+
+    private var topologySummaryPanel: some View {
         StatusPanelSection(icon: "point.3.connected.trianglepath.dotted", title: "Topology") {
             VStack(spacing: 12) {
-                HStack(spacing: 12) {
-                    StatusTopologyMetric(icon: "dot.radiowaves.left.and.right", title: "daemon endpoint", value: topologyPresentation.endpoint)
-                    StatusTopologyMetric(icon: "network", title: "runtime host", value: topologyPresentation.runtimeHost)
-                }
-
-                HStack(spacing: 12) {
-                    StatusTopologyMetric(icon: "cpu", title: "process", value: topologyPresentation.process)
-                    StatusTopologyMetric(
-                        icon: "cross.case",
-                        title: "system",
-                        value: topologyPresentation.system,
-                        tint: topologyPresentation.systemTint
-                    )
-                }
-
-                StatusSubconsciousList(rows: topologyPresentation.subconsciousRows)
+                StatusTopologyMetric(
+                    icon: "dot.radiowaves.left.and.right",
+                    title: "daemon endpoint",
+                    value: topologyPresentation.endpoint
+                )
+                StatusTopologyMetric(
+                    icon: "network",
+                    title: "runtime host",
+                    value: topologyPresentation.runtimeHost
+                )
+                StatusTopologyMetric(
+                    icon: "cpu",
+                    title: "process",
+                    value: topologyPresentation.process
+                )
+                StatusTopologyMetric(
+                    icon: "cross.case",
+                    title: "system",
+                    value: topologyPresentation.system,
+                    tint: topologyPresentation.systemTint
+                )
             }
         }
+    }
+
+    private var subconsciousPanel: some View {
+        StatusPanelSection(icon: "brain.head.profile", title: "Subconscious") {
+            StatusSubconsciousList(rows: topologyPresentation.subconsciousRows)
+        }
+    }
+
+    private var overviewAvailableWidth: CGFloat {
+        panelWidth - (panelInset * 2) - overviewSpacing
+    }
+
+    private var overviewControlWidth: CGFloat {
+        floor(overviewAvailableWidth * 0.6)
+    }
+
+    private var overviewTopologyWidth: CGFloat {
+        ceil(overviewAvailableWidth * 0.4)
     }
 
     private var controlPanel: some View {
