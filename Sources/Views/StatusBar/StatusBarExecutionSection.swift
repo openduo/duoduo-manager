@@ -85,9 +85,10 @@ struct StatusExecutionPanel: View {
 }
 
 struct StatusFooterBar: View {
-    let loadLabel: String
-    let loadValue: String
-    let eventFlow: Int
+    let costValue: String
+    let tokenValue: String
+    let cacheValue: String
+    let toolsValue: String
     let onDashboard: () -> Void
     let onReader: () -> Void
     let onQuit: () -> Void
@@ -95,11 +96,13 @@ struct StatusFooterBar: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 0) {
-                footerMetric(title: "AI ENGINE", value: "assistant runtime")
+                footerMetric(title: "COST", value: costValue, icon: "dollarsign.circle")
                 footerDivider
-                footerMetric(title: loadLabel, value: loadValue)
+                footerMetric(title: "TOK", value: tokenValue, icon: "circle.hexagongrid")
                 footerDivider
-                footerMetric(title: "EVENT FLOW", value: "\(eventFlow)")
+                footerMetric(title: "CACHE", value: cacheValue, icon: "externaldrive")
+                footerDivider
+                footerMetric(title: "TOOLS", value: toolsValue, icon: "wrench.and.screwdriver")
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
@@ -125,11 +128,16 @@ struct StatusFooterBar: View {
             .padding(.horizontal, 12)
     }
 
-    private func footerMetric(title: String, value: String) -> some View {
+    private func footerMetric(title: String, value: String, icon: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(title)
-                .font(.system(size: 9, design: .monospaced))
-                .foregroundStyle(ConsolePalette.secondaryText)
+            HStack(spacing: 5) {
+                Image(systemName: icon)
+                    .font(.system(size: 8, weight: .semibold))
+                    .foregroundStyle(ConsolePalette.mutedText)
+                Text(title)
+                    .font(.system(size: 9, design: .monospaced))
+                    .foregroundStyle(ConsolePalette.secondaryText)
+            }
             Text(value)
                 .font(.system(size: 11, weight: .semibold, design: .monospaced))
                 .foregroundStyle(ConsolePalette.primaryText)

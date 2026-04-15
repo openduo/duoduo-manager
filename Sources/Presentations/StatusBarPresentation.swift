@@ -23,9 +23,10 @@ struct StatusHeaderPresentation {
 struct StatusTopologyPresentation {
     let endpoint: String
     let runtimeHost: String
-    let process: String
     let system: String
     let systemTint: Color
+    let load: String
+    let loadTint: Color
     let subconsciousRows: [SummaryRowData]
 }
 
@@ -64,7 +65,8 @@ struct StatusExecutionPresentation {
 }
 
 struct StatusFooterPresentation {
-    let loadLabel: String
-    let loadValue: String
-    let eventFlow: Int
+    let costValue: String
+    let tokenValue: String
+    let cacheValue: String
+    let toolsValue: String
 }

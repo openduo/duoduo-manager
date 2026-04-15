@@ -12,6 +12,7 @@ struct StatusBarView: View {
     @State var feishuDraft: FeishuConfig
     @State var daemonNotice: InlineConfigNotice?
     @State var feishuNotice: InlineConfigNotice?
+    @State private var overviewCardHeight: CGFloat = 0
 
     let panelWidth: CGFloat = 568
     let panelHeight: CGFloat = 734
@@ -62,9 +63,10 @@ struct StatusBarView: View {
             Divider().overlay(ConsolePalette.divider)
 
             StatusFooterBar(
-                loadLabel: statusBarPresentation.footer.loadLabel,
-                loadValue: statusBarPresentation.footer.loadValue,
-                eventFlow: statusBarPresentation.footer.eventFlow,
+                costValue: statusBarPresentation.footer.costValue,
+                tokenValue: statusBarPresentation.footer.tokenValue,
+                cacheValue: statusBarPresentation.footer.cacheValue,
+                toolsValue: statusBarPresentation.footer.toolsValue,
                 onDashboard: { openDashboard?() },
                 onReader: { openCCReader() },
                 onQuit: { NSApplication.shared.terminate(nil) }
@@ -78,9 +80,16 @@ struct StatusBarView: View {
         HStack(alignment: .top, spacing: overviewSpacing) {
             controlPanel
                 .frame(width: overviewControlWidth)
+                .frame(minHeight: overviewCardHeight)
+                .measureStatusOverviewHeight()
 
             topologySummaryPanel
                 .frame(width: overviewTopologyWidth)
+                .frame(minHeight: overviewCardHeight)
+                .measureStatusOverviewHeight()
+        }
+        .onPreferenceChange(StatusOverviewHeightPreferenceKey.self) { height in
+            overviewCardHeight = height
         }
     }
 
@@ -89,8 +98,8 @@ struct StatusBarView: View {
             VStack(spacing: 12) {
                 StatusTopologyMetric(icon: "dot.radiowaves.left.and.right", title: "daemon endpoint", value: statusBarPresentation.topology.endpoint)
                 StatusTopologyMetric(icon: "network", title: "runtime host", value: statusBarPresentation.topology.runtimeHost)
-                StatusTopologyMetric(icon: "cpu", title: "process", value: statusBarPresentation.topology.process)
                 StatusTopologyMetric(icon: "cross.case", title: "system", value: statusBarPresentation.topology.system, tint: statusBarPresentation.topology.systemTint)
+                StatusTopologyMetric(icon: "gauge.with.dots.needle.33percent", title: "load", value: statusBarPresentation.topology.load, tint: statusBarPresentation.topology.loadTint)
             }
         }
     }

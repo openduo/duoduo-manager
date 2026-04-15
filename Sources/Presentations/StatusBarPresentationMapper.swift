@@ -23,9 +23,10 @@ struct StatusBarPresentationMapper {
             topology: StatusTopologyPresentation(
                 endpoint: store.runtime.daemonConfig.daemonURL,
                 runtimeHost: nodeAddressValue,
-                process: store.runtime.status.pid.isEmpty ? "pid pending" : "pid \(store.runtime.status.pid)",
-                system: systemHealthSummary,
+                system: SharedPresentationFormatting.systemHealthSummary(store.dashboard.health),
                 systemTint: systemHealthTint,
+                load: "\(activeSessionCount) \(activeSessionCount == 1 ? "session" : "sessions") · \(runningJobCount) \(runningJobCount == 1 ? "job" : "jobs")",
+                loadTint: activeSessionCount > 0 || runningJobCount > 0 ? ConsolePalette.accent : ConsolePalette.secondaryText,
                 subconsciousRows: subconsciousRows
             ),
             daemonCard: StatusServiceCardPresentation(
@@ -53,9 +54,10 @@ struct StatusBarPresentationMapper {
                 jobRows: jobSummaryRows
             ),
             footer: StatusFooterPresentation(
-                loadLabel: "ACTIVE LOAD",
-                loadValue: "\(activeSessionCount)s / \(runningJobCount)j",
-                eventFlow: recentEvents.count
+                costValue: DashboardTheme.formatCost(store.dashboard.totalCost),
+                tokenValue: DashboardTheme.formatTokens(store.dashboard.totalTokens),
+                cacheValue: "\(store.dashboard.cacheHitRate)%",
+                toolsValue: DashboardTheme.formatTools(store.dashboard.totalTools)
             ),
             controlHint: showRuntimeUpdate ? "updates ready" : (store.command.isLoading ? "commands in flight" : "direct operations")
         )
@@ -89,10 +91,6 @@ struct StatusBarPresentationMapper {
             return "local runtime"
         }
         return host
-    }
-
-    private var systemHealthSummary: String {
-        SharedPresentationFormatting.systemHealthSummary(store.dashboard.health)
     }
 
     private var systemHealthTint: Color {
