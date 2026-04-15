@@ -1,5 +1,10 @@
 import SwiftUI
 
+enum ConfigEditorMode {
+    case panel
+    case inline
+}
+
 // MARK: - Shared Config View Layout Helpers
 
 extension View {

@@ -197,3 +197,42 @@ struct StatusSmallActionButton: View {
         .disabled(isDisabled)
     }
 }
+
+struct StatusInlineConfigNotice: View {
+    let message: String
+    let tint: Color
+    let actionTitle: String?
+    let action: (() -> Void)?
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Circle()
+                .fill(tint)
+                .frame(width: 6, height: 6)
+
+            Text(message)
+                .font(.system(size: 10, design: .monospaced))
+                .foregroundStyle(tint)
+
+            Spacer()
+
+            if let actionTitle, let action {
+                StatusSmallActionButton(
+                    title: actionTitle,
+                    systemImage: "arrow.clockwise",
+                    tint: tint,
+                    isDisabled: false,
+                    action: action
+                )
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(tint.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(tint.opacity(0.25), lineWidth: 1)
+        )
+    }
+}

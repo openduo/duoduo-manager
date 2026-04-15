@@ -1,7 +1,7 @@
 import Foundation
 
 /// Feishu channel configuration, mapped to @openduo/channel-feishu environment variables
-struct FeishuConfig: Codable, Sendable {
+struct FeishuConfig: Codable, Sendable, Equatable {
 
     // MARK: - Authentication (required)
 

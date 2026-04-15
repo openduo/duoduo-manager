@@ -2,14 +2,19 @@ import SwiftUI
 
 struct DaemonConfigView: View {
     @Binding var config: DaemonConfig
+    var mode: ConfigEditorMode = .panel
+    var onSave: (() -> Void)?
+    var onCancel: (() -> Void)?
     @Environment(\.dismiss) private var dismiss
 
     @State private var showAdvanced = false
 
     var body: some View {
         VStack(spacing: 0) {
-            titleBar
-            Divider()
+            if mode == .panel {
+                titleBar
+                Divider()
+            }
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
                     workDirSection
@@ -22,9 +27,13 @@ struct DaemonConfigView: View {
                 }
                 .padding(.bottom, 16)
             }
+            if mode == .inline {
+                Divider()
+                inlineActions
+            }
         }
-        .frame(width: 380)
-        .fixedSize()
+        .frame(width: mode == .panel ? 380 : nil)
+        .fixedSize(horizontal: false, vertical: mode == .panel)
     }
 
     // MARK: - Title Bar
@@ -44,8 +53,7 @@ struct DaemonConfigView: View {
             Spacer()
 
             Button(L10n.Config.save) {
-                config.save()
-                dismiss()
+                saveConfig()
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.small)
@@ -190,6 +198,35 @@ struct DaemonConfigView: View {
                     .textFieldStyle(.roundedBorder)
                     .font(.system(size: 12, design: .monospaced))
             }
+        }
+    }
+
+    private var inlineActions: some View {
+        HStack(spacing: 8) {
+            Spacer()
+
+            Button(L10n.Config.cancel) {
+                onCancel?()
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+
+            Button(L10n.Config.save) {
+                saveConfig()
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.small)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+    }
+
+    private func saveConfig() {
+        config.save()
+        if let onSave {
+            onSave()
+        } else {
+            dismiss()
         }
     }
 

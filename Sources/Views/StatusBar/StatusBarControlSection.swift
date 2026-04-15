@@ -9,13 +9,16 @@ struct StatusServiceCard: View {
     let pid: String
     let isRunning: Bool
     let isLoading: Bool
+    let runtimeHint: String?
+    let runtimeHintTint: Color?
     let onConfig: (() -> Void)?
     let onStop: () -> Void
     let onRestart: () -> Void
     let onStart: () -> Void
+    let expandedContent: AnyView?
 
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 8) {
             HStack(spacing: 10) {
                 Image(systemName: icon)
                     .font(.system(size: 14, weight: .semibold))
@@ -97,8 +100,21 @@ struct StatusServiceCard: View {
                     .padding(.leading, 6)
                     .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(isRunning ? ConsolePalette.signal : ConsolePalette.secondaryText)
+
+                if let runtimeHint, !runtimeHint.isEmpty {
+                    Text(" · ")
+                        .foregroundStyle(ConsolePalette.mutedText)
+
+                    Text(runtimeHint)
+                        .foregroundStyle(runtimeHintTint ?? ConsolePalette.warning)
+                }
             }
             .font(.system(size: 10, design: .monospaced))
+
+            if let expandedContent {
+                Divider().overlay(ConsolePalette.divider)
+                expandedContent
+            }
         }
         .padding(12)
         .cardPanel()
@@ -110,51 +126,74 @@ struct StatusInstallCard: View {
     let name: String
     let packageName: String
     let isLoading: Bool
+    let runtimeHint: String?
+    let runtimeHintTint: Color?
     let onConfig: (() -> Void)?
     let onInstall: () -> Void
+    let expandedContent: AnyView?
 
     var body: some View {
-        HStack(spacing: 10) {
-            Image(systemName: iconName)
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(ConsolePalette.secondaryText)
-                .frame(width: 32, height: 32)
-                .background(ConsolePalette.panel)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(ConsolePalette.divider, lineWidth: 1)
-                )
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(name)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(ConsolePalette.primaryText)
-
-                Text(packageName)
-                    .font(.system(size: 10, design: .monospaced))
+        VStack(spacing: 8) {
+            HStack(spacing: 10) {
+                Image(systemName: iconName)
+                    .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(ConsolePalette.secondaryText)
-            }
+                    .frame(width: 32, height: 32)
+                    .background(ConsolePalette.panel)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(ConsolePalette.divider, lineWidth: 1)
+                    )
 
-            Spacer()
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(name)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(ConsolePalette.primaryText)
 
-            if let onConfig {
+                    Text(packageName)
+                        .font(.system(size: 10, design: .monospaced))
+                        .foregroundStyle(ConsolePalette.secondaryText)
+                }
+
+                Spacer()
+
+                if let onConfig {
+                    StatusIconButton(
+                        systemImage: "gearshape",
+                        tint: ConsolePalette.secondaryText,
+                        isDisabled: isLoading,
+                        action: onConfig
+                    )
+                }
+
                 StatusSmallActionButton(
-                    title: "config",
-                    systemImage: "gearshape",
-                    tint: ConsolePalette.secondaryText,
+                    title: "install",
+                    systemImage: "arrow.down.circle.fill",
+                    tint: ConsolePalette.accent,
                     isDisabled: isLoading,
-                    action: onConfig
+                    action: onInstall
                 )
             }
 
-            StatusSmallActionButton(
-                title: "install",
-                systemImage: "arrow.down.circle.fill",
-                tint: ConsolePalette.accent,
-                isDisabled: isLoading,
-                action: onInstall
-            )
+            if let runtimeHint, !runtimeHint.isEmpty {
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 8, weight: .semibold))
+                        .foregroundStyle(runtimeHintTint ?? ConsolePalette.warning)
+
+                    Text(runtimeHint)
+                        .font(.system(size: 10, weight: .medium, design: .monospaced))
+                        .foregroundStyle(runtimeHintTint ?? ConsolePalette.warning)
+
+                    Spacer()
+                }
+            }
+
+            if let expandedContent {
+                Divider().overlay(ConsolePalette.divider)
+                expandedContent
+            }
         }
         .padding(12)
         .cardPanel()

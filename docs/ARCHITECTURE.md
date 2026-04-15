@@ -8,35 +8,44 @@ DuoduoManager is a macOS menu bar app (SwiftUI + AppKit) for controlling duoduo 
 - **ATC Dashboard panel** for real-time session/job/event monitoring
 - **CC Reader window** for browsing Claude Code histories via `CCReaderKit`
 
-The app follows a layered MVVM-style architecture:
+The app now follows a layered root-store architecture:
 
 ```
-Views -> ViewModels -> Services -> Models
+Host -> Views -> Presentations -> Stores -> Services -> Models
 ```
 
 ```
-DuoduoManagerApp.swift (entry point + NSStatusItem/NSPopover lifecycle)
-├── StatusBarView.swift          (menu bar popover)
-│   ├── DaemonConfigView.swift   (daemon config panel)
-│   ├── FeishuConfigView.swift   (channel config panel)
-│   └── ConfigLayout.swift       (shared form rows)
-├── DashboardView.swift          (ATC Dashboard panel root)
-│   ├── Content/EventsContentView.swift
-│   ├── Content/SessionsContentView.swift
-│   ├── Content/JobsContentView.swift
-│   └── EventStreamView.swift
-├── ViewModels/
-│   ├── DaemonViewModel.swift    (popover orchestration + update logic)
-│   └── DashboardViewModel.swift (RPC polling + aggregated metrics)
+DuoduoManagerApp.swift
+├── Host/
+│   ├── AppStatusController.swift   (NSStatusItem + NSPopover host shell)
+│   └── AppWindowController.swift   (ATC / Reader NSWindow lifecycle)
+├── Stores/
+│   ├── AppStore.swift              (root orchestration store)
+│   ├── AppStore+Visibility.swift   (surface-driven polling lifecycle)
+│   ├── AppStore+Actions.swift      (user actions / command entrypoints)
+│   ├── AppStore+Fetch.swift        (runtime, update, dashboard fetch logic)
+│   ├── RuntimeStore.swift
+│   ├── DashboardStore.swift
+│   ├── UpdateStore.swift
+│   └── CommandStore.swift
+├── Presentations/
+│   ├── StatusBarPresentation*.swift
+│   ├── DashboardPresentation*.swift
+│   └── SharedPresentationFormatting.swift
+├── Views/
+│   ├── StatusBar/
+│   ├── Dashboard/
+│   ├── Config/
+│   └── Shared/
 ├── Services/
-│   ├── NodeRuntime.swift        (runtime paths/env/bootstrap install)
-│   ├── ShellService.swift       (subprocess execution + debug logging)
-│   ├── DaemonService.swift      (duoduo daemon CLI wrapper)
-│   ├── ChannelService.swift     (duoduo channel CLI wrapper)
-│   ├── DashboardRPCService.swift(JSON-RPC client: /rpc)
-│   ├── VersionService.swift     (npm latest version lookup)
-│   ├── UpgradeService.swift     (version-aware upgrade orchestration)
-│   └── AppUpdateService.swift   (GitHub release check for app updates)
+│   ├── NodeRuntime.swift
+│   ├── ShellService.swift
+│   ├── DaemonService.swift
+│   ├── ChannelService.swift
+│   ├── DashboardRPCService.swift
+│   ├── VersionService.swift
+│   ├── UpgradeService.swift
+│   └── AppUpdateService.swift
 ├── Models/
 │   ├── ConfigStore.swift
 │   ├── DaemonConfig.swift
@@ -45,10 +54,64 @@ DuoduoManagerApp.swift (entry point + NSStatusItem/NSPopover lifecycle)
 │   ├── ChannelInfo.swift
 │   ├── ChannelRegistry.swift
 │   ├── PackageVersion.swift
-│   └── DashboardModels.swift    (JSON-RPC response models)
+│   └── DashboardModels.swift
 └── Localization/
     └── L10n.swift
 ```
+
+## Layer Responsibilities
+
+### Host
+
+The `Host` layer is the AppKit shell around the app:
+
+- `AppStatusController` owns the menu bar item, popover presentation, and status icon updates
+- `AppWindowController` owns ATC and Reader window creation, show/hide behavior, and activation policy
+
+`DuoduoManagerApp.swift` now acts mainly as the composition root that wires `Host` to `AppStore` and root SwiftUI views.
+
+### Stores
+
+`AppStore` is the root store and orchestration boundary. It owns:
+
+- surface visibility state (`popover`, `dashboard`)
+- polling task lifecycle
+- service instances
+- cross-domain coordination
+
+It composes four domain stores:
+
+- `RuntimeStore`
+  daemon status, channel state, runtime config, bootstrap/install state
+- `DashboardStore`
+  sessions, jobs, subconscious, health, cadence, event stream, usage totals, system config
+- `UpdateStore`
+  latest runtime versions and app release information
+- `CommandStore`
+  current command output, loading state, and transient errors
+
+This keeps domain state independent while preserving a single root orchestration point.
+
+### Presentations
+
+SwiftUI views do not directly shape raw store data into UI structures. That responsibility lives in:
+
+- `StatusBarPresentationMapper`
+- `DashboardPresentationMapper`
+- `SharedPresentationFormatting`
+
+These mappers produce concise display-oriented models for the popover and ATC Dashboard, and keep view files focused on composition and rendering.
+
+### Views
+
+Views are now grouped by feature instead of being flat:
+
+- `Views/StatusBar`
+- `Views/Dashboard`
+- `Views/Config`
+- `Views/Shared`
+
+The `StatusBar` feature is split into a root view plus section components. `Dashboard` contains the dashboard shell and its content panes.
 
 ## Runtime Environment
 
@@ -61,7 +124,7 @@ DuoduoManagerApp.swift (entry point + NSStatusItem/NSPopover lifecycle)
   1) bundled `node/bin`
   2) npm global `bin`
   3) merged current PATH + login-shell PATH (`$SHELL -l -c "echo $PATH"`)
-- **Install bootstrap**: if duoduo is missing, `DaemonViewModel.ensureDuoduoInstalled()` runs `npm install -g @openduo/duoduo` automatically
+- **Install bootstrap**: if duoduo is missing, `AppStore.ensureDuoduoInstalledIfNeeded()` runs `npm install -g @openduo/duoduo` when an interactive surface is first shown
 
 ### Shared duoduo state
 
@@ -87,43 +150,70 @@ DuoduoManagerApp.swift (entry point + NSStatusItem/NSPopover lifecycle)
 - **Start/stop**: uses `duoduo channel <type> start|stop` with per-channel extra env (for Feishu from `FeishuConfig`)
 - **Status**: parsed from `duoduo channel <type> status`
 
-### ATC Dashboard lifecycle
+### Visibility-Driven Lifecycle
 
-- **Window creation**: launched from popover footer ("ATC"), hosted in `NSPanel`
-- **Data transport**: `DashboardRPCService` calls daemon JSON-RPC endpoint `POST <daemonURL>/rpc`
-- **Polled methods**:
-  - `system.status` (sessions, health, subconscious, cadence)
-  - `usage.get` (token/cost/tool aggregates)
-  - `job.list` (jobs + run state)
-  - `spine.tail` (incremental event stream with `after_id`)
-- **Polling cadence (`DashboardViewModel`)**:
-  - events: every 3s
-  - status/usage/jobs: every 5s
-- **Event retention**: in-memory cap at 2000 entries
+The app no longer does persistent background polling from startup.
+
+- **On app launch**:
+  - create host controllers
+  - create `AppStore`
+  - no runtime/dashboard/update fetch is started yet
+
+- **When popover becomes visible**:
+  - mark surface `.popover` visible
+  - ensure duoduo is installed if needed
+  - fetch runtime state
+  - fetch update state
+  - fetch dashboard status + events
+  - start runtime/update/dashboard polling
+
+- **When ATC Dashboard becomes visible**:
+  - mark surface `.dashboard` visible
+  - fetch dashboard status + events
+  - start dashboard polling if not already active
+
+- **When surfaces are hidden**:
+  - polling stops automatically once no visible surface still needs that data
+
+This means polling is now driven by UI visibility rather than by startup or duplicated per-view models.
+
+### Dashboard Data Transport
+
+`DashboardRPCService` calls daemon JSON-RPC endpoint `POST <daemonURL>/rpc`.
+
+Polled methods:
+
+- `system.status` for sessions, health, subconscious, cadence
+- `usage.get` for token/cost/tool aggregates
+- `job.list` for jobs
+- `spine.tail` for incremental event stream with `after_id`
+
+Polling cadence:
+
+- dashboard events: every 3s
+- dashboard status/usage/jobs: every 5s
+- runtime refresh: every 30s while popover is visible
+- update checks: every 10 min while popover is visible
+
+Event retention is capped in memory at 2000 entries.
 
 ### App update lifecycle
 
 - **Source**: GitHub Releases API (`/repos/openduo/duoduo-manager/releases/latest`)
-- **State**: `DaemonViewModel.appLatestVersion` + `appLatestReleaseURL`
+- **State**: `UpdateStore.appLatestVersion` + `appLatestReleaseURL`
 - **UI signal**: status bar icon switches to update badge when a newer app version exists
 
-## State Flows
-
-`DaemonViewModel` intentionally separates two flows:
-
-1. **Runtime refresh (`refreshStatus`)**
-   - daemon running state / pid / installed version
-   - installed channel list + per-channel runtime state
-   - fast local operations, called after command execution
-
-2. **Update refresh (`checkForUpdates`)**
-   - npm latest version for daemon/channels
-   - latest app release from GitHub
-   - slower network operations, called on periodic refresh start and manual check
-
-This separation keeps operational actions responsive while still exposing update information in the header.
-
 ## Key Design Decisions
+
+### Why a root store instead of separate view models?
+
+The status popover and ATC dashboard both need overlapping runtime, dashboard, and update state. A shared root store prevents:
+
+- duplicated polling
+- stale parallel caches
+- popover/dashboard disagreement about the current runtime state
+
+Domain stores keep the state model readable, while `AppStore` keeps orchestration centralized.
 
 ### Why `@Observable` (macOS 14+)?
 
@@ -152,6 +242,10 @@ The project builds with SwiftPM (`swift build`). `.lproj/Localizable.strings` wo
 
 This hybrid model keeps native menu bar behavior while preserving SwiftUI development ergonomics.
 
+### Why feature-grouped views?
+
+The project previously had a flatter `Views/` layout and generic directories like `Content/`. Views are now grouped by feature so that status bar, dashboard, config, and shared UI evolve independently and are easier to navigate.
+
 ## Build and Packaging
 
 `build_app.sh` drives release artifacts:
@@ -165,3 +259,9 @@ This hybrid model keeps native menu bar behavior while preserving SwiftUI develo
 7. Generate per-arch DMGs:
    - `DuoduoManager-{version}-arm64.dmg`
    - `DuoduoManager-{version}-x86_64.dmg`
+
+For repository releases, the normal workflow is:
+
+1. `make update-version NEW_VERSION=x.y.z`
+2. push `main` and tag `vX.Y.Z`
+3. let GitHub Actions build and publish release artifacts
