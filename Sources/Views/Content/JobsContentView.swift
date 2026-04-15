@@ -49,8 +49,11 @@ struct JobsContentView: View {
 
     private func jobRow(_ j: JobInfo) -> some View {
         let running = isJobRunning(j.id)
-        let isOnce = j.frontmatter?.cron == "once"
+        let cron = j.frontmatter?.cron ?? ""
+        let isOnce = cron == "once" || cron.hasPrefix("@in ")
+        let isKeepalive = cron == "keepalive"
         let result = j.state?.last_result ?? "idle"
+        let runtime = j.frontmatter?.runtime ?? "claude"
         let color: Color = running ? DashboardTheme.emerald :
             (result == "failure" ? DashboardTheme.red :
              result == "success" ? DashboardTheme.blue : DashboardTheme.textTertiary)
@@ -70,11 +73,18 @@ struct JobsContentView: View {
                         Text("[once]")
                             .font(.system(size: 10, design: .monospaced))
                             .foregroundStyle(DashboardTheme.accent)
+                    } else if isKeepalive {
+                        Text("[keepalive]")
+                            .font(.system(size: 10, design: .monospaced))
+                            .foregroundStyle(DashboardTheme.fuchsia)
                     }
+                    Text("[\(runtime)]")
+                        .font(.system(size: 10, design: .monospaced))
+                        .foregroundStyle(DashboardTheme.textTertiary)
                 }
 
                 HStack(spacing: 0) {
-                    if let cron = j.frontmatter?.cron {
+                    if !cron.isEmpty {
                         Text("cron:\(cron)")
                             .foregroundStyle(DashboardTheme.textTertiary)
                         Text("  •  ")

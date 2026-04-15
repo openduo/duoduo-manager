@@ -11,12 +11,12 @@ struct DashboardRPCService: Sendable {
         try await call("system.status")
     }
 
-    func usage() async throws -> UsageResponse {
-        try await call("usage.get")
+    func usageTotals() async throws -> UsageTotalsResponse {
+        try await call("usage.get", params: ["mode": "totals"])
     }
 
     func jobList() async throws -> JobListResponse {
-        try await call("job.list")
+        try await call("job.list", params: ["summary": true])
     }
 
     func spineTail(afterId: String? = nil, limit: Int = 200) async throws -> SpineTailResponse {

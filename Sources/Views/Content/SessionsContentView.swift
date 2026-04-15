@@ -79,6 +79,8 @@ struct SessionsContentView: View {
         default:       DashboardTheme.blue
         }
 
+        let displayName = s.display_name ?? s.session_key
+
         return HStack(spacing: 0) {
             // Left accent bar
             Rectangle()
@@ -86,10 +88,18 @@ struct SessionsContentView: View {
                 .frame(width: 2)
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(s.session_key)
-                    .font(.system(size: 12, design: .monospaced))
-                    .foregroundStyle(DashboardTheme.text)
-                    .lineLimit(1)
+                HStack(spacing: 6) {
+                    Text(displayName)
+                        .font(.system(size: 12, design: .monospaced))
+                        .foregroundStyle(DashboardTheme.text)
+                        .lineLimit(1)
+                    if s.display_name != nil {
+                        Text(s.session_key)
+                            .font(.system(size: 9, design: .monospaced))
+                            .foregroundStyle(DashboardTheme.textTertiary)
+                            .lineLimit(1)
+                    }
+                }
 
                 HStack(spacing: 8) {
                     Text("[\(s.status)]")

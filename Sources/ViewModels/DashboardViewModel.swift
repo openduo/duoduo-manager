@@ -13,6 +13,7 @@ final class DashboardViewModel {
     private(set) var totalCost: Double = 0
     private(set) var totalTokens: Int = 0
     private(set) var totalTools: Int = 0
+    private(set) var cacheHitRate: Int = 0
     private(set) var autoFollow = true
     private(set) var config: SystemConfig?
 
@@ -102,7 +103,7 @@ final class DashboardViewModel {
 
     private func fetchStatus() async {
         async let statusReq = rpc.systemStatus()
-        async let usageReq = rpc.usage()
+        async let usageReq = rpc.usageTotals()
         async let jobsReq = rpc.jobList()
 
         guard let status = try? await statusReq else { return }
@@ -113,18 +114,13 @@ final class DashboardViewModel {
         cadence = status.cadence
 
         if let usage = try? await usageReq {
-            var cost = 0.0
-            var tokens = 0
-            var tools = 0
-            for (_, session) in usage.sessions {
-                guard let s = session.summary else { continue }
-                cost += s.total_cost_usd ?? 0
-                tokens += (s.total_input_tokens ?? 0) + (s.total_output_tokens ?? 0) + (s.total_cache_read_tokens ?? 0)
-                tools += s.total_tool_calls ?? 0
-            }
-            totalCost = cost
-            totalTokens = tokens
-            totalTools = tools
+            let m = usage.totals
+            totalCost = m.total_cost_usd ?? 0
+            totalTokens = (m.total_input_tokens ?? 0) + (m.total_output_tokens ?? 0) + (m.total_cache_read_tokens ?? 0)
+            totalTools = m.total_tool_calls ?? 0
+            let cacheRead = m.total_cache_read_tokens ?? 0
+            let totalIn = (m.total_input_tokens ?? 0) + cacheRead
+            cacheHitRate = totalIn > 0 ? Int(round(Double(cacheRead) / Double(totalIn) * 100)) : 0
         }
 
         if let jobsResp = try? await jobsReq {

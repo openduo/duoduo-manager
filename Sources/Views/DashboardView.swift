@@ -148,7 +148,7 @@ struct DashboardView: View {
     private func sessionGroupItem(key: String) -> some View {
         let isExpanded = expandedGroups.contains(key)
         let isSelected = selectedEntry == .sessionGroup(key: key)
-        let shortKey = shortSessionKey(key)
+        let shortKey = shortSessionKey(key, sessions: viewModel.sessions)
         let totalCount = viewModel.events.filter { $0.session_key == key }.count
 
         return HStack(spacing: 0) {
@@ -307,18 +307,24 @@ struct DashboardView: View {
         DashboardTheme.color(forEventType: type)
     }
 
-    /// Format session key for display: job:foo.abc12345 → job:foo.abc12345 (last 8 of uuid)
-    private func shortSessionKey(_ key: String) -> String {
+    /// Format session key for display, preferring display_name when available
+    private func shortSessionKey(_ key: String, sessions: [SessionInfo]) -> String {
         if key.hasPrefix("meta:") { return String(key.dropFirst(5)) }
         if key.hasPrefix("job:") {
             let name = String(key.dropFirst(4))
-            // keep job name + last 8 chars of the uuid portion
             if let dot = name.lastIndex(of: ".") {
                 let base = String(name[..<dot])
                 let uid = String(name[name.index(after: dot)...].suffix(8))
                 return "job:\(base).\(uid)"
             }
             return "job:\(name)"
+        }
+        // Look up display_name from session status
+        if let session = sessions.first(where: { $0.session_key == key }),
+           let dn = session.display_name, !dn.isEmpty {
+            let label = dn.count > 16 ? String(dn.prefix(15)) + "\u{2026}" : dn
+            let kind = key.split(separator: ":").first.map(String.init) ?? ""
+            return "\(kind):\(label)"
         }
         let parts = key.split(separator: ":")
         if parts.count >= 2 {
@@ -368,6 +374,11 @@ struct DashboardView: View {
             bottomDivider
 
             Text("tok:\(DashboardTheme.formatTokens(viewModel.totalTokens))")
+                .font(.system(size: 11, design: .monospaced))
+                .foregroundStyle(DashboardTheme.text)
+            bottomDivider
+
+            Text("cache:\(viewModel.cacheHitRate)%")
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundStyle(DashboardTheme.text)
             bottomDivider

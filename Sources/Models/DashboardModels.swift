@@ -32,6 +32,7 @@ struct SessionInfo: Decodable, Sendable, Identifiable {
     let created_at: String?
     let last_error: String?
     let cwd: String?
+    let display_name: String?
 }
 
 struct HealthInfo: Decodable, Sendable {
@@ -54,17 +55,13 @@ struct CadenceInfo: Decodable, Sendable {
     let interval_ms: Int
 }
 
-// MARK: - usage.get
+// MARK: - usage.get (mode: "totals")
 
-struct UsageResponse: Decodable, Sendable {
-    let sessions: [String: SessionUsage]
+struct UsageTotalsResponse: Decodable, Sendable {
+    let totals: UsageTotals
 }
 
-struct SessionUsage: Decodable, Sendable {
-    let summary: UsageSummary?
-}
-
-struct UsageSummary: Decodable, Sendable {
+struct UsageTotals: Decodable, Sendable {
     let total_cost_usd: Double?
     let total_input_tokens: Int?
     let total_output_tokens: Int?
@@ -87,6 +84,7 @@ struct JobInfo: Decodable, Sendable, Identifiable {
 struct JobFrontmatter: Decodable, Sendable {
     let cron: String?
     let cwd_rel: String?
+    let runtime: String?
 }
 
 struct JobState: Decodable, Sendable {
@@ -215,6 +213,7 @@ enum ConfigMeta {
         "runtime_lock_heartbeat_ms": "ALADUO_RUNTIME_LOCK_HEARTBEAT_MS",
         "pull_limit": "ALADUO_PULL_LIMIT", "pull_wait_ms": "ALADUO_PULL_WAIT_MS", "subscribe_replay_limit": "ALADUO_SUBSCRIBE_REPLAY_LIMIT",
         "log_level": "ALADUO_LOG_LEVEL", "sdk_debug": "ALADUO_SDK_DEBUG", "log_session_lifecycle": "ALADUO_LOG_SESSION_LIFECYCLE",
+        "telemetry_enabled": "ALADUO_TELEMETRY_ENABLED",
         "permission_mode": "ALADUO_PERMISSION_MODE",
         "work_dir": "ALADUO_WORK_DIR", "bootstrap_dir": "ALADUO_BOOTSTRAP_DIR", "meta_prompt_path": "ALADUO_META_PROMPT_PATH"
     ]
