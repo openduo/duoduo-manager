@@ -31,7 +31,7 @@ enum ChannelRegistry {
                 id: "feishu",
                 displayName: L10n.Channel.feishuDisplayName,
                 packageName: "@openduo/channel-feishu",
-                iconName: "message.fill",
+                iconName: "message.badge.waveform.fill",
                 extraEnv: { feishuConfig.envVars }
             ),
         ]
