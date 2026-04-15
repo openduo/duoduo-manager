@@ -28,42 +28,9 @@ enum SidebarEntry: Identifiable, Hashable {
 }
 
 struct DashboardView: View {
-    @State private var viewModel: DashboardViewModel
+    @Bindable var store: AppStore
     @State private var selectedEntry: SidebarEntry = .sessionGroup(key: "")
     @State private var expandedGroups: Set<String> = []
-
-    init(daemonURL: String) {
-        _viewModel = State(initialValue: DashboardViewModel(daemonURL: daemonURL))
-    }
-
-    /// Extract unique session_keys from events, sorted by most recent activity
-    private var eventGroups: [String] {
-        var seen = Set<String>()
-        var keys: [String] = []
-        for evt in viewModel.events.reversed() {
-            guard let key = evt.session_key, !key.isEmpty, !seen.contains(key) else { continue }
-            seen.insert(key)
-            keys.append(key)
-        }
-        return keys
-    }
-
-    /// Events with no session_key (system events like cadence_tick)
-    private var systemEvents: [SpineEvent] {
-        viewModel.events.filter { $0.session_key == nil || $0.session_key!.isEmpty }
-    }
-
-    /// Get event types for a session key — stable order (first seen), with counts
-    private func eventTypeCounts(for sessionKey: String) -> [(type: String, count: Int)] {
-        let filtered = viewModel.events.filter { $0.session_key == sessionKey }
-        var counts: [String: Int] = [:]
-        var order: [String] = []
-        for evt in filtered {
-            if counts[evt.type] == nil { order.append(evt.type) }
-            counts[evt.type, default: 0] += 1
-        }
-        return order.map { (type: $0, count: counts[$0] ?? 0) }
-    }
 
     var body: some View {
         HStack(spacing: 0) {
@@ -75,9 +42,10 @@ struct DashboardView: View {
         }
         .frame(minWidth: 680, minHeight: 500)
         .background(DashboardTheme.background.ignoresSafeArea(edges: .top))
-        .task { viewModel.startPolling() }
+        .task { store.startDashboardPolling() }
+        .onDisappear { store.stopDashboardPolling() }
         .onChange(of: selectedEntry) { _, new in
-            if new == .config { Task { await viewModel.fetchConfig() } }
+            if new == .config { Task { await store.fetchConfig() } }
         }
     }
 
@@ -87,14 +55,13 @@ struct DashboardView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    // Session groups (expandable)
-                    if !eventGroups.isEmpty {
+                    if !sidebarGroups.isEmpty {
                         sectionLabel("SESSIONS")
-                        ForEach(eventGroups, id: \.self) { key in
-                            sessionGroupItem(key: key)
-                            if expandedGroups.contains(key) {
-                                ForEach(eventTypeCounts(for: key), id: \.type) { item in
-                                    typeSubItem(sessionKey: key, eventType: item.type, count: item.count)
+                        ForEach(sidebarGroups) { group in
+                            sessionGroupItem(group)
+                            if expandedGroups.contains(group.key) {
+                                ForEach(group.eventTypes) { item in
+                                    typeSubItem(sessionKey: group.key, item: item)
                                 }
                             }
                         }
@@ -119,7 +86,7 @@ struct DashboardView: View {
             }
 
             // Bottom: daemon URL
-            Text(viewModel.daemonURL)
+            Text(store.runtime.daemonConfig.daemonURL)
                 .font(.system(size: 10, design: .monospaced))
                 .foregroundStyle(DashboardTheme.textSecondary)
                 .lineLimit(1)
@@ -145,11 +112,9 @@ struct DashboardView: View {
 
     // Top-level session group row
     // Chevron → toggle expand only; name+count area → select only
-    private func sessionGroupItem(key: String) -> some View {
-        let isExpanded = expandedGroups.contains(key)
-        let isSelected = selectedEntry == .sessionGroup(key: key)
-        let shortKey = shortSessionKey(key, sessions: viewModel.sessions)
-        let totalCount = viewModel.events.filter { $0.session_key == key }.count
+    private func sessionGroupItem(_ group: DashboardSidebarGroupPresentation) -> some View {
+        let isExpanded = expandedGroups.contains(group.key)
+        let isSelected = selectedEntry == .sessionGroup(key: group.key)
 
         return HStack(spacing: 0) {
             // Left accent bar
@@ -159,7 +124,7 @@ struct DashboardView: View {
 
             // Chevron: expand/collapse only — big enough to hit easily
             Button {
-                if isExpanded { expandedGroups.remove(key) } else { expandedGroups.insert(key) }
+                if isExpanded { expandedGroups.remove(group.key) } else { expandedGroups.insert(group.key) }
             } label: {
                 Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
                     .font(.system(size: 12, weight: .medium))
@@ -171,10 +136,10 @@ struct DashboardView: View {
 
             // Name: select session (show all events)
             Button {
-                selectedEntry = .sessionGroup(key: key)
+                selectedEntry = .sessionGroup(key: group.key)
             } label: {
                 HStack(spacing: 0) {
-                    Text(shortKey)
+                    Text(group.label)
                         .font(.system(size: 13, design: .monospaced))
                         .foregroundStyle(isSelected ? DashboardTheme.text : DashboardTheme.sidebarItemText)
                         .lineLimit(1)
@@ -182,7 +147,7 @@ struct DashboardView: View {
 
                     Spacer()
 
-                    Text("\(totalCount)")
+                    Text("\(group.count)")
                         .font(.system(size: 11, design: .monospaced))
                         .foregroundStyle(DashboardTheme.textTertiary)
                         .padding(.trailing, 10)
@@ -196,18 +161,16 @@ struct DashboardView: View {
     }
 
     // Sub-item: event type within a session
-    private func typeSubItem(sessionKey: String, eventType: String, count: Int) -> some View {
-        let entry = SidebarEntry.sessionTypeItem(key: sessionKey, eventType: eventType)
+    private func typeSubItem(sessionKey: String, item: DashboardEventTypePresentation) -> some View {
+        let entry = SidebarEntry.sessionTypeItem(key: sessionKey, eventType: item.type)
         let isSelected = selectedEntry == entry
-        let shortType = shortTypeName(eventType)
-        let typeColor = eventTypeColor(eventType)
 
         return Button {
             selectedEntry = entry
         } label: {
             HStack(spacing: 0) {
                 Rectangle()
-                    .fill(isSelected ? typeColor : Color.clear)
+                    .fill(isSelected ? item.color : Color.clear)
                     .frame(width: 2)
 
                 // Indent spacer aligning with name (chevron width = 20, plus 2px bar)
@@ -216,16 +179,16 @@ struct DashboardView: View {
                 HStack(spacing: 6) {
                     Text("\u{25CF}")
                         .font(.system(size: 7))
-                        .foregroundStyle(typeColor.opacity(0.8))
+                        .foregroundStyle(item.color.opacity(0.8))
 
-                    Text(shortType)
+                    Text(item.shortName)
                         .font(.system(size: 12, design: .monospaced))
-                        .foregroundStyle(isSelected ? typeColor : typeColor.opacity(0.65))
+                        .foregroundStyle(isSelected ? item.color : item.color.opacity(0.65))
                         .lineLimit(1)
 
                     Spacer()
 
-                    Text("\(count)")
+                    Text("\(item.count)")
                         .font(.system(size: 11, design: .monospaced))
                         .foregroundStyle(DashboardTheme.textTertiary)
                         .padding(.trailing, 10)
@@ -233,7 +196,7 @@ struct DashboardView: View {
                 .frame(height: 26)
                 .contentShape(Rectangle())
             }
-            .background(isSelected ? typeColor.opacity(0.08) : Color.clear)
+            .background(isSelected ? item.color.opacity(0.08) : Color.clear)
         }
         .buttonStyle(.plain)
     }
@@ -302,64 +265,24 @@ struct DashboardView: View {
         .buttonStyle(.plain)
     }
 
-    /// Color for an event type — delegates to DashboardTheme
-    private func eventTypeColor(_ type: String) -> Color {
-        DashboardTheme.color(forEventType: type)
-    }
-
-    /// Format session key for display, preferring display_name when available
-    private func shortSessionKey(_ key: String, sessions: [SessionInfo]) -> String {
-        if key.hasPrefix("meta:") { return String(key.dropFirst(5)) }
-        if key.hasPrefix("job:") {
-            let name = String(key.dropFirst(4))
-            if let dot = name.lastIndex(of: ".") {
-                let base = String(name[..<dot])
-                let uid = String(name[name.index(after: dot)...].suffix(8))
-                return "job:\(base).\(uid)"
-            }
-            return "job:\(name)"
-        }
-        // Look up display_name from session status
-        if let session = sessions.first(where: { $0.session_key == key }),
-           let dn = session.display_name, !dn.isEmpty {
-            let label = dn.count > 16 ? String(dn.prefix(15)) + "\u{2026}" : dn
-            let kind = key.split(separator: ":").first.map(String.init) ?? ""
-            return "\(kind):\(label)"
-        }
-        let parts = key.split(separator: ":")
-        if parts.count >= 2 {
-            return "\(parts[0]):\(String(parts.last!.suffix(8)))"
-        }
-        return String(key.suffix(16))
-    }
-
-    /// Short display name for event type
-    private func shortTypeName(_ type: String) -> String {
-        // e.g. "agent.tool_use" → "tool_use"
-        if let dot = type.lastIndex(of: ".") {
-            return String(type[type.index(after: dot)...])
-        }
-        return type
-    }
-
     // MARK: - Main Content
 
     @ViewBuilder
     private var mainContent: some View {
         switch selectedEntry {
         case .sessions:
-            SessionsContentView(sessions: viewModel.sessions)
+            SessionsContentView(sessions: store.dashboard.sessions)
         case .config:
-            ConfigContentView(config: viewModel.config)
+            ConfigContentView(config: store.dashboard.config)
         case .jobs:
-            JobsContentView(jobs: viewModel.jobs, isJobRunning: viewModel.isJobRunning)
+            JobsContentView(jobs: store.dashboard.jobs, isJobRunning: store.isJobRunning)
         case .system:
             EventsContentView(events: systemEvents, sessionKey: "system")
         case .sessionGroup(let key):
-            let filtered = viewModel.events.filter { $0.session_key == key }
+            let filtered = store.dashboard.events.filter { $0.session_key == key }
             EventsContentView(events: filtered, sessionKey: key)
         case .sessionTypeItem(let key, let eventType):
-            let filtered = viewModel.events.filter { $0.session_key == key && $0.type == eventType }
+            let filtered = store.dashboard.events.filter { $0.session_key == key && $0.type == eventType }
             EventsContentView(events: filtered, sessionKey: "\(key)  [\(shortTypeName(eventType))]")
         }
     }
@@ -368,62 +291,55 @@ struct DashboardView: View {
 
     private var bottomStatsBar: some View {
         HStack(spacing: 0) {
-            Text(DashboardTheme.formatCost(viewModel.totalCost))
+            Text(dashboardBottomStats.costText)
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundStyle(DashboardTheme.text)
             bottomDivider
 
-            Text("tok:\(DashboardTheme.formatTokens(viewModel.totalTokens))")
+            Text(dashboardBottomStats.tokenText)
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundStyle(DashboardTheme.text)
             bottomDivider
 
-            Text("cache:\(viewModel.cacheHitRate)%")
+            Text(dashboardBottomStats.cacheText)
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundStyle(DashboardTheme.text)
             bottomDivider
 
-            Text("tools:\(DashboardTheme.formatTools(viewModel.totalTools))")
+            Text(dashboardBottomStats.toolText)
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundStyle(DashboardTheme.text)
 
             Spacer()
 
-            // Subconscious partitions
-            if let sub = viewModel.subconscious, !sub.partitions.isEmpty {
+            if !dashboardBottomStats.subconsciousItems.isEmpty {
                 HStack(spacing: 6) {
                     Text("sub:")
                         .font(.system(size: 10, design: .monospaced))
                         .foregroundStyle(DashboardTheme.accent)
-                    ForEach(sub.partitions) { part in
+                    ForEach(dashboardBottomStats.subconsciousItems) { item in
                         HStack(spacing: 2) {
-                            Text(part.done ? "\u{2713}" : "\u{00B7}")
+                            Text(item.marker)
                                 .font(.system(size: 10, design: .monospaced))
-                                .foregroundStyle(part.done ? DashboardTheme.emerald : DashboardTheme.amber)
+                                .foregroundStyle(item.markerColor)
                                 .frame(width: 10)
-                            Text(part.name)
+                            Text(item.name)
                                 .font(.system(size: 10, design: .monospaced))
-                                .foregroundStyle(part.done ? DashboardTheme.textSecondary : DashboardTheme.textTertiary)
+                                .foregroundStyle(item.textColor)
                         }
                     }
                 }
                 bottomDivider
             }
 
-            // Health
             HStack(spacing: 5) {
-                let isOk = viewModel.health?.gateway == "ok" && (viewModel.health?.meta_session == "ok" || viewModel.health?.meta_session == "starting")
-                let isErr = viewModel.health?.gateway == "down" || viewModel.health?.meta_session == "down"
-                let color = isOk ? DashboardTheme.emerald : isErr ? DashboardTheme.red : DashboardTheme.amber
                 Circle()
-                    .fill(color)
+                    .fill(dashboardBottomStats.healthColor)
                     .frame(width: 6, height: 6)
-                    .shadow(color: color.opacity(0.6), radius: 2)
-                Text(viewModel.health.map { h in
-                    "\(h.gateway == "ok" ? "gw:ok" : "gw:\(h.gateway)") \(h.meta_session == "ok" || h.meta_session == "starting" ? "meta:ok" : "meta:\(h.meta_session)")"
-                } ?? "no connection")
+                    .shadow(color: dashboardBottomStats.healthColor.opacity(0.6), radius: 2)
+                Text(dashboardBottomStats.healthText)
                     .font(.system(size: 11, design: .monospaced))
-                    .foregroundStyle(color)
+                    .foregroundStyle(dashboardBottomStats.healthColor)
             }
         }
         .padding(.horizontal, 14)

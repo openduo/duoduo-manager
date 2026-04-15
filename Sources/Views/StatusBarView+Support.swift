@@ -3,21 +3,21 @@ import SwiftUI
 extension StatusBarView {
     var headerPresentation: StatusHeaderPresentation {
         StatusHeaderPresentation(
-            runtimeLive: viewModel.status.isRunning,
-            controlBusy: viewModel.isLoading,
-            eventCount: dashboardViewModel?.events.count ?? 0,
+            runtimeLive: store.runtime.status.isRunning,
+            controlBusy: store.command.isLoading,
+            eventCount: store.dashboard.events.count,
             showAppUpdate: showAppUpdate,
-            appVersion: viewModel.appLatestVersion ?? "1.5.0",
+            appVersion: store.updates.appLatestVersion ?? "1.5.0",
             showRuntimeUpdate: showRuntimeUpdate,
-            isLoading: viewModel.isLoading
+            isLoading: store.command.isLoading
         )
     }
 
     var topologyPresentation: StatusTopologyPresentation {
         StatusTopologyPresentation(
-            endpoint: viewModel.daemonConfig.daemonURL,
+            endpoint: store.runtime.daemonConfig.daemonURL,
             runtimeHost: nodeAddressValue,
-            process: viewModel.status.pid.isEmpty ? "pid pending" : "pid \(viewModel.status.pid)",
+            process: store.runtime.status.pid.isEmpty ? "pid pending" : "pid \(store.runtime.status.pid)",
             system: systemHealthSummary,
             systemTint: systemHealthTint,
             subconsciousRows: subconsciousRows
@@ -28,12 +28,12 @@ extension StatusBarView {
         StatusServiceCardPresentation(
             icon: "server.rack",
             name: "daemon",
-            version: viewModel.status.version,
+            version: store.runtime.status.version,
             hasUpdate: showDaemonUpdate,
             latestVersion: daemonUpdateVersion,
-            pid: viewModel.status.pid,
-            isRunning: viewModel.status.isRunning,
-            isLoading: viewModel.isLoading
+            pid: store.runtime.status.pid,
+            isRunning: store.runtime.status.isRunning,
+            isLoading: store.command.isLoading
         )
     }
 
@@ -46,7 +46,7 @@ extension StatusBarView {
             latestVersion: channelUpdateVersion(channel.type),
             pid: channel.pid,
             isRunning: channel.isRunning,
-            isLoading: viewModel.isLoading
+            isLoading: store.command.isLoading
         )
     }
 
@@ -55,15 +55,15 @@ extension StatusBarView {
             iconName: channelControlIcon(for: entry.id),
             name: entry.displayName,
             packageName: entry.packageName,
-            isLoading: viewModel.isLoading
+            isLoading: store.command.isLoading
         )
     }
 
     var streamPresentation: StatusRuntimeStreamPresentation {
         StatusRuntimeStreamPresentation(
             hint: streamHint,
-            lastOutput: viewModel.lastOutput,
-            errorMessage: viewModel.errorMessage,
+            lastOutput: store.command.lastOutput,
+            errorMessage: store.command.errorMessage,
             recentEvents: recentEvents,
             expandedEventIDs: expandedEventIDs
         )
@@ -89,76 +89,67 @@ extension StatusBarView {
 }
 
 extension StatusBarView {
+    var daemonConfigBinding: Binding<DaemonConfig> {
+        Binding(
+            get: { store.runtime.daemonConfig },
+            set: { store.updateDaemonConfig($0) }
+        )
+    }
+
+    var feishuConfigBinding: Binding<FeishuConfig> {
+        Binding(
+            get: { store.runtime.feishuConfig },
+            set: { store.updateFeishuConfig($0) }
+        )
+    }
+
     var controlHint: String {
         if showRuntimeUpdate { return "updates ready" }
-        if viewModel.isLoading { return "commands in flight" }
+        if store.command.isLoading { return "commands in flight" }
         return "direct operations"
     }
 
-    var showAppUpdate: Bool {
-        viewModel.hasAppUpdate
-    }
-
-    var showRuntimeUpdate: Bool {
-        viewModel.hasDuoduoUpdate
-    }
-
-    var showDaemonUpdate: Bool {
-        viewModel.hasUpdate(type: "daemon", installedVersion: viewModel.status.version)
-    }
-
-    var daemonUpdateVersion: String {
-        viewModel.latestVersions["daemon"] ?? "0.4.7"
-    }
+    var showAppUpdate: Bool { store.hasAppUpdate }
+    var showRuntimeUpdate: Bool { store.hasDuoduoUpdate }
+    var showDaemonUpdate: Bool { store.hasUpdate(type: "daemon", installedVersion: store.runtime.status.version) }
+    var daemonUpdateVersion: String { store.updates.latestVersions["daemon"] ?? "0.4.7" }
 
     func showChannelUpdate(_ type: String, installedVersion: String) -> Bool {
-        viewModel.hasUpdate(type: type, installedVersion: installedVersion)
+        store.hasUpdate(type: type, installedVersion: installedVersion)
     }
 
     func channelUpdateVersion(_ type: String) -> String {
-        viewModel.latestVersions[type] ?? "0.3.1"
+        store.updates.latestVersions[type] ?? "0.3.1"
     }
 
     var streamHint: String {
-        if !viewModel.lastOutput.isEmpty { return "command feedback" }
-        if let error = viewModel.errorMessage, !error.isEmpty { return "attention required" }
+        if !store.command.lastOutput.isEmpty { return "command feedback" }
+        if let error = store.command.errorMessage, !error.isEmpty { return "attention required" }
         return recentEvents.isEmpty ? "waiting for activity" : "live event feed"
     }
 
-    var executionHint: String {
-        "active entities"
-    }
+    var executionHint: String { "active entities" }
 }
 
 extension StatusBarView {
     var activeSessionCount: Int {
-        dashboardViewModel?.sessions.filter { $0.status == "active" }.count ?? 0
-    }
-
-    var totalSessionCount: Int {
-        dashboardViewModel?.sessions.count ?? 0
+        store.dashboard.sessions.filter { $0.status == "active" }.count
     }
 
     var runningJobCount: Int {
-        dashboardViewModel?.jobs.filter { dashboardViewModel?.isJobRunning($0.id) == true }.count ?? 0
-    }
-
-    var subconsciousWarmCount: Int {
-        dashboardViewModel?.subconscious?.partitions.filter(\.done).count ?? 0
+        store.dashboard.jobs.filter { store.isJobRunning($0.id) }.count
     }
 
     var recentEvents: [SpineEvent] {
-        guard let dashboardViewModel else { return [] }
-        return Array(dashboardViewModel.events.suffix(6).reversed())
+        Array(store.dashboard.events.suffix(6).reversed())
     }
 
     var subconsciousPartitions: [SubconsciousPartition] {
-        dashboardViewModel?.subconscious?.partitions ?? []
+        store.dashboard.subconscious?.partitions ?? []
     }
 
     var topSessions: [SessionInfo] {
-        guard let sessions = dashboardViewModel?.sessions else { return [] }
-        let prioritized = sessions.sorted {
+        let prioritized = store.dashboard.sessions.sorted {
             let lhsActive = $0.status == "active"
             let rhsActive = $1.status == "active"
             if lhsActive != rhsActive { return lhsActive && !rhsActive }
@@ -168,10 +159,9 @@ extension StatusBarView {
     }
 
     var topJobs: [JobInfo] {
-        guard let jobs = dashboardViewModel?.jobs else { return [] }
-        let prioritized = jobs.sorted { lhs, rhs in
-            let lhsRunning = dashboardViewModel?.isJobRunning(lhs.id) == true
-            let rhsRunning = dashboardViewModel?.isJobRunning(rhs.id) == true
+        let prioritized = store.dashboard.jobs.sorted { lhs, rhs in
+            let lhsRunning = store.isJobRunning(lhs.id)
+            let rhsRunning = store.isJobRunning(rhs.id)
             if lhsRunning != rhsRunning { return lhsRunning && !rhsRunning }
             return (lhs.state?.last_run_at ?? "") > (rhs.state?.last_run_at ?? "")
         }
@@ -179,7 +169,7 @@ extension StatusBarView {
     }
 
     var nodeAddressValue: String {
-        let host = viewModel.daemonConfig.host
+        let host = store.runtime.daemonConfig.host
         if host == "127.0.0.1" || host == "localhost" {
             return "local runtime"
         }
@@ -187,16 +177,16 @@ extension StatusBarView {
     }
 
     var systemHealthSummary: String {
-        let gateway = dashboardViewModel?.health?.gateway ?? "unknown"
-        let meta = dashboardViewModel?.health?.meta_session ?? "unknown"
+        let gateway = store.dashboard.health?.gateway ?? "unknown"
+        let meta = store.dashboard.health?.meta_session ?? "unknown"
         return "gw:\(gateway) · meta:\(meta)"
     }
 
     var systemHealthTint: Color {
-        if dashboardViewModel?.health?.gateway == "down" || dashboardViewModel?.health?.meta_session == "down" {
+        if store.dashboard.health?.gateway == "down" || store.dashboard.health?.meta_session == "down" {
             return ConsolePalette.critical
         }
-        if dashboardViewModel?.health?.gateway == "ok" {
+        if store.dashboard.health?.gateway == "ok" {
             return ConsolePalette.signal
         }
         return ConsolePalette.warning
@@ -226,7 +216,7 @@ extension StatusBarView {
 
     var jobSummaryRows: [SummaryRowData] {
         topJobs.map { job in
-            let running = dashboardViewModel?.isJobRunning(job.id) == true
+            let running = store.isJobRunning(job.id)
             return SummaryRowData(
                 title: shortKey(job.id),
                 detail: jobDetail(job, running: running),
@@ -302,11 +292,6 @@ extension StatusBarView {
 }
 
 extension StatusBarView {
-    func ensureDashboardViewModel() {
-        guard dashboardViewModel == nil else { return }
-        dashboardViewModel = DashboardViewModel(daemonURL: viewModel.daemonConfig.daemonURL)
-    }
-
     func toggleEvent(_ eventID: String) {
         if expandedEventIDs.contains(eventID) {
             expandedEventIDs.remove(eventID)

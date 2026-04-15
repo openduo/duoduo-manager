@@ -24,7 +24,7 @@ struct DuoduoManagerApp: App {
 @MainActor
 class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowDelegate {
     private var statusItem: NSStatusItem?
-    private var viewModel: DaemonViewModel?
+    private var store: AppStore?
     private var popover: NSPopover?
     private var eventMonitor: Any?
     private var dashboardWindow: NSWindow?
@@ -85,7 +85,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
 
     nonisolated func applicationWillTerminate(_ notification: Notification) {
         Task { @MainActor in
-            viewModel?.endPeriodicRefresh()
+            store?.endPeriodicRefresh()
+            store?.stopDashboardPolling()
             if let monitor = eventMonitor {
                 NSEvent.removeMonitor(monitor)
             }
@@ -102,7 +103,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
     // MARK: - NSPopoverDelegate
 
     func popoverWillClose(_ notification: Notification) {
-        viewModel?.endPeriodicRefresh()
+        store?.endPeriodicRefresh()
     }
 
     // MARK: - NSWindowDelegate
@@ -123,22 +124,23 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
     // MARK: - Setup
 
     private func initViewModel() {
-        viewModel = DaemonViewModel()
-        viewModel?.updateStatusBarIcon = { [weak self] in
+        store = AppStore()
+        store?.updateStatusBarIcon = { [weak self] in
             self?.updateStatusBarIcon()
         }
         updatePopoverContent()
         Task {
-            await viewModel?.ensureDuoduoInstalled()
-            await viewModel?.refreshStatus()
+            await store?.ensureDuoduoInstalled()
+            await store?.refreshRuntimeForBootstrap()
+            await store?.checkForUpdatesForBootstrap()
             self.updateStatusBarIcon()
         }
     }
 
     private func updatePopoverContent() {
-        guard let viewModel else { return }
+        guard let store else { return }
         popover?.contentViewController = NSHostingController(rootView: StatusBarView(
-            viewModel: viewModel,
+            store: store,
             openDashboard: { [weak self] in self?.openDashboard() },
             openReader: { [weak self] in self?.openReader() }
         ))
@@ -146,9 +148,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
     }
 
     private func updateStatusBarIcon() {
-        guard let viewModel else { return }
+        guard let store else { return }
         let icon: String
-        if viewModel.hasAppUpdate {
+        if store.hasAppUpdate {
             icon = "dot.radiowaves.left.and.badge.plus"
         } else {
             icon = "dog.fill"
@@ -158,7 +160,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
             let config = NSImage.SymbolConfiguration(pointSize: 14, weight: .medium)
             button.image = sfImage.withSymbolConfiguration(config)
         }
-        statusItem?.button?.toolTip = "Duoduo Manager - \(viewModel.status.isRunning ? L10n.Status.running : L10n.Status.stopped)"
+        statusItem?.button?.toolTip = "Duoduo Manager - \(store.runtime.status.isRunning ? L10n.Status.running : L10n.Status.stopped)"
     }
 
     // MARK: - Popover
@@ -169,7 +171,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
         if let popover, popover.isShown {
             popover.performClose(nil)
         } else if let popover {
-            viewModel?.beginPeriodicRefresh()
+            store?.beginPeriodicRefresh()
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             NSApp.activate(ignoringOtherApps: true)
         }
@@ -186,10 +188,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
     private func openDashboard() {
         closePopover()
 
-        let dashboardURL = viewModel?.daemonConfig.daemonURL ?? "http://127.0.0.1:20233"
-
         if dashboardWindow == nil {
-            let dashboardView = DashboardView(daemonURL: dashboardURL)
+            guard let store else { return }
+            let dashboardView = DashboardView(store: store)
             dashboardWindow = NSWindow(
                 contentRect: NSRect(x: 0, y: 0, width: 1100, height: 700),
                 styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],

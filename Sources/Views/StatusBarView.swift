@@ -2,11 +2,10 @@ import SwiftUI
 
 @MainActor
 struct StatusBarView: View {
-    @Bindable var viewModel: DaemonViewModel
+    @Bindable var store: AppStore
     var openDashboard: (() -> Void)?
     var openReader: (() -> Void)?
 
-    @State var dashboardViewModel: DashboardViewModel?
     @State var expandedEventIDs: Set<String> = []
 
     let panelWidth: CGFloat = 568
@@ -24,12 +23,12 @@ struct StatusBarView: View {
                 appVersion: headerPresentation.appVersion,
                 showRuntimeUpdate: headerPresentation.showRuntimeUpdate,
                 isLoading: headerPresentation.isLoading,
-                onAppUpdate: { viewModel.openReleasesPage() },
+                onAppUpdate: { store.openReleasesPage() },
                 onRuntimeAction: {
                     if showRuntimeUpdate {
-                        viewModel.upgradeAll()
+                        store.upgradeAll()
                     } else {
-                        viewModel.checkForUpdatesWithFeedback()
+                        store.checkForUpdatesWithFeedback()
                     }
                 }
             )
@@ -60,23 +59,10 @@ struct StatusBarView: View {
         }
         .frame(width: panelWidth, height: panelHeight)
         .background(ConsolePalette.background)
-        .task {
-            ensureDashboardViewModel()
-            dashboardViewModel?.startPolling()
-        }
-        .onDisappear {
-            dashboardViewModel?.stopPolling()
-        }
-        .onChange(of: viewModel.daemonConfig.daemonURL) { _, _ in
-            dashboardViewModel?.stopPolling()
-            dashboardViewModel = nil
-            ensureDashboardViewModel()
-            dashboardViewModel?.startPolling()
-        }
     }
 
     private var overviewRow: some View {
-        HStack(alignment: .top, spacing: 14) {
+        HStack(alignment: .top, spacing: overviewSpacing) {
             controlPanel
                 .frame(width: overviewControlWidth)
 
@@ -88,27 +74,10 @@ struct StatusBarView: View {
     private var topologySummaryPanel: some View {
         StatusPanelSection(icon: "point.3.connected.trianglepath.dotted", title: "Topology") {
             VStack(spacing: 12) {
-                StatusTopologyMetric(
-                    icon: "dot.radiowaves.left.and.right",
-                    title: "daemon endpoint",
-                    value: topologyPresentation.endpoint
-                )
-                StatusTopologyMetric(
-                    icon: "network",
-                    title: "runtime host",
-                    value: topologyPresentation.runtimeHost
-                )
-                StatusTopologyMetric(
-                    icon: "cpu",
-                    title: "process",
-                    value: topologyPresentation.process
-                )
-                StatusTopologyMetric(
-                    icon: "cross.case",
-                    title: "system",
-                    value: topologyPresentation.system,
-                    tint: topologyPresentation.systemTint
-                )
+                StatusTopologyMetric(icon: "dot.radiowaves.left.and.right", title: "daemon endpoint", value: topologyPresentation.endpoint)
+                StatusTopologyMetric(icon: "network", title: "runtime host", value: topologyPresentation.runtimeHost)
+                StatusTopologyMetric(icon: "cpu", title: "process", value: topologyPresentation.process)
+                StatusTopologyMetric(icon: "cross.case", title: "system", value: topologyPresentation.system, tint: topologyPresentation.systemTint)
             }
         }
     }
@@ -136,8 +105,8 @@ struct StatusBarView: View {
             VStack(spacing: 10) {
                 daemonControlCard
 
-                if let entry = ChannelRegistry.channels(feishuConfig: viewModel.feishuConfig).first {
-                    if let channel = viewModel.channels.first(where: { $0.type == entry.id }) {
+                if let entry = ChannelRegistry.channels(feishuConfig: store.runtime.feishuConfig).first {
+                    if let channel = store.runtime.channels.first(where: { $0.type == entry.id }) {
                         channelControlCard(channel)
                     } else {
                         channelInstallCard(entry)
@@ -159,17 +128,17 @@ struct StatusBarView: View {
             isLoading: daemonCardPresentation.isLoading,
             onConfig: {
                 showConfigPanel(title: L10n.DaemonConfig.title) {
-                    DaemonConfigView(config: $viewModel.daemonConfig)
+                    DaemonConfigView(config: daemonConfigBinding)
                 }
             },
-            onStop: { viewModel.stopDaemon() },
-            onRestart: { viewModel.restartDaemon() },
-            onStart: { viewModel.startDaemon() }
+            onStop: { store.stopDaemon() },
+            onRestart: { store.restartDaemon() },
+            onStart: { store.startDaemon() }
         )
     }
 
     private func channelControlCard(_ channel: ChannelInfo) -> some View {
-        let needsConfig = channel.type == "feishu" && !viewModel.feishuConfig.isConfigured
+        let needsConfig = channel.type == "feishu" && !store.runtime.feishuConfig.isConfigured
         let presentation = channelCardPresentation(channel)
 
         return StatusServiceCard(
@@ -183,22 +152,22 @@ struct StatusBarView: View {
             isLoading: presentation.isLoading,
             onConfig: channel.type == "feishu" ? {
                 showConfigPanel(title: L10n.Channel.feishuConfigHint) {
-                    FeishuConfigView(config: $viewModel.feishuConfig)
+                    FeishuConfigView(config: feishuConfigBinding)
                 }
             } : nil,
-            onStop: { viewModel.stopChannel(channel.type) },
+            onStop: { store.stopChannel(channel.type) },
             onRestart: {
                 if needsConfig {
-                    viewModel.showConfigRequired()
+                    store.showConfigRequired()
                 } else {
-                    viewModel.restartChannel(channel.type)
+                    store.restartChannel(channel.type)
                 }
             },
             onStart: {
                 if needsConfig {
-                    viewModel.showConfigRequired()
+                    store.showConfigRequired()
                 } else {
-                    viewModel.startChannel(channel.type)
+                    store.startChannel(channel.type)
                 }
             }
         )
@@ -214,11 +183,11 @@ struct StatusBarView: View {
             isLoading: presentation.isLoading,
             onConfig: entry.id == "feishu" ? {
                 showConfigPanel(title: L10n.Channel.feishuConfigHint) {
-                    FeishuConfigView(config: $viewModel.feishuConfig)
+                    FeishuConfigView(config: feishuConfigBinding)
                 }
             } : nil,
             onInstall: {
-                viewModel.installChannel(packageName: entry.packageName)
+                store.installChannel(packageName: entry.packageName)
             }
         )
     }
@@ -246,12 +215,12 @@ struct StatusBarView: View {
 
     private var transientOutputPanel: some View {
         Group {
-            if !viewModel.lastOutput.isEmpty || viewModel.errorMessage != nil {
+            if !store.command.lastOutput.isEmpty || store.command.errorMessage != nil {
                 HStack(spacing: 8) {
                     Spacer()
 
                     Button(L10n.Status.clear) {
-                        viewModel.clearOutput()
+                        store.clearOutput()
                     }
                     .buttonStyle(.plain)
                     .font(.system(size: 10, design: .monospaced))
