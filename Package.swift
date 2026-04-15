@@ -14,13 +14,13 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/kuaner/cc-reader.git", from: "1.0.0"),
+        .package(url: "https://github.com/kuaner/cc-reader.git", from: "1.6.0"),
     ],
     targets: [
         .executableTarget(
             name: "DuoduoManager",
             dependencies: [
-                .product(name: "CCReaderKit", package: "cc-reader"),
+                .product(name: "CCReaderKit", package: "cc-reader")
             ],
             path: "Sources",
             resources: [

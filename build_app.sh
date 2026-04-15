@@ -98,6 +98,7 @@ build_variant() {
     local BINARY_PATH="$2"
     local INCLUDE_NODE="$3"
     local NODE_ARCH="$4"
+    local CC_READER_BUNDLE_SOURCE="$5"
     local APP_PATH="${DIST_DIR}/${APP_NAME}-${VARIANT}/${APP_BUNDLE}"
 
     echo -e "${GREEN}Building ${VARIANT}...${NC}"
@@ -119,14 +120,15 @@ build_variant() {
     mkdir -p "${APP_PATH}/Contents/Resources"
     cp -r Sources/Resources/*.lproj "${APP_PATH}/Contents/Resources/"
 
-    # Bundle CCReaderKit resources where SwiftPM's generated accessor looks them up.
-    local CC_READER_RESOURCES_DIR=".build/checkouts/cc-reader/CCReader/Resources"
     local CC_READER_BUNDLE_DIR="${APP_PATH}/CCReaderKit_CCReaderKit.bundle"
-    if [ -d "${CC_READER_RESOURCES_DIR}" ]; then
-        mkdir -p "${CC_READER_BUNDLE_DIR}"
-        cp -R "${CC_READER_RESOURCES_DIR}/"* "${CC_READER_BUNDLE_DIR}/"
+    # Copy the SwiftPM-generated resource bundle verbatim.
+    # Reconstructing it from checkout sources misses bundle metadata and can
+    # behave differently between remote package and local path dependency modes.
+    if [ -d "${CC_READER_BUNDLE_SOURCE}" ]; then
+        rm -rf "${CC_READER_BUNDLE_DIR}"
+        cp -R "${CC_READER_BUNDLE_SOURCE}" "${CC_READER_BUNDLE_DIR}"
     else
-        echo -e "${YELLOW}Warning: CCReaderKit resources not found at ${CC_READER_RESOURCES_DIR}${NC}"
+        echo -e "${YELLOW}Warning: CCReaderKit bundle not found at ${CC_READER_BUNDLE_SOURCE}${NC}"
     fi
 
     # Bundle matching-arch Node.js runtime (use tar to preserve symlinks)
@@ -152,14 +154,16 @@ build_all() {
 
     local ARM64_BINARY=".build/arm64-apple-macosx/release/${APP_NAME}"
     local X64_BINARY=".build/x86_64-apple-macosx/release/${APP_NAME}"
+    local ARM64_CC_READER_BUNDLE=".build/arm64-apple-macosx/release/CCReaderKit_CCReaderKit.bundle"
+    local X64_CC_READER_BUNDLE=".build/x86_64-apple-macosx/release/CCReaderKit_CCReaderKit.bundle"
     local ARM64_VARIANT="arm64-${WITH_NODE_SUFFIX}"
     local X64_VARIANT="x86_64-${WITH_NODE_SUFFIX}"
     local UNIVERSAL_APP_PATH="${DIST_DIR}/${APP_NAME}-${UNIVERSAL_LITE_VARIANT}/${APP_BUNDLE}"
 
-    build_variant "$ARM64_VARIANT" "$ARM64_BINARY" "yes" "arm64"
-    build_variant "$X64_VARIANT" "$X64_BINARY" "yes" "x86_64"
+    build_variant "$ARM64_VARIANT" "$ARM64_BINARY" "yes" "arm64" "$ARM64_CC_READER_BUNDLE"
+    build_variant "$X64_VARIANT" "$X64_BINARY" "yes" "x86_64" "$X64_CC_READER_BUNDLE"
 
-    build_variant "$UNIVERSAL_LITE_VARIANT" "$ARM64_BINARY" "no" "arm64"
+    build_variant "$UNIVERSAL_LITE_VARIANT" "$ARM64_BINARY" "no" "arm64" "$ARM64_CC_READER_BUNDLE"
     lipo -create "$ARM64_BINARY" "$X64_BINARY" -output "${UNIVERSAL_APP_PATH}/Contents/MacOS/${APP_NAME}"
     chmod +x "${UNIVERSAL_APP_PATH}/Contents/MacOS/${APP_NAME}"
     echo -e "${GREEN}${UNIVERSAL_LITE_VARIANT} binary merged with lipo${NC}"
