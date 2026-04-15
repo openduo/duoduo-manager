@@ -92,9 +92,7 @@ struct StatusBarPresentationMapper {
     }
 
     private var systemHealthSummary: String {
-        let gateway = store.dashboard.health?.gateway ?? "unknown"
-        let meta = store.dashboard.health?.meta_session ?? "unknown"
-        return "gw:\(gateway) · meta:\(meta)"
+        SharedPresentationFormatting.systemHealthSummary(store.dashboard.health)
     }
 
     private var systemHealthTint: Color {
@@ -110,7 +108,7 @@ struct StatusBarPresentationMapper {
     private var subconsciousRows: [SummaryRowData] {
         (store.dashboard.subconscious?.partitions ?? []).map { partition in
             SummaryRowData(
-                title: shortPartitionName(partition.name),
+                title: SharedPresentationFormatting.shortPartitionName(partition.name),
                 detail: partition.done ? "partition warm and ready" : "partition currently executing",
                 state: partition.done ? "WARM" : "RUN",
                 tint: partition.done ? ConsolePalette.fuchsia : ConsolePalette.warning
@@ -121,8 +119,8 @@ struct StatusBarPresentationMapper {
     private var sessionSummaryRows: [SummaryRowData] {
         topSessions.map {
             SummaryRowData(
-                title: $0.display_name ?? shortKey($0.session_key),
-                detail: sessionDetail($0),
+                title: $0.display_name ?? SharedPresentationFormatting.compactIdentifier($0.session_key),
+                detail: SharedPresentationFormatting.sessionDetail($0),
                 state: $0.status.uppercased(),
                 tint: sessionTint($0)
             )
@@ -133,8 +131,8 @@ struct StatusBarPresentationMapper {
         topJobs.map { job in
             let running = store.isJobRunning(job.id)
             return SummaryRowData(
-                title: shortKey(job.id),
-                detail: jobDetail(job, running: running),
+                title: SharedPresentationFormatting.compactIdentifier(job.id),
+                detail: SharedPresentationFormatting.jobDetail(job, running: running),
                 state: running ? "RUN" : (job.state?.last_result ?? "idle").uppercased(),
                 tint: jobTint(job, running: running)
             )
@@ -180,13 +178,6 @@ struct StatusBarPresentationMapper {
         }
     }
 
-    private func sessionDetail(_ session: SessionInfo) -> String {
-        var parts: [String] = []
-        if let last = session.last_event_at { parts.append(DashboardTheme.timeAgo(last)) }
-        if let health = session.health { parts.append(health) }
-        return parts.isEmpty ? "idle" : parts.joined(separator: " · ")
-    }
-
     private func jobTint(_ job: JobInfo, running: Bool) -> Color {
         if running { return ConsolePalette.warning }
         switch job.state?.last_result {
@@ -197,29 +188,6 @@ struct StatusBarPresentationMapper {
         default:
             return ConsolePalette.mutedText
         }
-    }
-
-    private func jobDetail(_ job: JobInfo, running: Bool) -> String {
-        if running, let last = job.state?.last_run_at {
-            return DashboardTheme.timeAgo(last)
-        }
-        if let cron = job.frontmatter?.cron, !cron.isEmpty {
-            return cron
-        }
-        if let last = job.state?.last_run_at {
-            return DashboardTheme.timeAgo(last)
-        }
-        return "idle"
-    }
-
-    private func shortKey(_ key: String) -> String {
-        if key.count <= 20 { return key }
-        return String(key.prefix(9)) + "…" + String(key.suffix(7))
-    }
-
-    private func shortPartitionName(_ name: String) -> String {
-        if name.count <= 14 { return name }
-        return String(name.prefix(10)) + "…"
     }
 
     private func channelControlIcon(for type: String) -> String {

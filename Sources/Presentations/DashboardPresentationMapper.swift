@@ -11,8 +11,7 @@ enum DashboardPresentationMapper {
     }
 
     static func shortTypeName(_ type: String) -> String {
-        guard let dot = type.lastIndex(of: ".") else { return type }
-        return String(type[type.index(after: dot)...])
+        SharedPresentationFormatting.shortEventTypeName(type)
     }
 
     private static func sidebarGroups(store: AppStore) -> [DashboardSidebarGroupPresentation] {
@@ -35,7 +34,7 @@ enum DashboardPresentationMapper {
                 DashboardSidebarGroupPresentation(
                     id: key,
                     key: key,
-                    label: shortSessionKey(key, sessions: store.dashboard.sessions),
+                    label: SharedPresentationFormatting.shortSessionKey(key, sessions: store.dashboard.sessions),
                     count: filtered.count,
                     eventTypes: order.map {
                         DashboardEventTypePresentation(
@@ -68,39 +67,13 @@ enum DashboardPresentationMapper {
                 DashboardSubconsciousItemPresentation(
                     id: part.id,
                     marker: part.done ? "✓" : ".",
-                    name: part.name,
+                    name: SharedPresentationFormatting.shortPartitionName(part.name),
                     markerColor: part.done ? DashboardTheme.emerald : DashboardTheme.amber,
                     textColor: part.done ? DashboardTheme.textSecondary : DashboardTheme.textTertiary
                 )
             },
-            healthText: health.map {
-                "\($0.gateway == "ok" ? "gw:ok" : "gw:\($0.gateway)") \($0.meta_session == "ok" || $0.meta_session == "starting" ? "meta:ok" : "meta:\($0.meta_session)")"
-            } ?? "no connection",
+            healthText: SharedPresentationFormatting.dashboardHealthText(health),
             healthColor: color
         )
-    }
-
-    private static func shortSessionKey(_ key: String, sessions: [SessionInfo]) -> String {
-        if key.hasPrefix("meta:") { return String(key.dropFirst(5)) }
-        if key.hasPrefix("job:") {
-            let name = String(key.dropFirst(4))
-            if let dot = name.lastIndex(of: ".") {
-                let base = String(name[..<dot])
-                let uid = String(name[name.index(after: dot)...].suffix(8))
-                return "job:\(base).\(uid)"
-            }
-            return "job:\(name)"
-        }
-        if let session = sessions.first(where: { $0.session_key == key }),
-           let displayName = session.display_name, !displayName.isEmpty {
-            let label = displayName.count > 16 ? String(displayName.prefix(15)) + "…" : displayName
-            let kind = key.split(separator: ":").first.map(String.init) ?? ""
-            return "\(kind):\(label)"
-        }
-        let parts = key.split(separator: ":")
-        if parts.count >= 2 {
-            return "\(parts[0]):\(String(parts.last!.suffix(8)))"
-        }
-        return String(key.suffix(16))
     }
 }
