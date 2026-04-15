@@ -84,16 +84,6 @@ struct StatusSubconsciousList: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 8) {
-            HStack(spacing: 5) {
-                Image(systemName: "brain.head.profile")
-                    .font(.system(size: 8, weight: .semibold))
-                    .foregroundStyle(ConsolePalette.mutedText)
-
-                Text("sub:")
-                    .font(.system(size: 10, weight: .medium, design: .monospaced))
-                    .foregroundStyle(ConsolePalette.secondaryText)
-            }
-
             if rows.isEmpty {
                 Text("idle")
                     .font(.system(size: 10, design: .monospaced))
