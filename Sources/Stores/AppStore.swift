@@ -1,39 +1,5 @@
 import Foundation
 
-struct RuntimeState {
-    var status = DaemonStatus.empty
-    var channels: [ChannelInfo] = []
-    var daemonConfig = DaemonConfig.load()
-    var feishuConfig = FeishuConfig.load()
-    var isSettingUp = false
-}
-
-struct DashboardState {
-    var sessions: [SessionInfo] = []
-    var health: HealthInfo?
-    var subconscious: SubconsciousInfo?
-    var cadence: CadenceInfo?
-    var jobs: [JobInfo] = []
-    var events: [SpineEvent] = []
-    var totalCost: Double = 0
-    var totalTokens: Int = 0
-    var totalTools: Int = 0
-    var cacheHitRate: Int = 0
-    var config: SystemConfig?
-}
-
-struct UpdateState {
-    var latestVersions: [String: String] = [:]
-    var appLatestVersion: String?
-    var appLatestReleaseURL: URL?
-}
-
-struct CommandState {
-    var isLoading = false
-    var lastOutput = ""
-    var errorMessage: String?
-}
-
 enum AppStoreSurface: Hashable {
     case popover
     case dashboard
@@ -42,10 +8,10 @@ enum AppStoreSurface: Hashable {
 @MainActor
 @Observable
 final class AppStore {
-    var runtime = RuntimeState()
-    var dashboard = DashboardState()
-    var updates = UpdateState()
-    var command = CommandState()
+    let runtime: RuntimeStore
+    let dashboard: DashboardStore
+    let updates: UpdateStore
+    let command: CommandStore
 
     let versionService = VersionService()
     let upgradeService = UpgradeService()
@@ -78,16 +44,16 @@ final class AppStore {
     init() {
         let config = DaemonConfig.load()
         let feishu = FeishuConfig.load()
-        runtime = RuntimeState(
+        runtime = RuntimeStore(
             status: DaemonStatus.empty,
             channels: [],
             daemonConfig: config,
             feishuConfig: feishu,
             isSettingUp: false
         )
-        dashboard = DashboardState()
-        updates = UpdateState()
-        command = CommandState()
+        dashboard = DashboardStore()
+        updates = UpdateStore()
+        command = CommandStore()
         daemonService = DaemonService(daemonURL: config.daemonURL)
         channelService = ChannelService(daemonURL: config.daemonURL)
         rpc = DashboardRPCService(daemonURL: config.daemonURL)
