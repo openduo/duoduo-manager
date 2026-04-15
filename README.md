@@ -11,6 +11,7 @@ A macOS menu bar application for managing the [duoduo](https://github.com/opendu
 - **Smart upgrades** — Version-aware: only updates and restarts components with newer versions
 - **ATC Dashboard** — Real-time event stream, session monitoring, and job management in a native panel (Catppuccin Mocha theme)
 - **CC Reader** — Embedded [cc-reader](https://github.com/kuaner/cc-reader) for browsing Claude Code session history, with timeline rendering, syntax highlighting, and multi-pane layout
+- **Shared app state** — Status popover and ATC Dashboard read from the same root store, so runtime state, dashboard data, and update signals stay in sync
 
 ## Screenshots
 
@@ -70,7 +71,7 @@ make run-release # Build release and run
 make clean      # Clean build artifacts
 ```
 
-### Release
+### Release Artifacts
 
 ```bash
 make app        # Build 3 .app bundles: arm64/x86_64 with-nodejs + universal-lite
@@ -85,13 +86,15 @@ make version                    # Show current version
 make update-version NEW_VERSION=x.y.z
 ```
 
+`make update-version` updates the app version, creates a version bump commit, tags `vX.Y.Z`, and pushes `main` plus tags. GitHub Actions is expected to build and publish release artifacts from that push.
+
 ## Architecture
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation including runtime environment, daemon lifecycle, and upgrade flow.
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the current application architecture, store layout, host layer, and runtime/update polling model.
 
 ## Localization
 
-See [I18N.md](I18N.md) for how to add or modify translations.
+See [docs/I18N.md](docs/I18N.md) for how to add or modify translations.
 
 ## License
 
