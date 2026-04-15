@@ -46,8 +46,6 @@ struct DashboardView: View {
         }
         .frame(minWidth: 680, minHeight: 500)
         .background(DashboardTheme.background.ignoresSafeArea(edges: .top))
-        .task { store.startDashboardPolling() }
-        .onDisappear { store.stopDashboardPolling() }
         .onChange(of: selectedEntry) { _, new in
             if new == .config { Task { await store.fetchConfig() } }
         }

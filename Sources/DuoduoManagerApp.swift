@@ -85,8 +85,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
 
     nonisolated func applicationWillTerminate(_ notification: Notification) {
         Task { @MainActor in
-            store?.endPeriodicRefresh()
-            store?.stopDashboardPolling()
+            store?.shutdown()
             if let monitor = eventMonitor {
                 NSEvent.removeMonitor(monitor)
             }
@@ -103,13 +102,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
     // MARK: - NSPopoverDelegate
 
     func popoverWillClose(_ notification: Notification) {
-        store?.endPeriodicRefresh()
+        store?.setPopoverVisible(false)
     }
 
     // MARK: - NSWindowDelegate
 
     nonisolated func windowShouldClose(_ sender: NSWindow) -> Bool {
         Task { @MainActor in
+            if sender == self.dashboardWindow {
+                self.store?.setDashboardVisible(false)
+            }
             sender.orderOut(nil)
             let hasOtherVisibleWindow = NSApp.windows.contains {
                 $0.isVisible && $0 != sender && $0.styleMask.contains(.titled) && !$0.title.isEmpty
@@ -129,12 +131,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
             self?.updateStatusBarIcon()
         }
         updatePopoverContent()
-        Task {
-            await store?.ensureDuoduoInstalled()
-            await store?.refreshRuntimeForBootstrap()
-            await store?.checkForUpdatesForBootstrap()
-            self.updateStatusBarIcon()
-        }
+        updateStatusBarIcon()
     }
 
     private func updatePopoverContent() {
@@ -171,7 +168,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
         if let popover, popover.isShown {
             popover.performClose(nil)
         } else if let popover {
-            store?.beginPeriodicRefresh()
+            store?.setPopoverVisible(true)
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             NSApp.activate(ignoringOtherApps: true)
         }
@@ -209,6 +206,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowD
             dashboardWindow?.collectionBehavior = [.managed, .participatesInCycle, .fullScreenAllowsTiling]
         }
 
+        store?.setDashboardVisible(true)
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
