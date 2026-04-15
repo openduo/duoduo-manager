@@ -29,6 +29,7 @@ enum L10n {
 
     enum Config {
         static let save = String(localized: "config.save", bundle: bundle)
+        static let cancel = String(localized: "config.cancel", bundle: bundle)
     }
 
     // MARK: - Daemon Config

@@ -1,7 +1,7 @@
 import Foundation
 
 /// Daemon configuration, mapped to duoduo daemon environment variables
-struct DaemonConfig: Codable, Sendable {
+struct DaemonConfig: Codable, Sendable, Equatable {
 
     // MARK: - General
     /// Working directory for the duoduo daemon

@@ -10,6 +10,7 @@
 
 /* Config */
 "config.save" = "Save";
+"config.cancel" = "Cancel";
 
 /* Daemon Config */
 "daemonConfig.title" = "Daemon Settings";
@@ -76,4 +77,3 @@
 "setup.installFailed" = "Failed to install duoduo";
 "setup.systemNodeMissingTitle" = "System Node.js not found";
 "setup.systemNodeMissing" = "System Node.js is required for the universal-lite build. Install Node.js 22+ and reopen DuoduoManager.";
-

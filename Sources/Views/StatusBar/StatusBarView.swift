@@ -7,11 +7,24 @@ struct StatusBarView: View {
     var openReader: (() -> Void)?
 
     @State var expandedEventIDs: Set<String> = []
+    @State var expandedConfigTarget: InlineConfigTarget?
+    @State var daemonDraft: DaemonConfig
+    @State var feishuDraft: FeishuConfig
+    @State var daemonNotice: InlineConfigNotice?
+    @State var feishuNotice: InlineConfigNotice?
 
     let panelWidth: CGFloat = 568
     let panelHeight: CGFloat = 734
     let panelInset: CGFloat = 14
     let overviewSpacing: CGFloat = 14
+
+    init(store: AppStore, openDashboard: (() -> Void)? = nil, openReader: (() -> Void)? = nil) {
+        self.store = store
+        self.openDashboard = openDashboard
+        self.openReader = openReader
+        _daemonDraft = State(initialValue: store.runtime.daemonConfig)
+        _feishuDraft = State(initialValue: store.runtime.feishuConfig)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -126,14 +139,17 @@ struct StatusBarView: View {
             pid: statusBarPresentation.daemonCard.pid,
             isRunning: statusBarPresentation.daemonCard.isRunning,
             isLoading: statusBarPresentation.daemonCard.isLoading,
+            runtimeHint: daemonRuntimeHint,
+            runtimeHintTint: daemonRuntimeHintTint,
             onConfig: {
-                showConfigPanel(title: L10n.DaemonConfig.title) {
-                    DaemonConfigView(config: daemonConfigBinding)
-                }
+                toggleConfig(.daemon)
             },
             onStop: { store.stopDaemon() },
             onRestart: { store.restartDaemon() },
-            onStart: { store.startDaemon() }
+            onStart: { store.startDaemon() },
+            expandedContent: expandedConfigTarget == .daemon
+                ? AnyView(daemonInlineConfig)
+                : nil
         )
     }
 
@@ -150,10 +166,10 @@ struct StatusBarView: View {
             pid: presentation.pid,
             isRunning: presentation.isRunning,
             isLoading: presentation.isLoading,
+            runtimeHint: feishuRuntimeHint(channelIsRunning: presentation.isRunning),
+            runtimeHintTint: feishuRuntimeHintTint(channelIsRunning: presentation.isRunning),
             onConfig: channel.type == "feishu" ? {
-                showConfigPanel(title: L10n.Channel.feishuConfigHint) {
-                    FeishuConfigView(config: feishuConfigBinding)
-                }
+                toggleConfig(.feishu)
             } : nil,
             onStop: { store.stopChannel(channel.type) },
             onRestart: {
@@ -169,7 +185,10 @@ struct StatusBarView: View {
                 } else {
                     store.startChannel(channel.type)
                 }
-            }
+            },
+            expandedContent: channel.type == "feishu" && expandedConfigTarget == .feishu
+                ? AnyView(feishuInlineConfig)
+                : nil
         )
     }
 
@@ -181,14 +200,17 @@ struct StatusBarView: View {
             name: presentation.name,
             packageName: presentation.packageName,
             isLoading: presentation.isLoading,
+            runtimeHint: nil,
+            runtimeHintTint: nil,
             onConfig: entry.id == "feishu" ? {
-                showConfigPanel(title: L10n.Channel.feishuConfigHint) {
-                    FeishuConfigView(config: feishuConfigBinding)
-                }
+                toggleConfig(.feishu)
             } : nil,
             onInstall: {
                 store.installChannel(packageName: entry.packageName)
-            }
+            },
+            expandedContent: entry.id == "feishu" && expandedConfigTarget == .feishu
+                ? AnyView(feishuInlineConfig)
+                : nil
         )
     }
 
@@ -226,6 +248,46 @@ struct StatusBarView: View {
                     .font(.system(size: 10, design: .monospaced))
                     .foregroundStyle(ConsolePalette.secondaryText)
                 }
+            }
+        }
+    }
+
+    private var daemonInlineConfig: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            DaemonConfigView(
+                config: $daemonDraft,
+                mode: .inline,
+                onSave: saveDaemonDraft,
+                onCancel: { cancelConfig(.daemon) }
+            )
+
+            if let daemonNotice {
+                StatusInlineConfigNotice(
+                    message: daemonNotice.message,
+                    tint: daemonNotice.tint,
+                    actionTitle: daemonNotice.actionTitle,
+                    action: daemonNotice.action
+                )
+            }
+        }
+    }
+
+    private var feishuInlineConfig: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            FeishuConfigView(
+                config: $feishuDraft,
+                mode: .inline,
+                onSave: saveFeishuDraft,
+                onCancel: { cancelConfig(.feishu) }
+            )
+
+            if let feishuNotice {
+                StatusInlineConfigNotice(
+                    message: feishuNotice.message,
+                    tint: feishuNotice.tint,
+                    actionTitle: feishuNotice.actionTitle,
+                    action: feishuNotice.action
+                )
             }
         }
     }
