@@ -32,6 +32,10 @@ struct DashboardView: View {
     @State private var selectedEntry: SidebarEntry = .sessionGroup(key: "")
     @State private var expandedGroups: Set<String> = []
 
+    private var dashboardPresentation: DashboardPresentationBundle {
+        DashboardPresentationMapper.make(store: store)
+    }
+
     var body: some View {
         HStack(spacing: 0) {
             sidebar
@@ -55,9 +59,9 @@ struct DashboardView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    if !sidebarGroups.isEmpty {
+                    if !dashboardPresentation.sidebarGroups.isEmpty {
                         sectionLabel("SESSIONS")
-                        ForEach(sidebarGroups) { group in
+                        ForEach(dashboardPresentation.sidebarGroups) { group in
                             sessionGroupItem(group)
                             if expandedGroups.contains(group.key) {
                                 ForEach(group.eventTypes) { item in
@@ -74,7 +78,7 @@ struct DashboardView: View {
                         .padding(.top, 8)
                         .padding(.bottom, 4)
 
-                    if !systemEvents.isEmpty {
+                    if !dashboardPresentation.systemEvents.isEmpty {
                         systemItem
                     }
                     staticItem(.sessions)
@@ -218,7 +222,7 @@ struct DashboardView: View {
                         .font(.system(size: 13, design: .monospaced))
                         .foregroundStyle(isSelected ? DashboardTheme.text : DashboardTheme.sidebarItemText)
                     Spacer()
-                    Text("\(systemEvents.count)")
+                    Text("\(dashboardPresentation.systemEvents.count)")
                         .font(.system(size: 11, design: .monospaced))
                         .foregroundStyle(DashboardTheme.textTertiary)
                         .padding(.trailing, 10)
@@ -277,13 +281,13 @@ struct DashboardView: View {
         case .jobs:
             JobsContentView(jobs: store.dashboard.jobs, isJobRunning: store.isJobRunning)
         case .system:
-            EventsContentView(events: systemEvents, sessionKey: "system")
+            EventsContentView(events: dashboardPresentation.systemEvents, sessionKey: "system")
         case .sessionGroup(let key):
             let filtered = store.dashboard.events.filter { $0.session_key == key }
             EventsContentView(events: filtered, sessionKey: key)
         case .sessionTypeItem(let key, let eventType):
             let filtered = store.dashboard.events.filter { $0.session_key == key && $0.type == eventType }
-            EventsContentView(events: filtered, sessionKey: "\(key)  [\(shortTypeName(eventType))]")
+            EventsContentView(events: filtered, sessionKey: "\(key)  [\(DashboardPresentationMapper.shortTypeName(eventType))]")
         }
     }
 
@@ -291,33 +295,33 @@ struct DashboardView: View {
 
     private var bottomStatsBar: some View {
         HStack(spacing: 0) {
-            Text(dashboardBottomStats.costText)
+            Text(dashboardPresentation.bottomStats.costText)
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundStyle(DashboardTheme.text)
             bottomDivider
 
-            Text(dashboardBottomStats.tokenText)
+            Text(dashboardPresentation.bottomStats.tokenText)
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundStyle(DashboardTheme.text)
             bottomDivider
 
-            Text(dashboardBottomStats.cacheText)
+            Text(dashboardPresentation.bottomStats.cacheText)
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundStyle(DashboardTheme.text)
             bottomDivider
 
-            Text(dashboardBottomStats.toolText)
+            Text(dashboardPresentation.bottomStats.toolText)
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundStyle(DashboardTheme.text)
 
             Spacer()
 
-            if !dashboardBottomStats.subconsciousItems.isEmpty {
+            if !dashboardPresentation.bottomStats.subconsciousItems.isEmpty {
                 HStack(spacing: 6) {
                     Text("sub:")
                         .font(.system(size: 10, design: .monospaced))
                         .foregroundStyle(DashboardTheme.accent)
-                    ForEach(dashboardBottomStats.subconsciousItems) { item in
+                    ForEach(dashboardPresentation.bottomStats.subconsciousItems) { item in
                         HStack(spacing: 2) {
                             Text(item.marker)
                                 .font(.system(size: 10, design: .monospaced))
@@ -334,12 +338,12 @@ struct DashboardView: View {
 
             HStack(spacing: 5) {
                 Circle()
-                    .fill(dashboardBottomStats.healthColor)
+                    .fill(dashboardPresentation.bottomStats.healthColor)
                     .frame(width: 6, height: 6)
-                    .shadow(color: dashboardBottomStats.healthColor.opacity(0.6), radius: 2)
-                Text(dashboardBottomStats.healthText)
+                    .shadow(color: dashboardPresentation.bottomStats.healthColor.opacity(0.6), radius: 2)
+                Text(dashboardPresentation.bottomStats.healthText)
                     .font(.system(size: 11, design: .monospaced))
-                    .foregroundStyle(dashboardBottomStats.healthColor)
+                    .foregroundStyle(dashboardPresentation.bottomStats.healthColor)
             }
         }
         .padding(.horizontal, 14)

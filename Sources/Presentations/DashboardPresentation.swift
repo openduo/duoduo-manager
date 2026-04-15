@@ -1,5 +1,11 @@
 import SwiftUI
 
+struct DashboardPresentationBundle {
+    let sidebarGroups: [DashboardSidebarGroupPresentation]
+    let systemEvents: [SpineEvent]
+    let bottomStats: DashboardBottomStatsPresentation
+}
+
 struct DashboardSidebarGroupPresentation: Identifiable {
     let id: String
     let key: String

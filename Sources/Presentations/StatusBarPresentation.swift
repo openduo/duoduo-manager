@@ -1,5 +1,15 @@
 import SwiftUI
 
+struct StatusBarPresentationBundle {
+    let header: StatusHeaderPresentation
+    let topology: StatusTopologyPresentation
+    let daemonCard: StatusServiceCardPresentation
+    let stream: StatusRuntimeStreamPresentation
+    let execution: StatusExecutionPresentation
+    let footer: StatusFooterPresentation
+    let controlHint: String
+}
+
 struct StatusHeaderPresentation {
     let runtimeLive: Bool
     let controlBusy: Bool

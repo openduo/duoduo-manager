@@ -16,16 +16,16 @@ struct StatusBarView: View {
     var body: some View {
         VStack(spacing: 0) {
             StatusHeaderBar(
-                runtimeLive: headerPresentation.runtimeLive,
-                controlBusy: headerPresentation.controlBusy,
-                eventCount: headerPresentation.eventCount,
-                showAppUpdate: headerPresentation.showAppUpdate,
-                appVersion: headerPresentation.appVersion,
-                showRuntimeUpdate: headerPresentation.showRuntimeUpdate,
-                isLoading: headerPresentation.isLoading,
+                runtimeLive: statusBarPresentation.header.runtimeLive,
+                controlBusy: statusBarPresentation.header.controlBusy,
+                eventCount: statusBarPresentation.header.eventCount,
+                showAppUpdate: statusBarPresentation.header.showAppUpdate,
+                appVersion: statusBarPresentation.header.appVersion,
+                showRuntimeUpdate: statusBarPresentation.header.showRuntimeUpdate,
+                isLoading: statusBarPresentation.header.isLoading,
                 onAppUpdate: { store.openReleasesPage() },
                 onRuntimeAction: {
-                    if showRuntimeUpdate {
+                    if statusBarPresentation.header.showRuntimeUpdate {
                         store.upgradeAll()
                     } else {
                         store.checkForUpdatesWithFeedback()
@@ -49,9 +49,9 @@ struct StatusBarView: View {
             Divider().overlay(ConsolePalette.divider)
 
             StatusFooterBar(
-                loadLabel: footerPresentation.loadLabel,
-                loadValue: footerPresentation.loadValue,
-                eventFlow: footerPresentation.eventFlow,
+                loadLabel: statusBarPresentation.footer.loadLabel,
+                loadValue: statusBarPresentation.footer.loadValue,
+                eventFlow: statusBarPresentation.footer.eventFlow,
                 onDashboard: { openDashboard?() },
                 onReader: { openCCReader() },
                 onQuit: { NSApplication.shared.terminate(nil) }
@@ -74,17 +74,17 @@ struct StatusBarView: View {
     private var topologySummaryPanel: some View {
         StatusPanelSection(icon: "point.3.connected.trianglepath.dotted", title: "Topology") {
             VStack(spacing: 12) {
-                StatusTopologyMetric(icon: "dot.radiowaves.left.and.right", title: "daemon endpoint", value: topologyPresentation.endpoint)
-                StatusTopologyMetric(icon: "network", title: "runtime host", value: topologyPresentation.runtimeHost)
-                StatusTopologyMetric(icon: "cpu", title: "process", value: topologyPresentation.process)
-                StatusTopologyMetric(icon: "cross.case", title: "system", value: topologyPresentation.system, tint: topologyPresentation.systemTint)
+                StatusTopologyMetric(icon: "dot.radiowaves.left.and.right", title: "daemon endpoint", value: statusBarPresentation.topology.endpoint)
+                StatusTopologyMetric(icon: "network", title: "runtime host", value: statusBarPresentation.topology.runtimeHost)
+                StatusTopologyMetric(icon: "cpu", title: "process", value: statusBarPresentation.topology.process)
+                StatusTopologyMetric(icon: "cross.case", title: "system", value: statusBarPresentation.topology.system, tint: statusBarPresentation.topology.systemTint)
             }
         }
     }
 
     private var subconsciousPanel: some View {
         StatusPanelSection(icon: "brain.head.profile", title: "Subconscious") {
-            StatusSubconsciousList(rows: topologyPresentation.subconsciousRows)
+            StatusSubconsciousList(rows: statusBarPresentation.topology.subconsciousRows)
         }
     }
 
@@ -101,7 +101,7 @@ struct StatusBarView: View {
     }
 
     private var controlPanel: some View {
-        StatusPanelSection(icon: "slider.horizontal.3", title: "Control Plane", hint: controlHint) {
+        StatusPanelSection(icon: "slider.horizontal.3", title: "Control Plane", hint: statusBarPresentation.controlHint) {
             VStack(spacing: 10) {
                 daemonControlCard
 
@@ -118,14 +118,14 @@ struct StatusBarView: View {
 
     private var daemonControlCard: some View {
         StatusServiceCard(
-            icon: daemonCardPresentation.icon,
-            name: daemonCardPresentation.name,
-            version: daemonCardPresentation.version,
-            hasUpdate: daemonCardPresentation.hasUpdate,
-            latestVersion: daemonCardPresentation.latestVersion,
-            pid: daemonCardPresentation.pid,
-            isRunning: daemonCardPresentation.isRunning,
-            isLoading: daemonCardPresentation.isLoading,
+            icon: statusBarPresentation.daemonCard.icon,
+            name: statusBarPresentation.daemonCard.name,
+            version: statusBarPresentation.daemonCard.version,
+            hasUpdate: statusBarPresentation.daemonCard.hasUpdate,
+            latestVersion: statusBarPresentation.daemonCard.latestVersion,
+            pid: statusBarPresentation.daemonCard.pid,
+            isRunning: statusBarPresentation.daemonCard.isRunning,
+            isLoading: statusBarPresentation.daemonCard.isLoading,
             onConfig: {
                 showConfigPanel(title: L10n.DaemonConfig.title) {
                     DaemonConfigView(config: daemonConfigBinding)
@@ -139,7 +139,7 @@ struct StatusBarView: View {
 
     private func channelControlCard(_ channel: ChannelInfo) -> some View {
         let needsConfig = channel.type == "feishu" && !store.runtime.feishuConfig.isConfigured
-        let presentation = channelCardPresentation(channel)
+        let presentation = statusBarMapper.channelCard(for: channel)
 
         return StatusServiceCard(
             icon: presentation.icon,
@@ -174,7 +174,7 @@ struct StatusBarView: View {
     }
 
     private func channelInstallCard(_ entry: ChannelEntry) -> some View {
-        let presentation = channelInstallPresentation(entry)
+        let presentation = statusBarMapper.installCard(for: entry)
 
         return StatusInstallCard(
             iconName: presentation.iconName,
@@ -194,22 +194,22 @@ struct StatusBarView: View {
 
     private var streamPanel: some View {
         StatusRuntimeStreamPanel(
-            hint: streamPresentation.hint,
-            lastOutput: streamPresentation.lastOutput,
-            errorMessage: streamPresentation.errorMessage,
-            recentEvents: streamPresentation.recentEvents,
-            expandedEventIDs: streamPresentation.expandedEventIDs,
+            hint: statusBarPresentation.stream.hint,
+            lastOutput: statusBarPresentation.stream.lastOutput,
+            errorMessage: statusBarPresentation.stream.errorMessage,
+            recentEvents: statusBarPresentation.stream.recentEvents,
+            expandedEventIDs: statusBarPresentation.stream.expandedEventIDs,
             onToggle: toggleEvent
         )
     }
 
     private var executionPanel: some View {
         StatusExecutionPanel(
-            hint: executionPresentation.hint,
-            sessionCaption: executionPresentation.sessionCaption,
-            jobCaption: executionPresentation.jobCaption,
-            sessionRows: executionPresentation.sessionRows,
-            jobRows: executionPresentation.jobRows
+            hint: statusBarPresentation.execution.hint,
+            sessionCaption: statusBarPresentation.execution.sessionCaption,
+            jobCaption: statusBarPresentation.execution.jobCaption,
+            sessionRows: statusBarPresentation.execution.sessionRows,
+            jobRows: statusBarPresentation.execution.jobRows
         )
     }
 

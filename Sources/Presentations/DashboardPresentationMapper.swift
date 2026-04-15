@@ -1,7 +1,21 @@
 import SwiftUI
 
-extension DashboardView {
-    var sidebarGroups: [DashboardSidebarGroupPresentation] {
+@MainActor
+enum DashboardPresentationMapper {
+    static func make(store: AppStore) -> DashboardPresentationBundle {
+        DashboardPresentationBundle(
+            sidebarGroups: sidebarGroups(store: store),
+            systemEvents: store.dashboard.events.filter { $0.session_key == nil || $0.session_key?.isEmpty == true },
+            bottomStats: bottomStats(store: store)
+        )
+    }
+
+    static func shortTypeName(_ type: String) -> String {
+        guard let dot = type.lastIndex(of: ".") else { return type }
+        return String(type[type.index(after: dot)...])
+    }
+
+    private static func sidebarGroups(store: AppStore) -> [DashboardSidebarGroupPresentation] {
         var seen = Set<String>()
         var groups: [DashboardSidebarGroupPresentation] = []
 
@@ -39,11 +53,7 @@ extension DashboardView {
         return groups
     }
 
-    var systemEvents: [SpineEvent] {
-        store.dashboard.events.filter { $0.session_key == nil || $0.session_key?.isEmpty == true }
-    }
-
-    var dashboardBottomStats: DashboardBottomStatsPresentation {
+    private static func bottomStats(store: AppStore) -> DashboardBottomStatsPresentation {
         let health = store.dashboard.health
         let isOk = health?.gateway == "ok" && (health?.meta_session == "ok" || health?.meta_session == "starting")
         let isErr = health?.gateway == "down" || health?.meta_session == "down"
@@ -70,7 +80,7 @@ extension DashboardView {
         )
     }
 
-    func shortSessionKey(_ key: String, sessions: [SessionInfo]) -> String {
+    private static func shortSessionKey(_ key: String, sessions: [SessionInfo]) -> String {
         if key.hasPrefix("meta:") { return String(key.dropFirst(5)) }
         if key.hasPrefix("job:") {
             let name = String(key.dropFirst(4))
@@ -92,10 +102,5 @@ extension DashboardView {
             return "\(parts[0]):\(String(parts.last!.suffix(8)))"
         }
         return String(key.suffix(16))
-    }
-
-    func shortTypeName(_ type: String) -> String {
-        guard let dot = type.lastIndex(of: ".") else { return type }
-        return String(type[type.index(after: dot)...])
     }
 }
