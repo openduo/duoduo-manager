@@ -147,20 +147,25 @@ extract_node() {
 check_signing_config() {
     if [ -f ".secret.env" ]; then
         source ./.secret.env
-        : "${APPLE_ID:?APPLE_ID is required}"
-        : "${APPLE_APP_SPECIFIC_PASSWORD:?APPLE_APP_SPECIFIC_PASSWORD is required}"
-        : "${APPLE_TEAM_ID:?APPLE_TEAM_ID is required}"
-        if [ -z "${APPLE_SIGNING_IDENTITY:-}" ] && [ -n "${APPLE_TEAM_NAME:-}" ]; then
-            APPLE_SIGNING_IDENTITY="${APPLE_TEAM_NAME}"
-        fi
-        : "${APPLE_SIGNING_IDENTITY:?APPLE_SIGNING_IDENTITY is required}"
-        echo -e "${GREEN}Signing config loaded${NC}"
-        return 0
-    else
-        echo -e "${YELLOW}No .secret.env found, skipping signing and notarization${NC}"
-        echo "  Copy secret.env.example to .secret.env and fill in config to enable signing"
+    fi
+
+    if [ -z "${APPLE_ID:-}" ] || [ -z "${APPLE_APP_SPECIFIC_PASSWORD:-}" ] || [ -z "${APPLE_TEAM_ID:-}" ]; then
+        echo -e "${YELLOW}Signing/notarization env is incomplete${NC}"
+        echo "  Provide APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, and APPLE_TEAM_ID via env or .secret.env"
         return 1
     fi
+
+    if [ -z "${APPLE_SIGNING_IDENTITY:-}" ] && [ -n "${APPLE_TEAM_NAME:-}" ]; then
+        APPLE_SIGNING_IDENTITY="${APPLE_TEAM_NAME}"
+    fi
+
+    if [ -z "${APPLE_SIGNING_IDENTITY:-}" ]; then
+        echo -e "${YELLOW}APPLE_SIGNING_IDENTITY is missing${NC}"
+        return 1
+    fi
+
+    echo -e "${GREEN}Signing config loaded${NC}"
+    return 0
 }
 
 # Build app bundle for a variant

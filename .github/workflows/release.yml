@@ -63,33 +63,13 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "${KEYCHAIN_PASSWORD}" "${KEYCHAIN_PATH}"
           security find-identity -v -p codesigning "${KEYCHAIN_PATH}"
 
-      - name: Write signing config
+      - name: Build, sign, notarize, and package
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-        run: |
-          set -euo pipefail
-          if [ -z "${APPLE_ID}" ] || [ -z "${APPLE_APP_SPECIFIC_PASSWORD}" ] || [ -z "${APPLE_TEAM_ID}" ] || [ -z "${APPLE_SIGNING_IDENTITY}" ]; then
-            echo "Missing notarization secrets"
-            exit 1
-          fi
-
-          printf '%s\n' \
-            "APPLE_ID=\"${APPLE_ID}\"" \
-            "APPLE_APP_SPECIFIC_PASSWORD=\"${APPLE_APP_SPECIFIC_PASSWORD}\"" \
-            "APPLE_TEAM_ID=\"${APPLE_TEAM_ID}\"" \
-            "APPLE_SIGNING_IDENTITY=\"${APPLE_SIGNING_IDENTITY}\"" \
-            > .secret.env
-          awk -F= '{print $1}' .secret.env
-
-      - name: Build, sign, notarize, and package
         run: make publish
-
-      - name: Clean signing config
-        if: always()
-        run: rm -f .secret.env
 
       - name: Clean temporary keychain
         if: always()
