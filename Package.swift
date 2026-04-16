@@ -14,7 +14,7 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/kuaner/cc-reader.git", from: "1.6.0"),
+        .package(url: "https://github.com/kuaner/cc-reader.git", exact: "1.6.0"),
     ],
     targets: [
         .executableTarget(
@@ -23,6 +23,9 @@ let package = Package(
                 .product(name: "CCReaderKit", package: "cc-reader")
             ],
             path: "Sources",
+            exclude: [
+                "Resources/App"
+            ],
             resources: [
                 .process("Resources/en.lproj"),
                 .process("Resources/zh-Hans.lproj"),

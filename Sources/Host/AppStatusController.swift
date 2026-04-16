@@ -68,7 +68,6 @@ final class AppStatusController: NSObject, NSPopoverDelegate {
         } else {
             onPopoverVisibilityChanged?(true)
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
-            NSApp.activate(ignoringOtherApps: true)
         }
     }
 

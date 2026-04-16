@@ -252,7 +252,7 @@ The project previously had a flatter `Views/` layout and generic directories lik
 
 1. Detect latest Node.js 24 LTS patch and cache arm64/x64 tarballs in `.node-cache`
 2. Build separate Swift binaries for `arm64` and `x86_64`
-3. Assemble `.app` from `DuoduoManager.app-template`
+3. Assemble a standard `.app` bundle from `Config/Info.plist` and bundled resources
 4. Copy localized `.lproj` resources into app bundle
 5. Extract matching-arch Node runtime into `Contents/Resources/node` (tar-based to preserve symlinks)
 6. Optional signing/notarization (if `.secret.env` exists)
