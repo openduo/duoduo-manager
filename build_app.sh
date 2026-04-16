@@ -213,8 +213,6 @@ build_all() {
     rm -rf "${DIST_DIR}"
     mkdir -p "${DIST_DIR}"
 
-    xcodegen generate
-
     ensure_node
     xcodebuild -project "${APP_NAME}.xcodeproj" -scheme "${APP_NAME}" -configuration Release -arch arm64 -derivedDataPath .build/arm64 build
     xcodebuild -project "${APP_NAME}.xcodeproj" -scheme "${APP_NAME}" -configuration Release -arch x86_64 -derivedDataPath .build/x64 build
