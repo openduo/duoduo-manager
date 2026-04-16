@@ -76,12 +76,12 @@ jobs:
             exit 1
           fi
 
-          cat > .secret.env <<EOF
-APPLE_ID="${APPLE_ID}"
-APPLE_APP_SPECIFIC_PASSWORD="${APPLE_APP_SPECIFIC_PASSWORD}"
-APPLE_TEAM_ID="${APPLE_TEAM_ID}"
-APPLE_SIGNING_IDENTITY="${APPLE_SIGNING_IDENTITY}"
-EOF
+          printf '%s\n' \
+            "APPLE_ID=\"${APPLE_ID}\"" \
+            "APPLE_APP_SPECIFIC_PASSWORD=\"${APPLE_APP_SPECIFIC_PASSWORD}\"" \
+            "APPLE_TEAM_ID=\"${APPLE_TEAM_ID}\"" \
+            "APPLE_SIGNING_IDENTITY=\"${APPLE_SIGNING_IDENTITY}\"" \
+            > .secret.env
           awk -F= '{print $1}' .secret.env
 
       - name: Build, sign, notarize, and package
