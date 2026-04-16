@@ -1,0 +1,57 @@
+name: DuoduoManager
+
+options:
+  createIntermediateGroups: true
+  minimumXcodeGenVersion: 2.45.4
+  deploymentTarget:
+    macOS: "14.0"
+
+packages:
+  cc-reader:
+    url: https://github.com/kuaner/cc-reader.git
+    exactVersion: 1.6.0
+
+settings:
+  base:
+    PRODUCT_NAME: DuoduoManager
+    PRODUCT_BUNDLE_IDENTIFIER: ai.openduo.manager
+    INFOPLIST_FILE: Config/Info.plist
+    CODE_SIGN_ENTITLEMENTS: entitlements.mac.plist
+    GENERATE_INFOPLIST_FILE: NO
+    SWIFT_VERSION: 5.9
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+
+targets:
+  DuoduoManager:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Sources
+        excludes:
+          - Resources
+      - path: Sources/Resources
+        buildPhase: resources
+      - path: Sources/Resources/App/AppIcon.icns
+        buildPhase: resources
+    dependencies:
+      - package: cc-reader
+        product: CCReaderKit
+    settings:
+      base:
+        PRODUCT_MODULE_NAME: DuoduoManager
+        EXECUTABLE_NAME: DuoduoManager
+
+schemes:
+  DuoduoManager:
+    build:
+      targets:
+        DuoduoManager: all
+    run:
+      config: Debug
+    archive:
+      config: Release
+    profile:
+      config: Release
+    analyze:
+      config: Debug

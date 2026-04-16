@@ -7,8 +7,17 @@ import Foundation
 /// running via `swift run`, and `Bundle.main` when running from an `.app` bundle.
 enum L10n {
     /// Bundle resolution: try `Bundle.main` first (`.app`), fall back to `Bundle.module` (SPM).
-    static let bundle: Bundle = Bundle.main.url(forResource: "en", withExtension: "lproj") != nil
-        ? Bundle.main : Bundle.module
+    static let bundle: Bundle = {
+        if Bundle.main.url(forResource: "en", withExtension: "lproj") != nil {
+            return Bundle.main
+        }
+
+        #if SWIFT_PACKAGE
+        return Bundle.module
+        #else
+        return Bundle.main
+        #endif
+    }()
 
     // MARK: - Status
 

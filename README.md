@@ -65,11 +65,14 @@ For `*-universal-lite` builds, install Node.js 22+ on your system.
 ### Build
 
 ```bash
+make project    # Generate DuoduoManager.xcodeproj with XcodeGen
 make build      # Debug build
 make run        # Build and run
 make run-release # Build release and run
 make clean      # Clean build artifacts
 ```
+
+Open `DuoduoManager.xcodeproj` in Xcode after running `make project`. The Xcode project is generated from [project.yml](project.yml), while `Package.swift` and `build_app.sh` remain the source of truth for SwiftPM builds and release packaging.
 
 ### Release Artifacts
 

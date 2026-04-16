@@ -79,9 +79,8 @@ final class AppWindowController: NSObject, NSWindowDelegate {
     }
 
     private func showWindow(_ window: NSWindow?) {
-        NSApp.setActivationPolicy(.regular)
-        NSApp.activate(ignoringOtherApps: true)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+        DispatchQueue.main.async {
+            NSApp.setActivationPolicy(.regular)
             window?.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
         }

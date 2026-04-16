@@ -1,0 +1,687 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		010BD62B88EE96606B80D4B2 /* DaemonConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18799A79169815D636D94496 /* DaemonConfigView.swift */; };
+		017084BD3C6DE881D64F1663 /* NodeRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E9E00A5B0A8B3275C899A48 /* NodeRuntime.swift */; };
+		046BEAA5887839B7621DCEE1 /* ChannelRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F90A264797A448DDFA20BF /* ChannelRegistry.swift */; };
+		18F89BEAF2BBD471D20C580E /* VersionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B18C58A264D7928F215FD2C1 /* VersionService.swift */; };
+		1AE91AE673A239BECE21292F /* StatusBarExecutionSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBA3BA1559ACB5B8DEC5DC72 /* StatusBarExecutionSection.swift */; };
+		1C109FCAF4464502FCB1D76B /* AppStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B63D809AA1DFB4E9079738E0 /* AppStore.swift */; };
+		215B500F921DEA3BD18BF344 /* StatusBarPresentationMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB10AA52A36C2C0DDB3E082D /* StatusBarPresentationMapper.swift */; };
+		2224CCBCC47C74BB0F7C1CED /* ConfigContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A614BA165C938FF6F95D053D /* ConfigContentView.swift */; };
+		223709C12B9D941FF19956CF /* L10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9222F0BCE466A5D13746D15B /* L10n.swift */; };
+		315443C46D9471FF21A17448 /* AppStore+Fetch.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0734A84D6BD5B7B46F95A44 /* AppStore+Fetch.swift */; };
+		321590D058CA99E9530B4FE7 /* StatusBarRuntimeStreamSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA8811AA530243F3BB28FF5B /* StatusBarRuntimeStreamSection.swift */; };
+		35F3E9C29A2F992A3B84784C /* PackageVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD3062CC1C88B89EE363866C /* PackageVersion.swift */; };
+		39B0FD04F3834B04B9E61E96 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F0C5CFEB78443D92540582DF /* InfoPlist.strings */; };
+		3C743456229643B52CF20F78 /* DashboardPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52ABF56B3A67B044533AB057 /* DashboardPresentation.swift */; };
+		3E5A505F3C91E1C0F4DC2336 /* StatusBarControlSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = E65007E3653DF04BA1B28A14 /* StatusBarControlSection.swift */; };
+		3F06193C066E4B68CD4DB443 /* StatusBarView+Support.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEC650582C38EC2C96D4C1D5 /* StatusBarView+Support.swift */; };
+		4DEC4D220CA3E1F92EF901CF /* ChannelService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 926633CA04F758F9BC2A5064 /* ChannelService.swift */; };
+		4F00CADDB45EB3F1B31246C8 /* FeishuConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = E29BB270BCC709AA4E4A82B6 /* FeishuConfig.swift */; };
+		533284317A1C3453B6C2FF30 /* AppStore+Visibility.swift in Sources */ = {isa = PBXBuildFile; fileRef = B727510888C757E0D9ABF84D /* AppStore+Visibility.swift */; };
+		5343FC419AF1A6736058519F /* EventsContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93D391255331DD40717520E5 /* EventsContentView.swift */; };
+		5626E057C5F55FFA555E32E4 /* SharedPresentationFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E0046CA8AE532D210FB92F7 /* SharedPresentationFormatting.swift */; };
+		5C201FFD868C1924954A8C52 /* DashboardTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2929BD4A52F7AEC4F969FB9B /* DashboardTheme.swift */; };
+		5DF5E97F1DD4F835663B8976 /* DashboardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D007A22CF7A3EFDA50D85248 /* DashboardStore.swift */; };
+		6726E4463756AFF1906335BB /* AppStatusController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FD413F335364A6203A47A3D /* AppStatusController.swift */; };
+		6753CC35BF8CACE4298B7501 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD1B503E8E96E73118E67D93 /* DashboardView.swift */; };
+		67919609723E49BE8D1FC602 /* ConfigLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E4A80BA81B497FFF0F2F949 /* ConfigLayout.swift */; };
+		6DB4DAD1E2EE5E6470EA02E8 /* ChannelInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF6F495D583E2F5B24E230D0 /* ChannelInfo.swift */; };
+		6E4911515C6E91A81149CE92 /* DashboardRPCService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210C266E6749AEA8B72E0E08 /* DashboardRPCService.swift */; };
+		6E804FCDF6C20E92352F5472 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = A795E79331D51BCF51211353 /* AppIcon.icns */; };
+		77B740AE23180F0A8A274FA2 /* JobsContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B128C5ABF94ABDF761C5B57C /* JobsContentView.swift */; };
+		788D30A4900C9B63050009AC /* CCReaderKit in Frameworks */ = {isa = PBXBuildFile; productRef = CC64276C4E99EC947B05A95B /* CCReaderKit */; };
+		7F4CFB13A97E23FC5F3D6D95 /* AppStore+Actions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54840B6846285AED341E1271 /* AppStore+Actions.swift */; };
+		8411541E31AA0B794EA8AFE4 /* DaemonService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8355C197B1A02286E7764494 /* DaemonService.swift */; };
+		84B87284D0CFC7204F39037A /* ShellService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F54D68D0A4635B98DE788042 /* ShellService.swift */; };
+		88E8A60676091CE351ED2CEA /* UpgradeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1AD037DDD7C23ACFA1C9D8 /* UpgradeService.swift */; };
+		8974A9E40949FFE2C32CBDD5 /* DashboardModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBAA39C3D4832508EC728871 /* DashboardModels.swift */; };
+		8B4D212F543C9D136745A3EB /* EventStreamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BEA40D33E29FED5A01BEB28 /* EventStreamView.swift */; };
+		8C76D7C9F2A6E4BAA14B967A /* RuntimeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC9C2D3B574FE326D021356D /* RuntimeStore.swift */; };
+		91FA18C55A51123CDDF890C6 /* CommandStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4342751622BFA0637BB62E76 /* CommandStore.swift */; };
+		A03503D709DAAF9C4AA91B36 /* StatusBarTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AEA42E718AE2B948BAB6FB /* StatusBarTheme.swift */; };
+		C4056C27635EC363B56C3248 /* FeishuConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657074B7EFCDAC93A1F55DD8 /* FeishuConfigView.swift */; };
+		C64BB4DB3FE3CEAD4ACE3950 /* StatusBarPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03599F7BD1273B95205930E6 /* StatusBarPresentation.swift */; };
+		C96C679274ED41CD859A7290 /* StatusBarSharedViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = C306376319589909FF3AF1D1 /* StatusBarSharedViews.swift */; };
+		C97570B220A94D83DF959CC4 /* SessionsContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 383647EF2C49D5F7595B6F3E /* SessionsContentView.swift */; };
+		CD22515C383306E95C3EC463 /* StatusBarHeaderSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4C329E703E0DD9203EA29BF /* StatusBarHeaderSection.swift */; };
+		D015D59BC93A38CCEB6C4480 /* BrandIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1BE2BFCB55011DE4EE5208E /* BrandIconView.swift */; };
+		D0DF3F1980B048444A509AB0 /* ConfigStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2528FBA2BF72BF1A03D7A7EA /* ConfigStore.swift */; };
+		D2BE4E4DF0173E7FC1821406 /* DaemonStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63FD10798EC2CABC731AE9AB /* DaemonStatus.swift */; };
+		DCD14982263FD265DD213F3D /* AppWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCAE8BA826F3F2FC84989E8E /* AppWindowController.swift */; };
+		E08920046FF8BCA7E8693D74 /* DuoduoManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5175981D0FA6FAD90921DCE /* DuoduoManagerApp.swift */; };
+		E0C6E810FA94AE64B35500DF /* AppUpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C4EACF47B7EFB6FD7EE9677 /* AppUpdateService.swift */; };
+		E29D739D6216455B4D6F60CA /* UpdateStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77280A851FF3D40035BCF49 /* UpdateStore.swift */; };
+		E4ABAFFE00ECC2A03DED886F /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = EDBE1098D012D8D7423DE84F /* Localizable.strings */; };
+		F7A144EB6254AE07E38EBB12 /* DaemonConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F208FDB32EE95280C59DE480 /* DaemonConfig.swift */; };
+		F97089A9A67B81FF81F9BB4C /* DashboardPresentationMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D50E480BA7922E6B4768AAD /* DashboardPresentationMapper.swift */; };
+		FA953AF57994D9DB7B81424A /* StatusBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 905C0CACFCF03BAA771CC96E /* StatusBarView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		03599F7BD1273B95205930E6 /* StatusBarPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarPresentation.swift; sourceTree = "<group>"; };
+		08AF8879FC0820B8606A783C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		0E0046CA8AE532D210FB92F7 /* SharedPresentationFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedPresentationFormatting.swift; sourceTree = "<group>"; };
+		18799A79169815D636D94496 /* DaemonConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonConfigView.swift; sourceTree = "<group>"; };
+		1E1AD037DDD7C23ACFA1C9D8 /* UpgradeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpgradeService.swift; sourceTree = "<group>"; };
+		210C266E6749AEA8B72E0E08 /* DashboardRPCService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardRPCService.swift; sourceTree = "<group>"; };
+		2528FBA2BF72BF1A03D7A7EA /* ConfigStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigStore.swift; sourceTree = "<group>"; };
+		26F554D4114DA0C65758F78F /* DuoduoManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DuoduoManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2929BD4A52F7AEC4F969FB9B /* DashboardTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardTheme.swift; sourceTree = "<group>"; };
+		2AFE377434F91AB5220C4E12 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		33AEA42E718AE2B948BAB6FB /* StatusBarTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarTheme.swift; sourceTree = "<group>"; };
+		383647EF2C49D5F7595B6F3E /* SessionsContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionsContentView.swift; sourceTree = "<group>"; };
+		3BEA40D33E29FED5A01BEB28 /* EventStreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventStreamView.swift; sourceTree = "<group>"; };
+		4342751622BFA0637BB62E76 /* CommandStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandStore.swift; sourceTree = "<group>"; };
+		4D50E480BA7922E6B4768AAD /* DashboardPresentationMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardPresentationMapper.swift; sourceTree = "<group>"; };
+		4E4A80BA81B497FFF0F2F949 /* ConfigLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigLayout.swift; sourceTree = "<group>"; };
+		51F90A264797A448DDFA20BF /* ChannelRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelRegistry.swift; sourceTree = "<group>"; };
+		52ABF56B3A67B044533AB057 /* DashboardPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardPresentation.swift; sourceTree = "<group>"; };
+		54840B6846285AED341E1271 /* AppStore+Actions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppStore+Actions.swift"; sourceTree = "<group>"; };
+		63FD10798EC2CABC731AE9AB /* DaemonStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonStatus.swift; sourceTree = "<group>"; };
+		657074B7EFCDAC93A1F55DD8 /* FeishuConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeishuConfigView.swift; sourceTree = "<group>"; };
+		6C4EACF47B7EFB6FD7EE9677 /* AppUpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdateService.swift; sourceTree = "<group>"; };
+		6E9E00A5B0A8B3275C899A48 /* NodeRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeRuntime.swift; sourceTree = "<group>"; };
+		6FD413F335364A6203A47A3D /* AppStatusController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStatusController.swift; sourceTree = "<group>"; };
+		8355C197B1A02286E7764494 /* DaemonService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonService.swift; sourceTree = "<group>"; };
+		8EE22FC1681BA2F7F2FC4C6F /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		905C0CACFCF03BAA771CC96E /* StatusBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarView.swift; sourceTree = "<group>"; };
+		9222F0BCE466A5D13746D15B /* L10n.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = L10n.swift; sourceTree = "<group>"; };
+		926633CA04F758F9BC2A5064 /* ChannelService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelService.swift; sourceTree = "<group>"; };
+		93D391255331DD40717520E5 /* EventsContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsContentView.swift; sourceTree = "<group>"; };
+		A1BE2BFCB55011DE4EE5208E /* BrandIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandIconView.swift; sourceTree = "<group>"; };
+		A5175981D0FA6FAD90921DCE /* DuoduoManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuoduoManagerApp.swift; sourceTree = "<group>"; };
+		A614BA165C938FF6F95D053D /* ConfigContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigContentView.swift; sourceTree = "<group>"; };
+		A795E79331D51BCF51211353 /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
+		B128C5ABF94ABDF761C5B57C /* JobsContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobsContentView.swift; sourceTree = "<group>"; };
+		B18C58A264D7928F215FD2C1 /* VersionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionService.swift; sourceTree = "<group>"; };
+		B63D809AA1DFB4E9079738E0 /* AppStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStore.swift; sourceTree = "<group>"; };
+		B727510888C757E0D9ABF84D /* AppStore+Visibility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppStore+Visibility.swift"; sourceTree = "<group>"; };
+		BB10AA52A36C2C0DDB3E082D /* StatusBarPresentationMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarPresentationMapper.swift; sourceTree = "<group>"; };
+		BBAA39C3D4832508EC728871 /* DashboardModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardModels.swift; sourceTree = "<group>"; };
+		BD1B503E8E96E73118E67D93 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		C306376319589909FF3AF1D1 /* StatusBarSharedViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarSharedViews.swift; sourceTree = "<group>"; };
+		CA8811AA530243F3BB28FF5B /* StatusBarRuntimeStreamSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarRuntimeStreamSection.swift; sourceTree = "<group>"; };
+		CD3062CC1C88B89EE363866C /* PackageVersion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackageVersion.swift; sourceTree = "<group>"; };
+		CEC650582C38EC2C96D4C1D5 /* StatusBarView+Support.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StatusBarView+Support.swift"; sourceTree = "<group>"; };
+		D007A22CF7A3EFDA50D85248 /* DashboardStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardStore.swift; sourceTree = "<group>"; };
+		D77280A851FF3D40035BCF49 /* UpdateStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateStore.swift; sourceTree = "<group>"; };
+		DF6F495D583E2F5B24E230D0 /* ChannelInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelInfo.swift; sourceTree = "<group>"; };
+		E0734A84D6BD5B7B46F95A44 /* AppStore+Fetch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppStore+Fetch.swift"; sourceTree = "<group>"; };
+		E29BB270BCC709AA4E4A82B6 /* FeishuConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeishuConfig.swift; sourceTree = "<group>"; };
+		E4C329E703E0DD9203EA29BF /* StatusBarHeaderSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarHeaderSection.swift; sourceTree = "<group>"; };
+		E65007E3653DF04BA1B28A14 /* StatusBarControlSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarControlSection.swift; sourceTree = "<group>"; };
+		EBA3BA1559ACB5B8DEC5DC72 /* StatusBarExecutionSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarExecutionSection.swift; sourceTree = "<group>"; };
+		EC458B24E507BA2488503CD4 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		EC9C2D3B574FE326D021356D /* RuntimeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeStore.swift; sourceTree = "<group>"; };
+		F208FDB32EE95280C59DE480 /* DaemonConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonConfig.swift; sourceTree = "<group>"; };
+		F54D68D0A4635B98DE788042 /* ShellService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellService.swift; sourceTree = "<group>"; };
+		FCAE8BA826F3F2FC84989E8E /* AppWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppWindowController.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		49F3BF51EFED63B30B3FDFD8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				788D30A4900C9B63050009AC /* CCReaderKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		04F6274206BE4526E3B27BB8 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				0A8FFCA0EAEC8F5307EC2F00 /* App */,
+				F0C5CFEB78443D92540582DF /* InfoPlist.strings */,
+				EDBE1098D012D8D7423DE84F /* Localizable.strings */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		0A8FFCA0EAEC8F5307EC2F00 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				A795E79331D51BCF51211353 /* AppIcon.icns */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		32934532BAF9AD505C7CF409 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				DF6F495D583E2F5B24E230D0 /* ChannelInfo.swift */,
+				51F90A264797A448DDFA20BF /* ChannelRegistry.swift */,
+				2528FBA2BF72BF1A03D7A7EA /* ConfigStore.swift */,
+				F208FDB32EE95280C59DE480 /* DaemonConfig.swift */,
+				63FD10798EC2CABC731AE9AB /* DaemonStatus.swift */,
+				BBAA39C3D4832508EC728871 /* DashboardModels.swift */,
+				E29BB270BCC709AA4E4A82B6 /* FeishuConfig.swift */,
+				CD3062CC1C88B89EE363866C /* PackageVersion.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		4C5A645C213587FB99087D24 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				A1BE2BFCB55011DE4EE5208E /* BrandIconView.swift */,
+				3BEA40D33E29FED5A01BEB28 /* EventStreamView.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		609826C5C06BE06005D6403A /* Content */ = {
+			isa = PBXGroup;
+			children = (
+				A614BA165C938FF6F95D053D /* ConfigContentView.swift */,
+				93D391255331DD40717520E5 /* EventsContentView.swift */,
+				B128C5ABF94ABDF761C5B57C /* JobsContentView.swift */,
+				383647EF2C49D5F7595B6F3E /* SessionsContentView.swift */,
+			);
+			path = Content;
+			sourceTree = "<group>";
+		};
+		679FA19D889125543F94D7F2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				26F554D4114DA0C65758F78F /* DuoduoManager.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		699317DC08453475F652AB21 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				6C4EACF47B7EFB6FD7EE9677 /* AppUpdateService.swift */,
+				926633CA04F758F9BC2A5064 /* ChannelService.swift */,
+				8355C197B1A02286E7764494 /* DaemonService.swift */,
+				210C266E6749AEA8B72E0E08 /* DashboardRPCService.swift */,
+				6E9E00A5B0A8B3275C899A48 /* NodeRuntime.swift */,
+				F54D68D0A4635B98DE788042 /* ShellService.swift */,
+				1E1AD037DDD7C23ACFA1C9D8 /* UpgradeService.swift */,
+				B18C58A264D7928F215FD2C1 /* VersionService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		86048B60EE189196D5617CD8 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				4E4A80BA81B497FFF0F2F949 /* ConfigLayout.swift */,
+				18799A79169815D636D94496 /* DaemonConfigView.swift */,
+				657074B7EFCDAC93A1F55DD8 /* FeishuConfigView.swift */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		8C732C4ED77BE686F8D96478 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				86048B60EE189196D5617CD8 /* Config */,
+				FAE99F0C705E238FFC1B8338 /* Dashboard */,
+				4C5A645C213587FB99087D24 /* Shared */,
+				9C0BF804C628BF856A4E44CE /* StatusBar */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		939733442F7CFBA0A6479AD0 /* Localization */ = {
+			isa = PBXGroup;
+			children = (
+				9222F0BCE466A5D13746D15B /* L10n.swift */,
+			);
+			path = Localization;
+			sourceTree = "<group>";
+		};
+		9C0BF804C628BF856A4E44CE /* StatusBar */ = {
+			isa = PBXGroup;
+			children = (
+				E65007E3653DF04BA1B28A14 /* StatusBarControlSection.swift */,
+				EBA3BA1559ACB5B8DEC5DC72 /* StatusBarExecutionSection.swift */,
+				E4C329E703E0DD9203EA29BF /* StatusBarHeaderSection.swift */,
+				CA8811AA530243F3BB28FF5B /* StatusBarRuntimeStreamSection.swift */,
+				C306376319589909FF3AF1D1 /* StatusBarSharedViews.swift */,
+				33AEA42E718AE2B948BAB6FB /* StatusBarTheme.swift */,
+				905C0CACFCF03BAA771CC96E /* StatusBarView.swift */,
+				CEC650582C38EC2C96D4C1D5 /* StatusBarView+Support.swift */,
+			);
+			path = StatusBar;
+			sourceTree = "<group>";
+		};
+		9C71E37662BBF5AA34D6D733 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				A5175981D0FA6FAD90921DCE /* DuoduoManagerApp.swift */,
+				D5B25F10D29F2F390DEE9452 /* Host */,
+				939733442F7CFBA0A6479AD0 /* Localization */,
+				32934532BAF9AD505C7CF409 /* Models */,
+				D7D0F243D1EF1A97B5ED811B /* Presentations */,
+				04F6274206BE4526E3B27BB8 /* Resources */,
+				699317DC08453475F652AB21 /* Services */,
+				A9CC746AF315586ED084F62D /* Stores */,
+				8C732C4ED77BE686F8D96478 /* Views */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		A9CC746AF315586ED084F62D /* Stores */ = {
+			isa = PBXGroup;
+			children = (
+				B63D809AA1DFB4E9079738E0 /* AppStore.swift */,
+				54840B6846285AED341E1271 /* AppStore+Actions.swift */,
+				E0734A84D6BD5B7B46F95A44 /* AppStore+Fetch.swift */,
+				B727510888C757E0D9ABF84D /* AppStore+Visibility.swift */,
+				4342751622BFA0637BB62E76 /* CommandStore.swift */,
+				D007A22CF7A3EFDA50D85248 /* DashboardStore.swift */,
+				EC9C2D3B574FE326D021356D /* RuntimeStore.swift */,
+				D77280A851FF3D40035BCF49 /* UpdateStore.swift */,
+			);
+			path = Stores;
+			sourceTree = "<group>";
+		};
+		D267197F6CA5EA965B09508D = {
+			isa = PBXGroup;
+			children = (
+				9C71E37662BBF5AA34D6D733 /* Sources */,
+				679FA19D889125543F94D7F2 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D5B25F10D29F2F390DEE9452 /* Host */ = {
+			isa = PBXGroup;
+			children = (
+				6FD413F335364A6203A47A3D /* AppStatusController.swift */,
+				FCAE8BA826F3F2FC84989E8E /* AppWindowController.swift */,
+			);
+			path = Host;
+			sourceTree = "<group>";
+		};
+		D7D0F243D1EF1A97B5ED811B /* Presentations */ = {
+			isa = PBXGroup;
+			children = (
+				52ABF56B3A67B044533AB057 /* DashboardPresentation.swift */,
+				4D50E480BA7922E6B4768AAD /* DashboardPresentationMapper.swift */,
+				0E0046CA8AE532D210FB92F7 /* SharedPresentationFormatting.swift */,
+				03599F7BD1273B95205930E6 /* StatusBarPresentation.swift */,
+				BB10AA52A36C2C0DDB3E082D /* StatusBarPresentationMapper.swift */,
+			);
+			path = Presentations;
+			sourceTree = "<group>";
+		};
+		FAE99F0C705E238FFC1B8338 /* Dashboard */ = {
+			isa = PBXGroup;
+			children = (
+				2929BD4A52F7AEC4F969FB9B /* DashboardTheme.swift */,
+				BD1B503E8E96E73118E67D93 /* DashboardView.swift */,
+				609826C5C06BE06005D6403A /* Content */,
+			);
+			path = Dashboard;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		C34C073F2C2CF3885F1D3A4C /* DuoduoManager */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 359AE48583C977DC4A7FA169 /* Build configuration list for PBXNativeTarget "DuoduoManager" */;
+			buildPhases = (
+				66B7A9F176C3126B31A2F40A /* Sources */,
+				73B0205660BE55B6E8A04FF0 /* Resources */,
+				49F3BF51EFED63B30B3FDFD8 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DuoduoManager;
+			packageProductDependencies = (
+				CC64276C4E99EC947B05A95B /* CCReaderKit */,
+			);
+			productName = DuoduoManager;
+			productReference = 26F554D4114DA0C65758F78F /* DuoduoManager.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9C6BA7CD102CA61A2DF707B4 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = 4EF07C6DB8C1ADB4C049F833 /* Build configuration list for PBXProject "DuoduoManager" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+				"zh-Hans",
+			);
+			mainGroup = D267197F6CA5EA965B09508D;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				659CCEBBE5385EA5E30D67F4 /* XCRemoteSwiftPackageReference "cc-reader" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 679FA19D889125543F94D7F2 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C34C073F2C2CF3885F1D3A4C /* DuoduoManager */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		73B0205660BE55B6E8A04FF0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6E804FCDF6C20E92352F5472 /* AppIcon.icns in Resources */,
+				39B0FD04F3834B04B9E61E96 /* InfoPlist.strings in Resources */,
+				E4ABAFFE00ECC2A03DED886F /* Localizable.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		66B7A9F176C3126B31A2F40A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6726E4463756AFF1906335BB /* AppStatusController.swift in Sources */,
+				7F4CFB13A97E23FC5F3D6D95 /* AppStore+Actions.swift in Sources */,
+				315443C46D9471FF21A17448 /* AppStore+Fetch.swift in Sources */,
+				533284317A1C3453B6C2FF30 /* AppStore+Visibility.swift in Sources */,
+				1C109FCAF4464502FCB1D76B /* AppStore.swift in Sources */,
+				E0C6E810FA94AE64B35500DF /* AppUpdateService.swift in Sources */,
+				DCD14982263FD265DD213F3D /* AppWindowController.swift in Sources */,
+				D015D59BC93A38CCEB6C4480 /* BrandIconView.swift in Sources */,
+				6DB4DAD1E2EE5E6470EA02E8 /* ChannelInfo.swift in Sources */,
+				046BEAA5887839B7621DCEE1 /* ChannelRegistry.swift in Sources */,
+				4DEC4D220CA3E1F92EF901CF /* ChannelService.swift in Sources */,
+				91FA18C55A51123CDDF890C6 /* CommandStore.swift in Sources */,
+				2224CCBCC47C74BB0F7C1CED /* ConfigContentView.swift in Sources */,
+				67919609723E49BE8D1FC602 /* ConfigLayout.swift in Sources */,
+				D0DF3F1980B048444A509AB0 /* ConfigStore.swift in Sources */,
+				F7A144EB6254AE07E38EBB12 /* DaemonConfig.swift in Sources */,
+				010BD62B88EE96606B80D4B2 /* DaemonConfigView.swift in Sources */,
+				8411541E31AA0B794EA8AFE4 /* DaemonService.swift in Sources */,
+				D2BE4E4DF0173E7FC1821406 /* DaemonStatus.swift in Sources */,
+				8974A9E40949FFE2C32CBDD5 /* DashboardModels.swift in Sources */,
+				3C743456229643B52CF20F78 /* DashboardPresentation.swift in Sources */,
+				F97089A9A67B81FF81F9BB4C /* DashboardPresentationMapper.swift in Sources */,
+				6E4911515C6E91A81149CE92 /* DashboardRPCService.swift in Sources */,
+				5DF5E97F1DD4F835663B8976 /* DashboardStore.swift in Sources */,
+				5C201FFD868C1924954A8C52 /* DashboardTheme.swift in Sources */,
+				6753CC35BF8CACE4298B7501 /* DashboardView.swift in Sources */,
+				E08920046FF8BCA7E8693D74 /* DuoduoManagerApp.swift in Sources */,
+				8B4D212F543C9D136745A3EB /* EventStreamView.swift in Sources */,
+				5343FC419AF1A6736058519F /* EventsContentView.swift in Sources */,
+				4F00CADDB45EB3F1B31246C8 /* FeishuConfig.swift in Sources */,
+				C4056C27635EC363B56C3248 /* FeishuConfigView.swift in Sources */,
+				77B740AE23180F0A8A274FA2 /* JobsContentView.swift in Sources */,
+				223709C12B9D941FF19956CF /* L10n.swift in Sources */,
+				017084BD3C6DE881D64F1663 /* NodeRuntime.swift in Sources */,
+				35F3E9C29A2F992A3B84784C /* PackageVersion.swift in Sources */,
+				8C76D7C9F2A6E4BAA14B967A /* RuntimeStore.swift in Sources */,
+				C97570B220A94D83DF959CC4 /* SessionsContentView.swift in Sources */,
+				5626E057C5F55FFA555E32E4 /* SharedPresentationFormatting.swift in Sources */,
+				84B87284D0CFC7204F39037A /* ShellService.swift in Sources */,
+				3E5A505F3C91E1C0F4DC2336 /* StatusBarControlSection.swift in Sources */,
+				1AE91AE673A239BECE21292F /* StatusBarExecutionSection.swift in Sources */,
+				CD22515C383306E95C3EC463 /* StatusBarHeaderSection.swift in Sources */,
+				C64BB4DB3FE3CEAD4ACE3950 /* StatusBarPresentation.swift in Sources */,
+				215B500F921DEA3BD18BF344 /* StatusBarPresentationMapper.swift in Sources */,
+				321590D058CA99E9530B4FE7 /* StatusBarRuntimeStreamSection.swift in Sources */,
+				C96C679274ED41CD859A7290 /* StatusBarSharedViews.swift in Sources */,
+				A03503D709DAAF9C4AA91B36 /* StatusBarTheme.swift in Sources */,
+				3F06193C066E4B68CD4DB443 /* StatusBarView+Support.swift in Sources */,
+				FA953AF57994D9DB7B81424A /* StatusBarView.swift in Sources */,
+				E29D739D6216455B4D6F60CA /* UpdateStore.swift in Sources */,
+				88E8A60676091CE351ED2CEA /* UpgradeService.swift in Sources */,
+				18F89BEAF2BBD471D20C580E /* VersionService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		EDBE1098D012D8D7423DE84F /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				08AF8879FC0820B8606A783C /* en */,
+				8EE22FC1681BA2F7F2FC4C6F /* zh-Hans */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		F0C5CFEB78443D92540582DF /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				2AFE377434F91AB5220C4E12 /* en */,
+				EC458B24E507BA2488503CD4 /* zh-Hans */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		00BF5DDEBAA2C4009867CA14 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = entitlements.mac.plist;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Config/Info.plist;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.openduo.manager;
+				PRODUCT_NAME = DuoduoManager;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		4D749283A2DC94B29D3916C9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				EXECUTABLE_NAME = DuoduoManager;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_MODULE_NAME = DuoduoManager;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		87E4AC17401FA1A4C2CF9E9B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				EXECUTABLE_NAME = DuoduoManager;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_MODULE_NAME = DuoduoManager;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		D3573810F6AF231B2426F637 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = entitlements.mac.plist;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Config/Info.plist;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.openduo.manager;
+				PRODUCT_NAME = DuoduoManager;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		359AE48583C977DC4A7FA169 /* Build configuration list for PBXNativeTarget "DuoduoManager" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4D749283A2DC94B29D3916C9 /* Debug */,
+				87E4AC17401FA1A4C2CF9E9B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		4EF07C6DB8C1ADB4C049F833 /* Build configuration list for PBXProject "DuoduoManager" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				00BF5DDEBAA2C4009867CA14 /* Debug */,
+				D3573810F6AF231B2426F637 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		659CCEBBE5385EA5E30D67F4 /* XCRemoteSwiftPackageReference "cc-reader" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kuaner/cc-reader.git";
+			requirement = {
+				kind = exactVersion;
+				version = 1.6.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CC64276C4E99EC947B05A95B /* CCReaderKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 659CCEBBE5385EA5E30D67F4 /* XCRemoteSwiftPackageReference "cc-reader" */;
+			productName = CCReaderKit;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 9C6BA7CD102CA61A2DF707B4 /* Project object */;
+}

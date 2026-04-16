@@ -14,8 +14,8 @@ NC='\033[0m'
 # Project config
 APP_NAME="DuoduoManager"
 APP_BUNDLE="${APP_NAME}.app"
-TEMPLATE_DIR="${APP_NAME}.app-template"
-INFO_PLIST="${TEMPLATE_DIR}/Contents/Info.plist"
+INFO_PLIST="Config/Info.plist"
+APP_ICON="Sources/Resources/App/AppIcon.icns"
 
 # Version from Info.plist
 VERSION=$(grep -A1 "CFBundleShortVersionString" "$INFO_PLIST" | grep "<string>" | sed -E 's/.*<string>(.*)<\/string>.*/\1/')
@@ -103,8 +103,11 @@ build_variant() {
 
     echo -e "${GREEN}Building ${VARIANT}...${NC}"
 
-    mkdir -p "$(dirname "$APP_PATH")"
-    cp -r "${TEMPLATE_DIR}" "$APP_PATH"
+    mkdir -p "${APP_PATH}/Contents/MacOS"
+    mkdir -p "${APP_PATH}/Contents/Resources"
+
+    cp "${INFO_PLIST}" "${APP_PATH}/Contents/Info.plist"
+    cp "${APP_ICON}" "${APP_PATH}/Contents/Resources/AppIcon.icns"
 
     cp "$BINARY_PATH" "${APP_PATH}/Contents/MacOS/${APP_NAME}"
     chmod +x "${APP_PATH}/Contents/MacOS/${APP_NAME}"

@@ -1,9 +1,12 @@
-.PHONY: build release run clean app dmg publish version update-version
+.PHONY: project build release run clean app dmg publish version update-version
 
-INFO_PLIST = DuoduoManager.app-template/Contents/Info.plist
+INFO_PLIST = Config/Info.plist
 VERSION ?= $(shell grep -A1 "CFBundleShortVersionString" "$(INFO_PLIST)" | grep "<string>" | sed -E 's/.*<string>(.*)<\/string>.*/\1/')
 
 all: build
+
+project:
+	xcodegen generate
 
 build:
 	swift build
