@@ -14,7 +14,6 @@ permissions:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  KEYCHAIN_PATH: ${{ runner.temp }}/build.keychain-db
 
 jobs:
   build:
@@ -32,6 +31,7 @@ jobs:
           KEYCHAIN_PASSWORD: ${{ secrets.MACOS_KEYCHAIN_PASSWORD }}
         run: |
           set -euo pipefail
+          KEYCHAIN_PATH="${RUNNER_TEMP}/build.keychain-db"
           if [ -z "${BUILD_CERTIFICATE_BASE64}" ] || [ -z "${P12_PASSWORD}" ] || [ -z "${KEYCHAIN_PASSWORD}" ]; then
             echo "Missing signing certificate secrets"
             exit 1
@@ -85,6 +85,7 @@ jobs:
         env:
           KEYCHAIN_PASSWORD: ${{ secrets.MACOS_KEYCHAIN_PASSWORD }}
         run: |
+          KEYCHAIN_PATH="${RUNNER_TEMP}/build.keychain-db"
           security delete-keychain "${KEYCHAIN_PATH}" || true
 
       - name: Upload DMG artifacts
