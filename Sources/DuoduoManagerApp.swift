@@ -1,4 +1,5 @@
 import SwiftUI
+import CCReaderKit
 
 @main
 struct DuoduoManagerApp: App {
@@ -7,16 +8,46 @@ struct DuoduoManagerApp: App {
     var body: some Scene {
         // Dummy scene: satisfies SwiftUI's Scene requirement, auto-closes on appear.
         WindowGroup("") {
-            EmptyView()
-                .onAppear {
-                    for window in NSApp.windows where window.title.isEmpty {
-                        window.close()
-                    }
-                }
+            LaunchBridgeView(appDelegate: appDelegate)
         }
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
         .defaultSize(width: 1, height: 1)
+
+        Window("CC Reader", id: "cc-reader") {
+            CCReaderSceneView()
+        }
+        .defaultSize(width: 1200, height: 800)
+    }
+}
+
+private struct LaunchBridgeView: View {
+    @Environment(\.openWindow) private var openWindow
+
+    let appDelegate: AppDelegate
+
+    var body: some View {
+        EmptyView()
+            .onAppear {
+                appDelegate.registerOpenReaderWindowAction {
+                    openWindow(id: "cc-reader")
+                }
+
+                DispatchQueue.main.async {
+                    for window in NSApp.windows where window.title.isEmpty {
+                        window.close()
+                    }
+                }
+            }
+    }
+}
+
+private struct CCReaderSceneView: View {
+    var body: some View {
+        CCReaderKit.makeView()
+            .onDisappear {
+                AppDelegate.restoreAccessoryPolicyIfNeeded()
+            }
     }
 }
 
@@ -25,6 +56,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var store: AppStore?
     private var statusController: AppStatusController?
     private var windowController: AppWindowController?
+    private var openReaderWindowAction: (() -> Void)?
 
     nonisolated func applicationDidFinishLaunching(_ notification: Notification) {
         Task { @MainActor in
@@ -99,6 +131,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func openReader() {
         statusController?.dismissPopover()
-        windowController?.showReader()
+        DispatchQueue.main.async {
+            NSApp.setActivationPolicy(.regular)
+            self.openReaderWindowAction?()
+            NSApp.activate(ignoringOtherApps: true)
+        }
+    }
+
+    func registerOpenReaderWindowAction(_ action: @escaping () -> Void) {
+        openReaderWindowAction = action
+    }
+
+    static func restoreAccessoryPolicyIfNeeded() {
+        let hasOtherVisibleWindow = NSApp.windows.contains {
+            $0.isVisible && $0.styleMask.contains(.titled) && !$0.title.isEmpty
+        }
+        if !hasOtherVisibleWindow {
+            NSApp.setActivationPolicy(.accessory)
+        }
     }
 }

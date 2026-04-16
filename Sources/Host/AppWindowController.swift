@@ -1,11 +1,9 @@
 import AppKit
 import SwiftUI
-import CCReaderKit
 
 @MainActor
 final class AppWindowController: NSObject, NSWindowDelegate {
     private var dashboardWindow: NSWindow?
-    private var readerWindow: NSWindow?
 
     var onDashboardVisibilityChanged: ((Bool) -> Void)?
 
@@ -35,36 +33,8 @@ final class AppWindowController: NSObject, NSWindowDelegate {
         showWindow(dashboardWindow)
     }
 
-    func showReader() {
-        if readerWindow == nil {
-            let readerView = CCReaderKit.makeView()
-            let window = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 1200, height: 800),
-                styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
-                backing: .buffered,
-                defer: false
-            )
-            window.title = "CC Reader"
-            let toolbar = NSToolbar(identifier: "CCReaderToolbar")
-            toolbar.displayMode = .iconOnly
-            window.toolbar = toolbar
-            window.toolbarStyle = .unified
-            window.contentViewController = NSHostingController(rootView: readerView)
-            window.setContentSize(NSSize(width: 1200, height: 800))
-            window.delegate = self
-            window.minSize = NSSize(width: 680, height: 500)
-            window.center()
-            window.isReleasedWhenClosed = false
-            window.collectionBehavior = [.managed, .participatesInCycle, .fullScreenAllowsTiling]
-            readerWindow = window
-        }
-
-        showWindow(readerWindow)
-    }
-
     func shutdown() {
         dashboardWindow?.delegate = nil
-        readerWindow?.delegate = nil
     }
 
     nonisolated func windowShouldClose(_ sender: NSWindow) -> Bool {

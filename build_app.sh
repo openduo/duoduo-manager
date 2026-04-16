@@ -3,7 +3,7 @@
 # DuoduoManager build script
 # Builds separate arm64 and x86_64 app bundles, each with matching Node.js runtime.
 
-set -e
+set -euo pipefail
 
 # Colors
 GREEN='\033[0;32m'
@@ -24,6 +24,7 @@ VERSION=$(grep -A1 "CFBundleShortVersionString" "$INFO_PLIST" | grep "<string>" 
 DIST_DIR="dist"
 WITH_NODE_SUFFIX="with-nodejs"
 UNIVERSAL_LITE_VARIANT="universal-lite"
+ALL_VARIANTS=("arm64-${WITH_NODE_SUFFIX}" "x86_64-${WITH_NODE_SUFFIX}" "${UNIVERSAL_LITE_VARIANT}")
 
 # Node.js config
 NODE_VERSION="24"
@@ -31,6 +32,69 @@ NODE_CACHE_DIR=".node-cache"
 
 echo -e "${GREEN}=== DuoduoManager Build ===${NC}"
 echo "Version: ${VERSION}"
+
+variant_app_path() {
+    local variant="$1"
+    echo "${DIST_DIR}/${APP_NAME}-${variant}/${APP_BUNDLE}"
+}
+
+variant_dmg_path() {
+    local variant="$1"
+    echo "${DIST_DIR}/${APP_NAME}-${VERSION}-${variant}.dmg"
+}
+
+runtime_mode_for_variant() {
+    local include_node="$1"
+    if [ "$include_node" = "yes" ]; then
+        echo "bundled"
+    else
+        echo "system"
+    fi
+}
+
+copy_localized_resources() {
+    local app_path="$1"
+    cp -R Sources/Resources/*.lproj "${app_path}/Contents/Resources/"
+}
+
+copy_cc_reader_bundle() {
+    local bundle_source="$1"
+    local app_path="$2"
+    local bundle_dest="${app_path}/CCReaderKit_CCReaderKit.bundle"
+
+    # Copy the SwiftPM-generated resource bundle verbatim.
+    # Reconstructing it from checkout sources misses bundle metadata and can
+    # behave differently between remote package and local path dependency modes.
+    if [ -d "${bundle_source}" ]; then
+        rm -rf "${bundle_dest}"
+        cp -R "${bundle_source}" "${bundle_dest}"
+    else
+        echo -e "${YELLOW}Warning: CCReaderKit bundle not found at ${bundle_source}${NC}"
+    fi
+}
+
+bundle_node_runtime() {
+    local node_arch="$1"
+    local app_path="$2"
+    local node_dir
+
+    node_dir=$(extract_node "$node_arch")
+    mkdir -p "${app_path}/Contents/Resources/node"
+    tar -cf - -C "$node_dir" . | tar -xf - -C "${app_path}/Contents/Resources/node"
+    rm -rf "$node_dir"
+}
+
+print_app_artifacts() {
+    echo "  arm64-with-nodejs:  $(variant_app_path "arm64-${WITH_NODE_SUFFIX}")"
+    echo "  x86_64-with-nodejs: $(variant_app_path "x86_64-${WITH_NODE_SUFFIX}")"
+    echo "  universal-lite:     $(variant_app_path "${UNIVERSAL_LITE_VARIANT}")"
+}
+
+print_dmg_artifacts() {
+    echo "  arm64-with-nodejs DMG:  $(variant_dmg_path "arm64-${WITH_NODE_SUFFIX}")"
+    echo "  x86_64-with-nodejs DMG: $(variant_dmg_path "x86_64-${WITH_NODE_SUFFIX}")"
+    echo "  universal-lite DMG:     $(variant_dmg_path "${UNIVERSAL_LITE_VARIANT}")"
+}
 
 # Download Node.js if not cached
 ensure_node() {
@@ -48,16 +112,16 @@ ensure_node() {
 
     echo "Node.js version: ${NODE_FULL_VERSION}"
 
-    local ARM64_FILE="${NODE_CACHE_DIR}/node-v${NODE_FULL_VERSION}-darwin-arm64.tar.gz"
-    if [ ! -f "$ARM64_FILE" ]; then
+    local arm64_file="${NODE_CACHE_DIR}/node-v${NODE_FULL_VERSION}-darwin-arm64.tar.gz"
+    if [ ! -f "$arm64_file" ]; then
         echo "Downloading arm64..."
-        curl -L "https://nodejs.org/dist/v${NODE_FULL_VERSION}/node-v${NODE_FULL_VERSION}-darwin-arm64.tar.gz" -o "$ARM64_FILE"
+        curl -L "https://nodejs.org/dist/v${NODE_FULL_VERSION}/node-v${NODE_FULL_VERSION}-darwin-arm64.tar.gz" -o "$arm64_file"
     fi
 
-    local X64_FILE="${NODE_CACHE_DIR}/node-v${NODE_FULL_VERSION}-darwin-x64.tar.gz"
-    if [ ! -f "$X64_FILE" ]; then
+    local x64_file="${NODE_CACHE_DIR}/node-v${NODE_FULL_VERSION}-darwin-x64.tar.gz"
+    if [ ! -f "$x64_file" ]; then
         echo "Downloading x86_64..."
-        curl -L "https://nodejs.org/dist/v${NODE_FULL_VERSION}/node-v${NODE_FULL_VERSION}-darwin-x64.tar.gz" -o "$X64_FILE"
+        curl -L "https://nodejs.org/dist/v${NODE_FULL_VERSION}/node-v${NODE_FULL_VERSION}-darwin-x64.tar.gz" -o "$x64_file"
     fi
 
     echo -e "${GREEN}Node.js ${NODE_FULL_VERSION} ready in ${NODE_CACHE_DIR}${NC}"
@@ -65,18 +129,18 @@ ensure_node() {
 
 # Extract cached Node.js for a given arch, prints the extract path
 extract_node() {
-    local ARCH="$1"
-    local NODE_FULL_VERSION
-    NODE_FULL_VERSION=$(ls "${NODE_CACHE_DIR}"/node-v*-darwin-arm64.tar.gz 2>/dev/null | head -1 | xargs -I{} basename {} | sed -E 's/node-v([0-9]+\.[0-9]+\.[0-9]+)-.*/\1/')
+    local arch="$1"
+    local node_full_version
+    node_full_version=$(basename "$(ls "${NODE_CACHE_DIR}"/node-v*-darwin-arm64.tar.gz 2>/dev/null | head -1)" | sed -E 's/node-v([0-9]+\.[0-9]+\.[0-9]+)-.*/\1/')
 
-    local ARCH_SUFFIX="x64"
-    [ "$ARCH" = "arm64" ] && ARCH_SUFFIX="arm64"
+    local arch_suffix="x64"
+    [ "$arch" = "arm64" ] && arch_suffix="arm64"
 
-    local EXTRACT_DIR="${NODE_CACHE_DIR}/.extract-${ARCH}"
-    rm -rf "$EXTRACT_DIR"
-    mkdir -p "$EXTRACT_DIR"
-    tar -xzf "${NODE_CACHE_DIR}/node-v${NODE_FULL_VERSION}-darwin-${ARCH_SUFFIX}.tar.gz" -C "$EXTRACT_DIR" --strip-components=1
-    echo "$EXTRACT_DIR"
+    local extract_dir="${NODE_CACHE_DIR}/.extract-${arch}"
+    rm -rf "$extract_dir"
+    mkdir -p "$extract_dir"
+    tar -xzf "${NODE_CACHE_DIR}/node-v${node_full_version}-darwin-${arch_suffix}.tar.gz" -C "$extract_dir" --strip-components=1
+    echo "$extract_dir"
 }
 
 # Check signing config
@@ -94,56 +158,42 @@ check_signing_config() {
 
 # Build app bundle for a variant
 build_variant() {
-    local VARIANT="$1"
-    local BINARY_PATH="$2"
-    local INCLUDE_NODE="$3"
-    local NODE_ARCH="$4"
-    local CC_READER_BUNDLE_SOURCE="$5"
-    local APP_PATH="${DIST_DIR}/${APP_NAME}-${VARIANT}/${APP_BUNDLE}"
+    local variant="$1"
+    local binary_path="$2"
+    local include_node="$3"
+    local node_arch="$4"
+    local cc_reader_bundle_source="$5"
+    local app_path
+    app_path=$(variant_app_path "$variant")
 
-    echo -e "${GREEN}Building ${VARIANT}...${NC}"
+    echo -e "${GREEN}Building ${variant}...${NC}"
 
-    mkdir -p "${APP_PATH}/Contents/MacOS"
-    mkdir -p "${APP_PATH}/Contents/Resources"
+    mkdir -p "${app_path}/Contents/MacOS"
+    mkdir -p "${app_path}/Contents/Resources"
 
-    cp "${INFO_PLIST}" "${APP_PATH}/Contents/Info.plist"
-    cp "${APP_ICON}" "${APP_PATH}/Contents/Resources/AppIcon.icns"
+    cp "${INFO_PLIST}" "${app_path}/Contents/Info.plist"
+    cp "${APP_ICON}" "${app_path}/Contents/Resources/AppIcon.icns"
 
-    cp "$BINARY_PATH" "${APP_PATH}/Contents/MacOS/${APP_NAME}"
-    chmod +x "${APP_PATH}/Contents/MacOS/${APP_NAME}"
-    echo -n "APPL????" > "${APP_PATH}/Contents/PkgInfo"
+    cp "$binary_path" "${app_path}/Contents/MacOS/${APP_NAME}"
+    chmod +x "${app_path}/Contents/MacOS/${APP_NAME}"
+    echo -n "APPL????" > "${app_path}/Contents/PkgInfo"
 
     # Mark runtime mode in Info.plist so app logic doesn't rely on stale files.
-    local INFO_PLIST_PATH="${APP_PATH}/Contents/Info.plist"
-    local RUNTIME_MODE="system"
-    [ "$INCLUDE_NODE" = "yes" ] && RUNTIME_MODE="bundled"
-    /usr/libexec/PlistBuddy -c "Delete :DuoduoNodeRuntimeMode" "$INFO_PLIST_PATH" >/dev/null 2>&1 || true
-    /usr/libexec/PlistBuddy -c "Add :DuoduoNodeRuntimeMode string $RUNTIME_MODE" "$INFO_PLIST_PATH"
+    local info_plist_path="${app_path}/Contents/Info.plist"
+    local runtime_mode
+    runtime_mode=$(runtime_mode_for_variant "$include_node")
+    /usr/libexec/PlistBuddy -c "Delete :DuoduoNodeRuntimeMode" "$info_plist_path" >/dev/null 2>&1 || true
+    /usr/libexec/PlistBuddy -c "Add :DuoduoNodeRuntimeMode string $runtime_mode" "$info_plist_path"
 
-    mkdir -p "${APP_PATH}/Contents/Resources"
-    cp -r Sources/Resources/*.lproj "${APP_PATH}/Contents/Resources/"
-
-    local CC_READER_BUNDLE_DIR="${APP_PATH}/CCReaderKit_CCReaderKit.bundle"
-    # Copy the SwiftPM-generated resource bundle verbatim.
-    # Reconstructing it from checkout sources misses bundle metadata and can
-    # behave differently between remote package and local path dependency modes.
-    if [ -d "${CC_READER_BUNDLE_SOURCE}" ]; then
-        rm -rf "${CC_READER_BUNDLE_DIR}"
-        cp -R "${CC_READER_BUNDLE_SOURCE}" "${CC_READER_BUNDLE_DIR}"
-    else
-        echo -e "${YELLOW}Warning: CCReaderKit bundle not found at ${CC_READER_BUNDLE_SOURCE}${NC}"
-    fi
+    copy_localized_resources "${app_path}"
+    copy_cc_reader_bundle "${cc_reader_bundle_source}" "${app_path}"
 
     # Bundle matching-arch Node.js runtime (use tar to preserve symlinks)
-    if [ "$INCLUDE_NODE" = "yes" ]; then
-        local NODE_DIR
-        NODE_DIR=$(extract_node "$NODE_ARCH")
-        mkdir -p "${APP_PATH}/Contents/Resources/node"
-        tar -cf - -C "$NODE_DIR" . | tar -xf - -C "${APP_PATH}/Contents/Resources/node"
-        rm -rf "$NODE_DIR"
+    if [ "$include_node" = "yes" ]; then
+        bundle_node_runtime "$node_arch" "${app_path}"
     fi
 
-    echo -e "${GREEN}${VARIANT} bundle created: ${APP_PATH}${NC}"
+    echo -e "${GREEN}${variant} bundle created: ${app_path}${NC}"
 }
 
 # Build both architectures + universal-lite
@@ -155,100 +205,94 @@ build_all() {
     swift build -c release --arch arm64
     swift build -c release --arch x86_64
 
-    local ARM64_BINARY=".build/arm64-apple-macosx/release/${APP_NAME}"
-    local X64_BINARY=".build/x86_64-apple-macosx/release/${APP_NAME}"
-    local ARM64_CC_READER_BUNDLE=".build/arm64-apple-macosx/release/CCReaderKit_CCReaderKit.bundle"
-    local X64_CC_READER_BUNDLE=".build/x86_64-apple-macosx/release/CCReaderKit_CCReaderKit.bundle"
-    local ARM64_VARIANT="arm64-${WITH_NODE_SUFFIX}"
-    local X64_VARIANT="x86_64-${WITH_NODE_SUFFIX}"
-    local UNIVERSAL_APP_PATH="${DIST_DIR}/${APP_NAME}-${UNIVERSAL_LITE_VARIANT}/${APP_BUNDLE}"
+    local arm64_binary=".build/arm64-apple-macosx/release/${APP_NAME}"
+    local x64_binary=".build/x86_64-apple-macosx/release/${APP_NAME}"
+    local arm64_cc_reader_bundle=".build/arm64-apple-macosx/release/CCReaderKit_CCReaderKit.bundle"
+    local x64_cc_reader_bundle=".build/x86_64-apple-macosx/release/CCReaderKit_CCReaderKit.bundle"
+    local universal_app_path
+    universal_app_path=$(variant_app_path "${UNIVERSAL_LITE_VARIANT}")
 
-    build_variant "$ARM64_VARIANT" "$ARM64_BINARY" "yes" "arm64" "$ARM64_CC_READER_BUNDLE"
-    build_variant "$X64_VARIANT" "$X64_BINARY" "yes" "x86_64" "$X64_CC_READER_BUNDLE"
+    build_variant "arm64-${WITH_NODE_SUFFIX}" "$arm64_binary" "yes" "arm64" "$arm64_cc_reader_bundle"
+    build_variant "x86_64-${WITH_NODE_SUFFIX}" "$x64_binary" "yes" "x86_64" "$x64_cc_reader_bundle"
 
-    build_variant "$UNIVERSAL_LITE_VARIANT" "$ARM64_BINARY" "no" "arm64" "$ARM64_CC_READER_BUNDLE"
-    lipo -create "$ARM64_BINARY" "$X64_BINARY" -output "${UNIVERSAL_APP_PATH}/Contents/MacOS/${APP_NAME}"
-    chmod +x "${UNIVERSAL_APP_PATH}/Contents/MacOS/${APP_NAME}"
+    build_variant "$UNIVERSAL_LITE_VARIANT" "$arm64_binary" "no" "arm64" "$arm64_cc_reader_bundle"
+    lipo -create "$arm64_binary" "$x64_binary" -output "${universal_app_path}/Contents/MacOS/${APP_NAME}"
+    chmod +x "${universal_app_path}/Contents/MacOS/${APP_NAME}"
     echo -e "${GREEN}${UNIVERSAL_LITE_VARIANT} binary merged with lipo${NC}"
 }
 
 # Sign app for a variant
 sign_app_variant() {
-    local VARIANT="$1"
-    local APP_PATH="${DIST_DIR}/${APP_NAME}-${VARIANT}/${APP_BUNDLE}"
+    local variant="$1"
+    local app_path
+    app_path=$(variant_app_path "$variant")
 
-    echo -e "${GREEN}Signing ${VARIANT}...${NC}"
-    xattr -cr "$APP_PATH"
+    echo -e "${GREEN}Signing ${variant}...${NC}"
+    xattr -cr "$app_path"
 
     codesign --force --options runtime \
         --sign "${APPLE_TEAM_NAME}" \
         --entitlements "entitlements.mac.plist" \
-        --deep "$APP_PATH"
+        --deep "$app_path"
 
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}${VARIANT} signing succeeded${NC}"
-    else
-        echo -e "${RED}${VARIANT} signing failed${NC}"
-        exit 1
-    fi
+    echo -e "${GREEN}${variant} signing succeeded${NC}"
 }
 
 # Notarize app for a variant
 notarize_app_variant() {
-    local VARIANT="$1"
-    local APP_PATH="${DIST_DIR}/${APP_NAME}-${VARIANT}/${APP_BUNDLE}"
-    local ZIP_PATH="${DIST_DIR}/${APP_NAME}-${VARIANT}.zip"
+    local variant="$1"
+    local app_path
+    local zip_path
+    app_path=$(variant_app_path "$variant")
+    zip_path="${DIST_DIR}/${APP_NAME}-${variant}.zip"
 
-    echo -e "${GREEN}Notarizing ${VARIANT}...${NC}"
+    echo -e "${GREEN}Notarizing ${variant}...${NC}"
 
-    ditto -c -k --keepParent "$APP_PATH" "$ZIP_PATH"
+    ditto -c -k --keepParent "$app_path" "$zip_path"
 
-    echo "Submitting ${VARIANT} notarization request (may take a few minutes)..."
-    xcrun notarytool submit "$ZIP_PATH" \
+    echo "Submitting ${variant} notarization request (may take a few minutes)..."
+    xcrun notarytool submit "$zip_path" \
         --wait \
         --apple-id "${APPLE_ID}" \
         --password "${APPLE_APP_SPECIFIC_PASSWORD}" \
         --team-id "${APPLE_TEAM_ID}"
 
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}${VARIANT} notarization succeeded${NC}"
-        xcrun stapler staple "$APP_PATH"
-        echo -e "${GREEN}${VARIANT} staple attached${NC}"
-    else
-        echo -e "${RED}${VARIANT} notarization failed${NC}"
-        exit 1
-    fi
+    echo -e "${GREEN}${variant} notarization succeeded${NC}"
+    xcrun stapler staple "$app_path"
+    echo -e "${GREEN}${variant} staple attached${NC}"
 
-    rm "$ZIP_PATH"
+    rm "$zip_path"
 }
 
 # Create DMG for a variant
 create_dmg_variant() {
-    local VARIANT="$1"
-    local APP_PATH="${DIST_DIR}/${APP_NAME}-${VARIANT}/${APP_BUNDLE}"
-    local DMG_PATH="${DIST_DIR}/${APP_NAME}-${VERSION}-${VARIANT}.dmg"
+    local variant="$1"
+    local app_path
+    local dmg_path
+    app_path=$(variant_app_path "$variant")
+    dmg_path=$(variant_dmg_path "$variant")
 
-    echo -e "${GREEN}Creating ${VARIANT} DMG...${NC}"
+    echo -e "${GREEN}Creating ${variant} DMG...${NC}"
 
-    local VOLNAME="${APP_NAME}-${VERSION}-${VARIANT}"
+    local volname="${APP_NAME}-${VERSION}-${variant}"
 
     # Unmount any previously mounted volume with the same name
-    hdiutil detach "/Volumes/${VOLNAME}" >/dev/null 2>&1 || true
+    hdiutil detach "/Volumes/${volname}" >/dev/null 2>&1 || true
 
-    local TEMP_DIR="${DIST_DIR}/temp_dmg_${VARIANT}"
-    rm -rf "$TEMP_DIR"
-    mkdir -p "$TEMP_DIR"
-    cp -r "$APP_PATH" "$TEMP_DIR/"
+    local temp_dir="${DIST_DIR}/temp_dmg_${variant}"
+    rm -rf "$temp_dir"
+    mkdir -p "$temp_dir"
+    cp -R "$app_path" "$temp_dir/"
 
     if command -v create-dmg &> /dev/null; then
-        echo "Using create-dmg for styled ${VARIANT} DMG..."
+        echo "Using create-dmg for styled ${variant} DMG..."
 
-        [ -f "$DMG_PATH" ] && rm "$DMG_PATH"
+        [ -f "$dmg_path" ] && rm "$dmg_path"
 
         create-dmg \
             --text-size 13 \
-            --volname "${VOLNAME}" \
-            --volicon "${APP_PATH}/Contents/Resources/AppIcon.icns" \
+            --volname "${volname}" \
+            --volicon "${app_path}/Contents/Resources/AppIcon.icns" \
             --window-pos 200 120 \
             --window-size 600 400 \
             --icon-size 100 \
@@ -256,50 +300,45 @@ create_dmg_variant() {
             --app-drop-link 450 190 \
             --no-internet-enable \
             --format UDZO \
-            "$DMG_PATH" \
-            "$TEMP_DIR" || {
+            "$dmg_path" \
+            "$temp_dir" || {
             echo -e "${YELLOW}create-dmg failed, falling back to simple mode${NC}"
-            ln -sf /Applications "$TEMP_DIR/Applications"
-            hdiutil create -volname "${APP_NAME}-${VERSION}-${VARIANT}" \
-                -srcfolder "$TEMP_DIR" \
-                -ov -format UDZO "$DMG_PATH"
+            ln -sf /Applications "$temp_dir/Applications"
+            hdiutil create -volname "${volname}" \
+                -srcfolder "$temp_dir" \
+                -ov -format UDZO "$dmg_path"
         }
     else
         echo "Using simple DMG mode..."
-        ln -sf /Applications "$TEMP_DIR/Applications"
-        hdiutil create -volname "${VOLNAME}" \
-            -srcfolder "$TEMP_DIR" \
-            -ov -format UDZO "$DMG_PATH"
+        ln -sf /Applications "$temp_dir/Applications"
+        hdiutil create -volname "${volname}" \
+            -srcfolder "$temp_dir" \
+            -ov -format UDZO "$dmg_path"
     fi
 
-    rm -rf "$TEMP_DIR"
+    rm -rf "$temp_dir"
 
-    echo -e "${GREEN}${VARIANT} DMG: ${DMG_PATH}${NC}"
+    echo -e "${GREEN}${variant} DMG: ${dmg_path}${NC}"
 }
 
 # Build only (no signing)
 build_only() {
     build_all
     echo -e "${GREEN}Build complete${NC}"
-    echo "  arm64-with-nodejs:  ${DIST_DIR}/${APP_NAME}-arm64-${WITH_NODE_SUFFIX}/${APP_BUNDLE}"
-    echo "  x86_64-with-nodejs: ${DIST_DIR}/${APP_NAME}-x86_64-${WITH_NODE_SUFFIX}/${APP_BUNDLE}"
-    echo "  universal-lite:     ${DIST_DIR}/${APP_NAME}-${UNIVERSAL_LITE_VARIANT}/${APP_BUNDLE}"
+    print_app_artifacts
 }
 
 # Full release flow
 release() {
     if check_signing_config; then
         build_all
-        local variants=("arm64-${WITH_NODE_SUFFIX}" "x86_64-${WITH_NODE_SUFFIX}" "${UNIVERSAL_LITE_VARIANT}")
-        for variant in "${variants[@]}"; do
+        for variant in "${ALL_VARIANTS[@]}"; do
             sign_app_variant "$variant"
             notarize_app_variant "$variant"
             create_dmg_variant "$variant"
         done
         echo -e "${GREEN}=== Release complete ===${NC}"
-        echo "  arm64-with-nodejs DMG:  ${DIST_DIR}/${APP_NAME}-${VERSION}-arm64-${WITH_NODE_SUFFIX}.dmg"
-        echo "  x86_64-with-nodejs DMG: ${DIST_DIR}/${APP_NAME}-${VERSION}-x86_64-${WITH_NODE_SUFFIX}.dmg"
-        echo "  universal-lite DMG:     ${DIST_DIR}/${APP_NAME}-${VERSION}-${UNIVERSAL_LITE_VARIANT}.dmg"
+        print_dmg_artifacts
     else
         echo -e "${RED}Signing config required for release${NC}"
         exit 1
@@ -329,14 +368,12 @@ case "${1:-build}" in
         ;;
     sign)
         check_signing_config
-        variants=("arm64-${WITH_NODE_SUFFIX}" "x86_64-${WITH_NODE_SUFFIX}" "${UNIVERSAL_LITE_VARIANT}")
-        for variant in "${variants[@]}"; do
+        for variant in "${ALL_VARIANTS[@]}"; do
             sign_app_variant "$variant"
         done
         ;;
     dmg)
-        variants=("arm64-${WITH_NODE_SUFFIX}" "x86_64-${WITH_NODE_SUFFIX}" "${UNIVERSAL_LITE_VARIANT}")
-        for variant in "${variants[@]}"; do
+        for variant in "${ALL_VARIANTS[@]}"; do
             create_dmg_variant "$variant"
         done
         ;;
