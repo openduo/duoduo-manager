@@ -16,7 +16,7 @@ settings:
     PRODUCT_NAME: DuoduoManager
     PRODUCT_BUNDLE_IDENTIFIER: ai.openduo.manager
     INFOPLIST_FILE: Config/Info.plist
-    MARKETING_VERSION: 1.5.4
+    MARKETING_VERSION: 1.6.0
     CURRENT_PROJECT_VERSION: 1
     CODE_SIGN_ENTITLEMENTS: entitlements.mac.plist
     GENERATE_INFOPLIST_FILE: NO
