@@ -45,23 +45,4 @@ extension View {
                     .stroke(ConsolePalette.divider, lineWidth: 1)
             )
     }
-
-    func measureStatusOverviewHeight() -> some View {
-        background(
-            GeometryReader { proxy in
-                Color.clear.preference(
-                    key: StatusOverviewHeightPreferenceKey.self,
-                    value: proxy.size.height
-                )
-            }
-        )
-    }
-}
-
-struct StatusOverviewHeightPreferenceKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = max(value, nextValue())
-    }
 }

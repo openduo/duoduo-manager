@@ -12,12 +12,12 @@ struct StatusBarView: View {
     @State var feishuDraft: FeishuConfig
     @State var daemonNotice: InlineConfigNotice?
     @State var feishuNotice: InlineConfigNotice?
-    @State private var overviewCardHeight: CGFloat = 0
-
     let panelWidth: CGFloat = 568
     let panelHeight: CGFloat = 734
     let panelInset: CGFloat = 14
     let overviewSpacing: CGFloat = 14
+    let panelContentInset: CGFloat = 12
+    let overviewDividerWidth: CGFloat = 1
 
     init(store: AppStore, openDashboard: (() -> Void)? = nil, openReader: (() -> Void)? = nil) {
         self.store = store
@@ -77,30 +77,69 @@ struct StatusBarView: View {
     }
 
     private var overviewRow: some View {
-        HStack(alignment: .top, spacing: overviewSpacing) {
-            controlPanel
+        HStack(alignment: .top, spacing: 0) {
+            overviewColumn(
+                icon: "slider.horizontal.3",
+                title: "Control Plane",
+                hint: statusBarPresentation.controlHint
+            ) {
+                controlPanelContent
+            }
                 .frame(width: overviewControlWidth)
-                .frame(minHeight: overviewCardHeight)
-                .measureStatusOverviewHeight()
 
-            topologySummaryPanel
+            Rectangle()
+                .fill(ConsolePalette.divider)
+                .frame(width: 1)
+                .padding(.horizontal, overviewSpacing)
+
+            overviewColumn(
+                icon: "point.3.connected.trianglepath.dotted",
+                title: "Topology"
+            ) {
+                topologySummaryContent
+            }
                 .frame(width: overviewTopologyWidth)
-                .frame(minHeight: overviewCardHeight)
-                .measureStatusOverviewHeight()
         }
-        .onPreferenceChange(StatusOverviewHeightPreferenceKey.self) { height in
-            overviewCardHeight = height
+        .consolePanel()
+    }
+
+    @ViewBuilder
+    private func overviewColumn<Content: View>(
+        icon: String,
+        title: String,
+        hint: String? = nil,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Image(systemName: icon)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(ConsolePalette.secondaryText)
+                    .frame(width: 16)
+
+                Text(title)
+                    .font(.system(size: 13, weight: .semibold, design: .monospaced))
+                    .foregroundStyle(ConsolePalette.primaryText)
+
+                Spacer()
+
+                if let hint, !hint.isEmpty {
+                    Text(hint)
+                        .font(.system(size: 10, design: .monospaced))
+                        .foregroundStyle(ConsolePalette.secondaryText)
+                }
+            }
+
+            content()
         }
     }
 
-    private var topologySummaryPanel: some View {
-        StatusPanelSection(icon: "point.3.connected.trianglepath.dotted", title: "Topology") {
-            VStack(spacing: 12) {
-                StatusTopologyMetric(icon: "dot.radiowaves.left.and.right", title: "daemon endpoint", value: statusBarPresentation.topology.endpoint)
-                StatusTopologyMetric(icon: "network", title: "runtime host", value: statusBarPresentation.topology.runtimeHost)
-                StatusTopologyMetric(icon: "cross.case", title: "system", value: statusBarPresentation.topology.system, tint: statusBarPresentation.topology.systemTint)
-                StatusTopologyMetric(icon: "gauge.with.dots.needle.33percent", title: "load", value: statusBarPresentation.topology.load, tint: statusBarPresentation.topology.loadTint)
-            }
+    private var topologySummaryContent: some View {
+        VStack(spacing: 12) {
+            StatusTopologyMetric(icon: "dot.radiowaves.left.and.right", title: "daemon endpoint", value: statusBarPresentation.topology.endpoint)
+            StatusTopologyMetric(icon: "network", title: "runtime host", value: statusBarPresentation.topology.runtimeHost)
+            StatusTopologyMetric(icon: "cross.case", title: "system", value: statusBarPresentation.topology.system, tint: statusBarPresentation.topology.systemTint)
+            StatusTopologyMetric(icon: "gauge.with.dots.needle.33percent", title: "load", value: statusBarPresentation.topology.load, tint: statusBarPresentation.topology.loadTint)
         }
     }
 
@@ -111,7 +150,11 @@ struct StatusBarView: View {
     }
 
     private var overviewAvailableWidth: CGFloat {
-        panelWidth - (panelInset * 2) - overviewSpacing
+        panelWidth
+            - (panelInset * 2)
+            - (panelContentInset * 2)
+            - (overviewSpacing * 2)
+            - overviewDividerWidth
     }
 
     private var overviewControlWidth: CGFloat {
@@ -122,17 +165,15 @@ struct StatusBarView: View {
         ceil(overviewAvailableWidth * 0.4)
     }
 
-    private var controlPanel: some View {
-        StatusPanelSection(icon: "slider.horizontal.3", title: "Control Plane", hint: statusBarPresentation.controlHint) {
-            VStack(spacing: 10) {
-                daemonControlCard
+    private var controlPanelContent: some View {
+        VStack(spacing: 10) {
+            daemonControlCard
 
-                if let entry = ChannelRegistry.channels(feishuConfig: store.runtime.feishuConfig).first {
-                    if let channel = store.runtime.channels.first(where: { $0.type == entry.id }) {
-                        channelControlCard(channel)
-                    } else {
-                        channelInstallCard(entry)
-                    }
+            if let entry = ChannelRegistry.channels(feishuConfig: store.runtime.feishuConfig).first {
+                if let channel = store.runtime.channels.first(where: { $0.type == entry.id }) {
+                    channelControlCard(channel)
+                } else {
+                    channelInstallCard(entry)
                 }
             }
         }
