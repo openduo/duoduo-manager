@@ -669,8 +669,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/kuaner/cc-reader.git";
 			requirement = {
-				kind = exactVersion;
-				version = 1.6.0;
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.6.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

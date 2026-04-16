@@ -9,7 +9,7 @@ options:
 packages:
   cc-reader:
     url: https://github.com/kuaner/cc-reader.git
-    exactVersion: 1.6.0
+    from: 1.6.0
 
 settings:
   base:
