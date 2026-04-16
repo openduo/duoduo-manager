@@ -101,6 +101,7 @@ jobs:
 
             ## Notes
 
+            - All builds are signed with Apple Developer ID and notarized.
             - Prefer `with-nodejs` builds for zero-setup usage.
             - Choose `universal-lite` only if you explicitly want to use your system Node.js.
 
@@ -122,6 +123,7 @@ jobs:
 
             ## Notes
 
+            - All builds are signed with Apple Developer ID and notarized.
             - This is an automated sync build triggered by a `cc-reader` release.
             - Prefer `with-nodejs` builds for zero-setup usage.
             - Choose `universal-lite` only if you explicitly want to use your system Node.js.

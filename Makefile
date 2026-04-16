@@ -1,8 +1,8 @@
 .PHONY: project build release run clean app dmg publish version update-version
 
 APP_NAME = DuoduoManager
-INFO_PLIST = Config/Info.plist
-VERSION ?= $(shell grep -A1 "CFBundleShortVersionString" "$(INFO_PLIST)" | grep "<string>" | sed -E 's/.*<string>(.*)<\/string>.*/\1/')
+PROJECT_YML = project.yml
+VERSION ?= $(shell grep 'MARKETING_VERSION:' $(PROJECT_YML) | sed 's/.*: *//')
 
 all: build
 
@@ -40,13 +40,13 @@ version:
 	@echo "$(VERSION)"
 
 update-version:
-	@if [ "$(NEW_VERSION)" = "$(VERSION)" ]; then \
+	@if [ -z "$(NEW_VERSION)" ] || [ "$(NEW_VERSION)" = "$(VERSION)" ]; then \
 		echo "Usage: make update-version NEW_VERSION=x.x.x"; \
 		exit 1; \
 	fi
-	sed -i '' -e '/<key>CFBundleShortVersionString<\/key>/{n;s/<string>.*<\/string>/<string>$(NEW_VERSION)<\/string>/;}' "$(INFO_PLIST)"
-	sed -i '' -e '/<key>CFBundleVersion<\/key>/{n;s/<string>.*<\/string>/<string>$(NEW_VERSION)<\/string>/;}' "$(INFO_PLIST)"
-	git add $(INFO_PLIST)
+	sed -i '' 's/MARKETING_VERSION: .*/MARKETING_VERSION: $(NEW_VERSION)/' $(PROJECT_YML)
+	xcodegen generate
+	git add $(PROJECT_YML) $(APP_NAME).xcodeproj
 	git commit -m "bump version to $(NEW_VERSION)"
 	git tag -a v$(NEW_VERSION) -m "v$(NEW_VERSION)"
 	git push origin main --tags
