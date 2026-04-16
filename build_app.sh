@@ -14,11 +14,9 @@ NC='\033[0m'
 # Project config
 APP_NAME="DuoduoManager"
 APP_BUNDLE="${APP_NAME}.app"
-INFO_PLIST="Config/Info.plist"
-APP_ICON="Sources/Resources/App/AppIcon.icns"
 
-# Version from Info.plist
-VERSION=$(grep -A1 "CFBundleShortVersionString" "$INFO_PLIST" | grep "<string>" | sed -E 's/.*<string>(.*)<\/string>.*/\1/')
+# Version from project.yml (Info.plist uses Xcode build variables, not readable at script time)
+VERSION=$(grep 'MARKETING_VERSION:' project.yml | sed 's/.*: *//')
 
 # Output directories
 DIST_DIR="dist"
@@ -49,27 +47,6 @@ runtime_mode_for_variant() {
         echo "bundled"
     else
         echo "system"
-    fi
-}
-
-copy_localized_resources() {
-    local app_path="$1"
-    cp -R Sources/Resources/*.lproj "${app_path}/Contents/Resources/"
-}
-
-copy_cc_reader_bundle() {
-    local bundle_source="$1"
-    local app_path="$2"
-    local bundle_dest="${app_path}/Contents/Resources/CCReaderKit_CCReaderKit.bundle"
-
-    # Copy the SwiftPM-generated resource bundle verbatim.
-    # Reconstructing it from checkout sources misses bundle metadata and can
-    # behave differently between remote package and local path dependency modes.
-    if [ -d "${bundle_source}" ]; then
-        rm -rf "${bundle_dest}"
-        cp -R "${bundle_source}" "${bundle_dest}"
-    else
-        echo -e "${YELLOW}Warning: CCReaderKit bundle not found at ${bundle_source}${NC}"
     fi
 }
 
@@ -168,37 +145,29 @@ check_signing_config() {
     return 0
 }
 
-# Build app bundle for a variant
+# Build app bundle for a variant, based on the xcodebuild-produced .app
 build_variant() {
     local variant="$1"
-    local binary_path="$2"
+    local source_app="$2"
     local include_node="$3"
     local node_arch="$4"
-    local cc_reader_bundle_source="$5"
     local app_path
     app_path=$(variant_app_path "$variant")
 
     echo -e "${GREEN}Building ${variant}...${NC}"
 
-    mkdir -p "${app_path}/Contents/MacOS"
-    mkdir -p "${app_path}/Contents/Resources"
+    # Start from the xcodebuild-produced .app (has correct Info.plist, resources, bundles)
+    rm -rf "$app_path"
+    mkdir -p "$(dirname "$app_path")"
+    cp -R "$source_app" "$app_path"
+    chmod -R u+w "$app_path"
 
-    cp "${INFO_PLIST}" "${app_path}/Contents/Info.plist"
-    cp "${APP_ICON}" "${app_path}/Contents/Resources/AppIcon.icns"
-
-    cp "$binary_path" "${app_path}/Contents/MacOS/${APP_NAME}"
-    chmod +x "${app_path}/Contents/MacOS/${APP_NAME}"
-    echo -n "APPL????" > "${app_path}/Contents/PkgInfo"
-
-    # Mark runtime mode in Info.plist so app logic doesn't rely on stale files.
+    # Mark runtime mode in Info.plist
     local info_plist_path="${app_path}/Contents/Info.plist"
     local runtime_mode
     runtime_mode=$(runtime_mode_for_variant "$include_node")
     /usr/libexec/PlistBuddy -c "Delete :DuoduoNodeRuntimeMode" "$info_plist_path" >/dev/null 2>&1 || true
     /usr/libexec/PlistBuddy -c "Add :DuoduoNodeRuntimeMode string $runtime_mode" "$info_plist_path"
-
-    copy_localized_resources "${app_path}"
-    copy_cc_reader_bundle "${cc_reader_bundle_source}" "${app_path}"
 
     # Bundle matching-arch Node.js runtime (use tar to preserve symlinks)
     if [ "$include_node" = "yes" ]; then
@@ -217,17 +186,17 @@ build_all() {
     xcodebuild -project "${APP_NAME}.xcodeproj" -scheme "${APP_NAME}" -configuration Release -arch arm64 -derivedDataPath .build/arm64 build
     xcodebuild -project "${APP_NAME}.xcodeproj" -scheme "${APP_NAME}" -configuration Release -arch x86_64 -derivedDataPath .build/x64 build
 
-    local arm64_binary=".build/arm64/Build/Products/Release/${APP_NAME}.app/Contents/MacOS/${APP_NAME}"
-    local x64_binary=".build/x64/Build/Products/Release/${APP_NAME}.app/Contents/MacOS/${APP_NAME}"
-    local arm64_cc_reader_bundle=".build/arm64/Build/Products/Release/CCReaderKit_CCReaderKit.bundle"
-    local x64_cc_reader_bundle=".build/x64/Build/Products/Release/CCReaderKit_CCReaderKit.bundle"
+    local arm64_app=".build/arm64/Build/Products/Release/${APP_NAME}.app"
+    local x64_app=".build/x64/Build/Products/Release/${APP_NAME}.app"
     local universal_app_path
     universal_app_path=$(variant_app_path "${UNIVERSAL_LITE_VARIANT}")
 
-    build_variant "arm64-${WITH_NODE_SUFFIX}" "$arm64_binary" "yes" "arm64" "$arm64_cc_reader_bundle"
-    build_variant "x86_64-${WITH_NODE_SUFFIX}" "$x64_binary" "yes" "x86_64" "$x64_cc_reader_bundle"
+    build_variant "arm64-${WITH_NODE_SUFFIX}" "$arm64_app" "yes" "arm64"
+    build_variant "x86_64-${WITH_NODE_SUFFIX}" "$x64_app" "yes" "x86_64"
 
-    build_variant "$UNIVERSAL_LITE_VARIANT" "$arm64_binary" "no" "arm64" "$arm64_cc_reader_bundle"
+    build_variant "$UNIVERSAL_LITE_VARIANT" "$arm64_app" "no" "arm64"
+    local arm64_binary="${arm64_app}/Contents/MacOS/${APP_NAME}"
+    local x64_binary="${x64_app}/Contents/MacOS/${APP_NAME}"
     lipo -create "$arm64_binary" "$x64_binary" -output "${universal_app_path}/Contents/MacOS/${APP_NAME}"
     chmod +x "${universal_app_path}/Contents/MacOS/${APP_NAME}"
     echo -e "${GREEN}${UNIVERSAL_LITE_VARIANT} binary merged with lipo${NC}"
