@@ -213,14 +213,16 @@ build_all() {
     rm -rf "${DIST_DIR}"
     mkdir -p "${DIST_DIR}"
 
-    ensure_node
-    swift build -c release --arch arm64
-    swift build -c release --arch x86_64
+    xcodegen generate
 
-    local arm64_binary=".build/arm64-apple-macosx/release/${APP_NAME}"
-    local x64_binary=".build/x86_64-apple-macosx/release/${APP_NAME}"
-    local arm64_cc_reader_bundle=".build/arm64-apple-macosx/release/CCReaderKit_CCReaderKit.bundle"
-    local x64_cc_reader_bundle=".build/x86_64-apple-macosx/release/CCReaderKit_CCReaderKit.bundle"
+    ensure_node
+    xcodebuild -project "${APP_NAME}.xcodeproj" -scheme "${APP_NAME}" -configuration Release -arch arm64 -derivedDataPath .build/arm64 build
+    xcodebuild -project "${APP_NAME}.xcodeproj" -scheme "${APP_NAME}" -configuration Release -arch x86_64 -derivedDataPath .build/x64 build
+
+    local arm64_binary=".build/arm64/Build/Products/Release/${APP_NAME}.app/Contents/MacOS/${APP_NAME}"
+    local x64_binary=".build/x64/Build/Products/Release/${APP_NAME}.app/Contents/MacOS/${APP_NAME}"
+    local arm64_cc_reader_bundle=".build/arm64/Build/Products/Release/CCReaderKit_CCReaderKit.bundle"
+    local x64_cc_reader_bundle=".build/x64/Build/Products/Release/CCReaderKit_CCReaderKit.bundle"
     local universal_app_path
     universal_app_path=$(variant_app_path "${UNIVERSAL_LITE_VARIANT}")
 

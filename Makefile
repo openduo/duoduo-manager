@@ -1,5 +1,6 @@
 .PHONY: project build release run clean app dmg publish version update-version
 
+APP_NAME = DuoduoManager
 INFO_PLIST = Config/Info.plist
 VERSION ?= $(shell grep -A1 "CFBundleShortVersionString" "$(INFO_PLIST)" | grep "<string>" | sed -E 's/.*<string>(.*)<\/string>.*/\1/')
 
@@ -9,10 +10,12 @@ project:
 	xcodegen generate
 
 build:
-	swift build
+	xcodegen generate
+	xcodebuild -project $(APP_NAME).xcodeproj -scheme $(APP_NAME) build
 
 release:
-	swift build -c release
+	xcodegen generate
+	xcodebuild -project $(APP_NAME).xcodeproj -scheme $(APP_NAME) -configuration Release build
 
 run: build
 	.build/debug/DuoduoManager
@@ -21,7 +24,6 @@ run-release: release
 	.build/release/DuoduoManager
 
 clean:
-	swift package clean
 	rm -rf .build dist
 
 app:
