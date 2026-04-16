@@ -38,7 +38,17 @@ jobs:
           fi
 
           CERT_PATH="${RUNNER_TEMP}/DeveloperID_Application.p12"
-          printf '%s' "${BUILD_CERTIFICATE_BASE64}" | base64 -D -o "${CERT_PATH}"
+          CERT_PATH="${CERT_PATH}" BUILD_CERTIFICATE_BASE64="${BUILD_CERTIFICATE_BASE64}" python3 - <<'PY'
+          import base64
+          import os
+          from pathlib import Path
+
+          cert_path = Path(os.environ["CERT_PATH"])
+          cert_bytes = base64.b64decode(os.environ["BUILD_CERTIFICATE_BASE64"])
+          cert_path.write_bytes(cert_bytes)
+          print(f"decoded certificate bytes: {len(cert_bytes)}")
+          PY
+          file "${CERT_PATH}"
 
           security create-keychain -p "${KEYCHAIN_PASSWORD}" "${KEYCHAIN_PATH}"
           security set-keychain-settings -lut 21600 "${KEYCHAIN_PATH}"
