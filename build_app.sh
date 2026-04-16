@@ -60,7 +60,7 @@ copy_localized_resources() {
 copy_cc_reader_bundle() {
     local bundle_source="$1"
     local app_path="$2"
-    local bundle_dest="${app_path}/CCReaderKit_CCReaderKit.bundle"
+    local bundle_dest="${app_path}/Contents/Resources/CCReaderKit_CCReaderKit.bundle"
 
     # Copy the SwiftPM-generated resource bundle verbatim.
     # Reconstructing it from checkout sources misses bundle metadata and can
@@ -147,6 +147,13 @@ extract_node() {
 check_signing_config() {
     if [ -f ".secret.env" ]; then
         source ./.secret.env
+        : "${APPLE_ID:?APPLE_ID is required}"
+        : "${APPLE_APP_SPECIFIC_PASSWORD:?APPLE_APP_SPECIFIC_PASSWORD is required}"
+        : "${APPLE_TEAM_ID:?APPLE_TEAM_ID is required}"
+        if [ -z "${APPLE_SIGNING_IDENTITY:-}" ] && [ -n "${APPLE_TEAM_NAME:-}" ]; then
+            APPLE_SIGNING_IDENTITY="${APPLE_TEAM_NAME}"
+        fi
+        : "${APPLE_SIGNING_IDENTITY:?APPLE_SIGNING_IDENTITY is required}"
         echo -e "${GREEN}Signing config loaded${NC}"
         return 0
     else
@@ -228,40 +235,37 @@ sign_app_variant() {
     app_path=$(variant_app_path "$variant")
 
     echo -e "${GREEN}Signing ${variant}...${NC}"
+    chmod -R u+w "$app_path"
     xattr -cr "$app_path"
 
     codesign --force --options runtime \
-        --sign "${APPLE_TEAM_NAME}" \
+        --sign "${APPLE_SIGNING_IDENTITY}" \
         --entitlements "entitlements.mac.plist" \
         --deep "$app_path"
 
+    codesign --verify --deep --strict "$app_path"
     echo -e "${GREEN}${variant} signing succeeded${NC}"
 }
 
-# Notarize app for a variant
-notarize_app_variant() {
+# Notarize DMG for a variant
+notarize_dmg_variant() {
     local variant="$1"
-    local app_path
-    local zip_path
-    app_path=$(variant_app_path "$variant")
-    zip_path="${DIST_DIR}/${APP_NAME}-${variant}.zip"
+    local dmg_path
+    dmg_path=$(variant_dmg_path "$variant")
 
     echo -e "${GREEN}Notarizing ${variant}...${NC}"
 
-    ditto -c -k --keepParent "$app_path" "$zip_path"
-
     echo "Submitting ${variant} notarization request (may take a few minutes)..."
-    xcrun notarytool submit "$zip_path" \
+    xcrun notarytool submit "$dmg_path" \
         --wait \
         --apple-id "${APPLE_ID}" \
         --password "${APPLE_APP_SPECIFIC_PASSWORD}" \
         --team-id "${APPLE_TEAM_ID}"
 
     echo -e "${GREEN}${variant} notarization succeeded${NC}"
-    xcrun stapler staple "$app_path"
-    echo -e "${GREEN}${variant} staple attached${NC}"
-
-    rm "$zip_path"
+    xcrun stapler staple "$dmg_path"
+    spctl --assess --type open --context context:primary-signature --verbose "$dmg_path"
+    echo -e "${GREEN}${variant} DMG stapled and verified${NC}"
 }
 
 # Create DMG for a variant
@@ -321,6 +325,17 @@ create_dmg_variant() {
     echo -e "${GREEN}${variant} DMG: ${dmg_path}${NC}"
 }
 
+sign_dmg_variant() {
+    local variant="$1"
+    local dmg_path
+    dmg_path=$(variant_dmg_path "$variant")
+
+    echo -e "${GREEN}Signing ${variant} DMG...${NC}"
+    codesign --force --sign "${APPLE_SIGNING_IDENTITY}" "$dmg_path"
+    codesign --verify --verbose "$dmg_path"
+    echo -e "${GREEN}${variant} DMG signing succeeded${NC}"
+}
+
 # Build only (no signing)
 build_only() {
     build_all
@@ -334,8 +349,9 @@ release() {
         build_all
         for variant in "${ALL_VARIANTS[@]}"; do
             sign_app_variant "$variant"
-            notarize_app_variant "$variant"
             create_dmg_variant "$variant"
+            sign_dmg_variant "$variant"
+            notarize_dmg_variant "$variant"
         done
         echo -e "${GREEN}=== Release complete ===${NC}"
         print_dmg_artifacts
