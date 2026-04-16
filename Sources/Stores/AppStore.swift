@@ -24,20 +24,18 @@ final class AppStore {
     var runtimeRefreshTask: Task<Void, Never>?
     var dashboardEventsTask: Task<Void, Never>?
     var dashboardStatusTask: Task<Void, Never>?
-    var updateCheckTask: Task<Void, Never>?
     var prepareInteractiveSessionTask: Task<Void, Never>?
+    var clearCommandFeedbackTask: Task<Void, Never>?
 
     var visibleSurfaces: Set<AppStoreSurface> = []
     var lastEventId: String?
     var lastSeenBySession: [String: Date] = [:]
-    var lastUpdateCheckAt: Date?
     var hasPreparedInteractiveSession = false
 
     let maxEvents = 2000
     let runtimeRefreshInterval: TimeInterval = 30
     let dashboardEventsInterval: TimeInterval = 3
     let dashboardStatusInterval: TimeInterval = 5
-    let updateCheckInterval: TimeInterval = 10 * 60
 
     var updateStatusBarIcon: (() -> Void)?
 

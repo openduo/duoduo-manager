@@ -2,19 +2,13 @@ import SwiftUI
 
 struct StatusRuntimeStreamPanel: View {
     let hint: String
-    let lastOutput: String
-    let errorMessage: String?
     let recentEvents: [SpineEvent]
     let expandedEventIDs: Set<String>
     let onToggle: (String) -> Void
 
     var body: some View {
         StatusPanelSection(icon: "waveform.path.ecg", title: "Runtime Stream", hint: hint) {
-            if let errorMessage, !errorMessage.isEmpty {
-                streamMessage(icon: "exclamationmark.triangle.fill", tint: ConsolePalette.critical, message: errorMessage)
-            } else if !lastOutput.isEmpty {
-                streamMessage(icon: "checkmark.circle.fill", tint: ConsolePalette.signal, message: lastOutput)
-            } else if recentEvents.isEmpty {
+            if recentEvents.isEmpty {
                 Text("runtime idle, waiting for new activity")
                     .font(.system(size: 12, design: .monospaced))
                     .foregroundStyle(ConsolePalette.secondaryText)
@@ -25,28 +19,6 @@ struct StatusRuntimeStreamPanel: View {
                 streamTimeline
             }
         }
-    }
-
-    private func streamMessage(icon: String, tint: Color, message: String) -> some View {
-        HStack(alignment: .top, spacing: 10) {
-            Image(systemName: icon)
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(tint)
-                .padding(.top, 1)
-
-            Text(message)
-                .font(.system(size: 11, design: .monospaced))
-                .foregroundStyle(ConsolePalette.primaryText)
-                .textSelection(.enabled)
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .padding(12)
-        .background(ConsolePalette.panelRaised)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(ConsolePalette.divider, lineWidth: 1)
-        )
     }
 
     @ViewBuilder

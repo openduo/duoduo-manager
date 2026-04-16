@@ -41,8 +41,6 @@ struct StatusBarPresentationMapper {
             ),
             stream: StatusRuntimeStreamPresentation(
                 hint: streamHint(recentEvents: recentEvents),
-                lastOutput: store.command.lastOutput,
-                errorMessage: store.command.errorMessage,
                 recentEvents: recentEvents,
                 expandedEventIDs: expandedEventIDs
             ),
@@ -57,7 +55,9 @@ struct StatusBarPresentationMapper {
                 costValue: DashboardTheme.formatCost(store.dashboard.totalCost),
                 tokenValue: DashboardTheme.formatTokens(store.dashboard.totalTokens),
                 cacheValue: "\(store.dashboard.cacheHitRate)%",
-                toolsValue: DashboardTheme.formatTools(store.dashboard.totalTools)
+                toolsValue: DashboardTheme.formatTools(store.dashboard.totalTools),
+                statusMessage: footerStatusMessage,
+                statusIsError: footerStatusIsError
             ),
             controlHint: showRuntimeUpdate ? "updates ready" : (store.command.isLoading ? "commands in flight" : "direct operations")
         )
@@ -158,9 +158,20 @@ struct StatusBarPresentationMapper {
     }
 
     private func streamHint(recentEvents: [SpineEvent]) -> String {
-        if !store.command.lastOutput.isEmpty { return "command feedback" }
-        if let error = store.command.errorMessage, !error.isEmpty { return "attention required" }
         return recentEvents.isEmpty ? "waiting for activity" : "live event feed"
+    }
+
+    private var footerStatusMessage: String? {
+        if let error = store.command.errorMessage, !error.isEmpty { return error }
+        if !store.command.lastOutput.isEmpty { return store.command.lastOutput }
+        return nil
+    }
+
+    private var footerStatusIsError: Bool {
+        if let error = store.command.errorMessage {
+            return !error.isEmpty
+        }
+        return false
     }
 
     private func sessionTint(_ session: SessionInfo) -> Color {

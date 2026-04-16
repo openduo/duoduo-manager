@@ -24,6 +24,7 @@ extension AppStore {
                 self.command.errorMessage = error.localizedDescription
             }
             self.command.isLoading = false
+            self.scheduleCommandFeedbackAutoClear()
             self.updateStatusBarIcon?()
         }
     }
@@ -52,12 +53,6 @@ extension AppStore {
     }
 
     func checkForUpdates(force: Bool) async {
-        if !force,
-           let lastUpdateCheckAt,
-           Date().timeIntervalSince(lastUpdateCheckAt) < updateCheckInterval {
-            return
-        }
-
         if let result = await appUpdateService.fetchLatestRelease() {
             updates.appLatestVersion = result.version
             updates.appLatestReleaseURL = result.url
@@ -74,8 +69,6 @@ extension AppStore {
                 updates.latestVersions[channel.type] = latest
             }
         }
-
-        lastUpdateCheckAt = Date()
         updateStatusBarIcon?()
     }
 

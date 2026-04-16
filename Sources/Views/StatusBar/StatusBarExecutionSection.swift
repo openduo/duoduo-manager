@@ -89,6 +89,8 @@ struct StatusFooterBar: View {
     let tokenValue: String
     let cacheValue: String
     let toolsValue: String
+    let statusMessage: String?
+    let statusIsError: Bool
     let onDashboard: () -> Void
     let onReader: () -> Void
     let onQuit: () -> Void
@@ -112,7 +114,13 @@ struct StatusFooterBar: View {
             HStack(spacing: 8) {
                 footerButton(title: "ATC", systemImage: "square.grid.2x2", action: onDashboard)
                 footerButton(title: "Reader", systemImage: "book.closed", action: onReader)
+
                 Spacer()
+
+                if let statusMessage, !statusMessage.isEmpty {
+                    footerStatusMessage(statusMessage)
+                }
+
                 footerButton(title: L10n.Status.quit, systemImage: "power", action: onQuit)
             }
             .padding(.horizontal, 12)
@@ -161,5 +169,19 @@ struct StatusFooterBar: View {
             .clipShape(RoundedRectangle(cornerRadius: 9))
         }
         .buttonStyle(.plain)
+    }
+
+    private func footerStatusMessage(_ message: String) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: statusIsError ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
+                .font(.system(size: 10, weight: .semibold))
+            Text(message)
+                .lineLimit(1)
+                .truncationMode(.tail)
+        }
+        .font(.system(size: 10, design: .monospaced))
+        .foregroundStyle(statusIsError ? ConsolePalette.critical : ConsolePalette.secondaryText)
+        .frame(maxWidth: .infinity, alignment: .trailing)
+        .help(message)
     }
 }

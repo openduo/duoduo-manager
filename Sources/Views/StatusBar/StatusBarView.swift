@@ -38,13 +38,8 @@ struct StatusBarView: View {
                 showRuntimeUpdate: statusBarPresentation.header.showRuntimeUpdate,
                 isLoading: statusBarPresentation.header.isLoading,
                 onAppUpdate: { store.openReleasesPage() },
-                onRuntimeAction: {
-                    if statusBarPresentation.header.showRuntimeUpdate {
-                        store.upgradeAll()
-                    } else {
-                        store.checkForUpdatesWithFeedback()
-                    }
-                }
+                onRefresh: { store.refreshVisibleContentWithFeedback() },
+                onUpgrade: { store.upgradeAll() }
             )
 
             Divider().overlay(ConsolePalette.divider)
@@ -67,6 +62,8 @@ struct StatusBarView: View {
                 tokenValue: statusBarPresentation.footer.tokenValue,
                 cacheValue: statusBarPresentation.footer.cacheValue,
                 toolsValue: statusBarPresentation.footer.toolsValue,
+                statusMessage: statusBarPresentation.footer.statusMessage,
+                statusIsError: statusBarPresentation.footer.statusIsError,
                 onDashboard: { openDashboard?() },
                 onReader: { openCCReader() },
                 onQuit: { NSApplication.shared.terminate(nil) }
@@ -267,8 +264,6 @@ struct StatusBarView: View {
     private var streamPanel: some View {
         StatusRuntimeStreamPanel(
             hint: statusBarPresentation.stream.hint,
-            lastOutput: statusBarPresentation.stream.lastOutput,
-            errorMessage: statusBarPresentation.stream.errorMessage,
             recentEvents: statusBarPresentation.stream.recentEvents,
             expandedEventIDs: statusBarPresentation.stream.expandedEventIDs,
             onToggle: toggleEvent
@@ -286,20 +281,7 @@ struct StatusBarView: View {
     }
 
     private var transientOutputPanel: some View {
-        Group {
-            if !store.command.lastOutput.isEmpty || store.command.errorMessage != nil {
-                HStack(spacing: 8) {
-                    Spacer()
-
-                    Button(L10n.Status.clear) {
-                        store.clearOutput()
-                    }
-                    .buttonStyle(.plain)
-                    .font(.system(size: 10, design: .monospaced))
-                    .foregroundStyle(ConsolePalette.secondaryText)
-                }
-            }
-        }
+        EmptyView()
     }
 
     private var daemonInlineConfig: some View {

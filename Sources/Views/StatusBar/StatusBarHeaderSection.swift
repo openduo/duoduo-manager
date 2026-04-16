@@ -9,7 +9,8 @@ struct StatusHeaderBar: View {
     let showRuntimeUpdate: Bool
     let isLoading: Bool
     let onAppUpdate: () -> Void
-    let onRuntimeAction: () -> Void
+    let onRefresh: () -> Void
+    let onUpgrade: () -> Void
 
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
@@ -50,11 +51,24 @@ struct StatusHeaderBar: View {
                     .clipShape(RoundedRectangle(cornerRadius: 11))
                 }
                 .buttonStyle(.plain)
-            } else {
-                Button(action: onRuntimeAction) {
-                    Image(systemName: showRuntimeUpdate ? "arrow.up.circle.fill" : "arrow.clockwise")
+            }
+
+            Button(action: onRefresh) {
+                Image(systemName: "arrow.clockwise")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(ConsolePalette.primaryText)
+                    .frame(width: 30, height: 30)
+                    .background(ConsolePalette.panelRaised)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+            .buttonStyle(.plain)
+            .disabled(isLoading)
+
+            if showRuntimeUpdate {
+                Button(action: onUpgrade) {
+                    Image(systemName: "arrow.up.circle.fill")
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(showRuntimeUpdate ? ConsolePalette.warning : ConsolePalette.primaryText)
+                        .foregroundStyle(ConsolePalette.warning)
                         .frame(width: 30, height: 30)
                         .background(ConsolePalette.panelRaised)
                         .clipShape(RoundedRectangle(cornerRadius: 8))

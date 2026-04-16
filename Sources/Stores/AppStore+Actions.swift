@@ -1,6 +1,21 @@
 import Foundation
 
 extension AppStore {
+    func scheduleCommandFeedbackAutoClear() {
+        let outputSnapshot = command.lastOutput
+        let errorSnapshot = command.errorMessage
+
+        clearCommandFeedbackTask?.cancel()
+        clearCommandFeedbackTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(4))
+            guard let self, !Task.isCancelled else { return }
+            if self.command.lastOutput == outputSnapshot, self.command.errorMessage == errorSnapshot {
+                self.clearOutput()
+            }
+            self.clearCommandFeedbackTask = nil
+        }
+    }
+
     func updateDaemonConfig(_ config: DaemonConfig) {
         runtime.daemonConfig = config
         reconfigureConnectionsIfNeeded()
@@ -10,6 +25,21 @@ extension AppStore {
     func updateFeishuConfig(_ config: FeishuConfig) {
         runtime.feishuConfig = config
         Task { await refreshVisibleContentNow() }
+    }
+
+    func refreshVisibleContentWithFeedback() {
+        guard !command.isLoading else { return }
+        command.isLoading = true
+        command.errorMessage = nil
+        command.lastOutput = ""
+
+        Task { [weak self] in
+            guard let self else { return }
+            await self.refreshVisibleContentNow()
+            self.command.isLoading = false
+            self.scheduleCommandFeedbackAutoClear()
+            self.updateStatusBarIcon?()
+        }
     }
 
     func ensureDuoduoInstalledIfNeeded() async {
@@ -36,6 +66,7 @@ extension AppStore {
             command.errorMessage = error.localizedDescription
         }
         runtime.isSettingUp = false
+        scheduleCommandFeedbackAutoClear()
         updateStatusBarIcon?()
     }
 
@@ -88,26 +119,12 @@ extension AppStore {
 
     func showConfigRequired() {
         command.errorMessage = L10n.Channel.feishuConfigRequired
-    }
-
-    func checkForUpdatesWithFeedback() {
-        guard !command.isLoading else { return }
-        command.isLoading = true
-        command.errorMessage = nil
-        command.lastOutput = ""
-
-        Task { [weak self] in
-            guard let self else { return }
-            await self.checkForUpdates(force: true)
-            self.command.isLoading = false
-            if !self.hasDuoduoUpdate {
-                self.command.lastOutput = L10n.Upgrade.allUpToDate
-            }
-            self.updateStatusBarIcon?()
-        }
+        scheduleCommandFeedbackAutoClear()
     }
 
     func clearOutput() {
+        clearCommandFeedbackTask?.cancel()
+        clearCommandFeedbackTask = nil
         command.lastOutput = ""
         command.errorMessage = nil
     }

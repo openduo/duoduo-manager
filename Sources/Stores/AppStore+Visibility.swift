@@ -15,12 +15,17 @@ extension AppStore {
         prepareInteractiveSessionTask = nil
         stopRuntimePolling()
         stopDashboardPollingTasks()
-        stopUpdateChecks()
     }
 
     private func setSurface(_ surface: AppStoreSurface, visible: Bool) {
         if visible {
             visibleSurfaces.insert(surface)
+            if surface == .popover {
+                Task { [weak self] in
+                    await self?.checkForUpdates(force: true)
+                    self?.updateStatusBarIcon?()
+                }
+            }
         } else {
             visibleSurfaces.remove(surface)
         }
@@ -37,10 +42,8 @@ extension AppStore {
 
         if wantsRuntime {
             startRuntimePollingIfNeeded()
-            startUpdateChecksIfNeeded()
         } else {
             stopRuntimePolling()
-            stopUpdateChecks()
         }
 
         if wantsDashboard {
@@ -65,7 +68,6 @@ extension AppStore {
     func refreshVisibleContentNow() async {
         if visibleSurfaces.contains(.popover) {
             await refreshRuntime()
-            await checkForUpdates(force: false)
         }
         if !visibleSurfaces.isEmpty {
             await fetchDashboardAll()
@@ -93,28 +95,6 @@ extension AppStore {
     private func stopRuntimePolling() {
         runtimeRefreshTask?.cancel()
         runtimeRefreshTask = nil
-    }
-
-    private func startUpdateChecksIfNeeded() {
-        guard updateCheckTask == nil else { return }
-
-        Task {
-            await checkForUpdates(force: false)
-            updateStatusBarIcon?()
-        }
-
-        updateCheckTask = Task { [weak self] in
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(self?.updateCheckInterval ?? 600))
-                guard !Task.isCancelled else { break }
-                await self?.checkForUpdates(force: true)
-            }
-        }
-    }
-
-    private func stopUpdateChecks() {
-        updateCheckTask?.cancel()
-        updateCheckTask = nil
     }
 
     private func startDashboardPollingTasksIfNeeded() {

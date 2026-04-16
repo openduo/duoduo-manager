@@ -50,8 +50,6 @@ struct StatusInstallCardPresentation {
 
 struct StatusRuntimeStreamPresentation {
     let hint: String
-    let lastOutput: String
-    let errorMessage: String?
     let recentEvents: [SpineEvent]
     let expandedEventIDs: Set<String>
 }
@@ -69,4 +67,6 @@ struct StatusFooterPresentation {
     let tokenValue: String
     let cacheValue: String
     let toolsValue: String
+    let statusMessage: String?
+    let statusIsError: Bool
 }
