@@ -94,6 +94,7 @@ struct StatusFooterBar: View {
     let onDashboard: () -> Void
     let onOnboard: () -> Void
     let onReader: () -> Void
+    let onTerminal: () -> Void
     let onQuit: () -> Void
 
     var body: some View {
@@ -114,8 +115,9 @@ struct StatusFooterBar: View {
 
             HStack(spacing: 8) {
                 footerButton(title: "ATC", systemImage: "square.grid.2x2", action: onDashboard)
-                footerButton(title: "Onboard", systemImage: "slider.horizontal.3", action: onOnboard)
+                footerButton(title: "Onboard", systemImage: "checklist", action: onOnboard)
                 footerButton(title: "Reader", systemImage: "book.closed", action: onReader)
+                footerButton(title: "Terminal", systemImage: "terminal", action: onTerminal)
 
                 Spacer()
 
@@ -139,21 +141,20 @@ struct StatusFooterBar: View {
     }
 
     private func footerMetric(title: String, value: String, icon: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 5) {
-                Image(systemName: icon)
-                    .font(.system(size: 8, weight: .semibold))
-                    .foregroundStyle(ConsolePalette.mutedText)
-                Text(title)
-                    .font(.system(size: 9, design: .monospaced))
-                    .foregroundStyle(ConsolePalette.secondaryText)
-            }
+        HStack(spacing: 5) {
+            Image(systemName: icon)
+                .font(.system(size: 8, weight: .semibold))
+                .foregroundStyle(ConsolePalette.mutedText)
+            Text(title)
+                .font(.system(size: 9, design: .monospaced))
+                .foregroundStyle(ConsolePalette.secondaryText)
+            Spacer()
             Text(value)
                 .font(.system(size: 11, weight: .semibold, design: .monospaced))
                 .foregroundStyle(ConsolePalette.primaryText)
                 .lineLimit(1)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity)
     }
 
     private func footerButton(title: String, systemImage: String, action: @escaping () -> Void) -> some View {

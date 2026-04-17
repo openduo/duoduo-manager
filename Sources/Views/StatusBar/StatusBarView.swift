@@ -70,6 +70,7 @@ struct StatusBarView: View {
                 onDashboard: { openDashboard?() },
                 onOnboard: { openOnboard?() },
                 onReader: { openCCReader() },
+                onTerminal: { openTerminal() },
                 onQuit: { NSApplication.shared.terminate(nil) }
             )
         }

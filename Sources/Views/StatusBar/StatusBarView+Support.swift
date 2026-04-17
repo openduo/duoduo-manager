@@ -56,6 +56,32 @@ extension StatusBarView {
         openReader?()
     }
 
+    func openTerminal() {
+        let env = NodeRuntime.environment
+        var exports: [String] = []
+        if let path = env["PATH"] {
+            exports.append("PATH='\(path.escapingSingleQuotes)'")
+        }
+        if let prefix = env["NPM_CONFIG_PREFIX"] {
+            exports.append("NPM_CONFIG_PREFIX='\(prefix.escapingSingleQuotes)'")
+        }
+        if let nodePath = env["NODE_PATH"] {
+            exports.append("NODE_PATH='\(nodePath.escapingSingleQuotes)'")
+        }
+        let script = "export \(exports.joined(separator: " ")); clear"
+
+        let appleScript = """
+        tell application "Terminal"
+            activate
+            do script "\(script.escapingBackslashAndQuotes)"
+        end tell
+        """
+        if let nsScript = NSAppleScript(source: appleScript) {
+            var error: NSDictionary?
+            nsScript.executeAndReturnError(&error)
+        }
+    }
+
     func toggleConfig(_ target: InlineConfigTarget) {
         if expandedConfigTarget == target {
             cancelConfig(target)
@@ -121,5 +147,16 @@ extension StatusBarView {
                 feishuNotice = nil
             } : nil
         )
+    }
+}
+
+private extension String {
+    var escapingSingleQuotes: String {
+        replacingOccurrences(of: "'", with: "'\\''")
+    }
+
+    var escapingBackslashAndQuotes: String {
+        replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "\"", with: "\\\"")
     }
 }

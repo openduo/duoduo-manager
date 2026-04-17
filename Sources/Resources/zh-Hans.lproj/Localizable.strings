@@ -102,7 +102,7 @@
 "onboard.officialHint" = "将通过浏览器登录 Anthropic 官方账号。";
 "onboard.customProvider" = "自定义";
 "onboard.createBot" = "创建机器人";
-"onboard.update" = "更新 %@";
+"onboard.update %@" = "更新 %@";
 "onboard.metricModel" = "模型";
 "onboard.req.duoduoCLI" = "安装 duoduo";
 "onboard.req.claudeCLI" = "安装 Claude CLI";
@@ -114,7 +114,7 @@
 "onboard.summary.daemon" = "启动 duoduo daemon，让菜单栏主界面可以继续管理运行时。";
 "onboard.status.detecting" = "正在读取 duoduo、claude 和 daemon 状态。";
 "onboard.status.redetecting" = "正在重新读取本机状态。";
-"onboard.status.editing" = "继续修改%@。";
+"onboard.status.editing %@" = "继续修改%@。";
 "onboard.status.installingDuoduo" = "正在安装 duoduo CLI。";
 "onboard.status.installingClaude" = "正在安装 Claude CLI。";
 "onboard.status.readingAuth" = "正在读取 `claude auth status`。";

@@ -102,7 +102,7 @@
 "onboard.officialHint" = "Sign in with your Anthropic account via browser.";
 "onboard.customProvider" = "Custom";
 "onboard.createBot" = "Create Bot";
-"onboard.update" = "Update %@";
+"onboard.update %@" = "Update %@";
 "onboard.metricModel" = "Model";
 "onboard.req.duoduoCLI" = "Install duoduo";
 "onboard.req.claudeCLI" = "Install Claude CLI";
@@ -114,7 +114,7 @@
 "onboard.summary.daemon" = "Start the duoduo daemon so the menu bar can manage the runtime.";
 "onboard.status.detecting" = "Reading duoduo, claude and daemon status.";
 "onboard.status.redetecting" = "Re-reading local status.";
-"onboard.status.editing" = "Continue editing %@.";
+"onboard.status.editing %@" = "Continue editing %@.";
 "onboard.status.installingDuoduo" = "Installing duoduo CLI.";
 "onboard.status.installingClaude" = "Installing Claude CLI.";
 "onboard.status.readingAuth" = "Reading `claude auth status`.";

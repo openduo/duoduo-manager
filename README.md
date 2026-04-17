@@ -5,10 +5,14 @@ A macOS menu bar application for managing the [duoduo](https://github.com/opendu
 ## Features
 
 - **Menu bar interface** — Unobtrusive status item with a popover for quick access to daemon controls, channel status, and version updates
+- **Onboarding flow** — Guided first-time setup: installs duoduo CLI, Claude CLI, connects LLM provider, and starts the daemon with a step-by-step checklist
+- **LLM provider presets** — Built-in support for Official (Anthropic OAuth), 智谱 GLM, Z.AI, Kimi, 百炼, MiniMax, DeepSeek, or custom endpoints
+- **Terminal integration** — Opens Terminal.app with the correct environment injected so duoduo CLI is accessible outside the app
 - **Flexible runtime options** — Choose bundled Node.js builds or a universal-lite build that uses system Node.js
 - **Daemon management** — Start, stop, restart, and configure the duoduo daemon directly from the popover
 - **Channel management** — Install, configure, and control messaging channels (currently Feishu)
 - **Smart upgrades** — Version-aware: only updates and restarts components with newer versions
+- **Sparkle auto-update** — In-app update checks with channel-based rollouts per build variant
 - **ATC Dashboard** — Real-time event stream, session monitoring, and job management in a native panel (Catppuccin Mocha theme)
 - **CC Reader** — Embedded [cc-reader](https://github.com/kuaner/cc-reader) for browsing Claude Code session history, with timeline rendering, syntax highlighting, and multi-pane layout
 - **Shared app state** — Status popover and ATC Dashboard read from the same root store, so runtime state, dashboard data, and update signals stay in sync
