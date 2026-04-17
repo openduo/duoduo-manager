@@ -166,17 +166,13 @@ jobs:
           fi
           chmod +x "$SIGN_UPDATE"
 
-          # sign_update reads EdDSA private key from keychain
-          # Add it to the login keychain (the only one available on CI)
-          security add-generic-password -a "ed25519" -s "https://sparkle-project.org" -w "${SPARKLE_PRIVATE_ED_KEY}" -U login.keychain-db 2>/dev/null || true
-
-          # Sign each DMG and extract EdDSA signature
+          # Sign each DMG by piping private key via stdin (-p prints only the signature)
           echo "Signing arm64 DMG..."
-          ARM64_SIG=$("$SIGN_UPDATE" -f "dist/DuoduoManager-${VERSION}-arm64-with-nodejs.dmg" 2>&1 | grep -oE 'sparkle:edSignature="[^"]+"' | sed 's/sparkle:edSignature="//;s/"//')
+          ARM64_SIG=$(echo "$SPARKLE_PRIVATE_ED_KEY" | "$SIGN_UPDATE" --ed-key-file - -p "dist/DuoduoManager-${VERSION}-arm64-with-nodejs.dmg" 2>&1)
           echo "Signing x86_64 DMG..."
-          X64_SIG=$("$SIGN_UPDATE" -f "dist/DuoduoManager-${VERSION}-x86_64-with-nodejs.dmg" 2>&1 | grep -oE 'sparkle:edSignature="[^"]+"' | sed 's/sparkle:edSignature="//;s/"//')
+          X64_SIG=$(echo "$SPARKLE_PRIVATE_ED_KEY" | "$SIGN_UPDATE" --ed-key-file - -p "dist/DuoduoManager-${VERSION}-x86_64-with-nodejs.dmg" 2>&1)
           echo "Signing universal-lite DMG..."
-          LITE_SIG=$("$SIGN_UPDATE" -f "dist/DuoduoManager-${VERSION}-universal-lite.dmg" 2>&1 | grep -oE 'sparkle:edSignature="[^"]+"' | sed 's/sparkle:edSignature="//;s/"//')
+          LITE_SIG=$(echo "$SPARKLE_PRIVATE_ED_KEY" | "$SIGN_UPDATE" --ed-key-file - -p "dist/DuoduoManager-${VERSION}-universal-lite.dmg" 2>&1)
 
           echo "ARM64 sig: ${ARM64_SIG}"
           echo "X64 sig: ${X64_SIG}"
