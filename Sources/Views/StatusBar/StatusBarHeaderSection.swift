@@ -24,28 +24,17 @@ struct StatusHeaderBar: View {
 
                 HStack(spacing: 8) {
                     StatusBadge(title: "v\(currentVersion)", tint: ConsolePalette.accent)
+                    if showAppUpdate {
+                        Button(action: onAppUpdate) {
+                            StatusBadge(title: "New v\(appVersion)", tint: ConsolePalette.warning)
+                        }
+                        .buttonStyle(.plain)
+                    }
                     StatusBadge(title: "events \(eventCount)", tint: ConsolePalette.accent)
                 }
             }
 
             Spacer(minLength: 0)
-
-            if showAppUpdate {
-                Button(action: onAppUpdate) {
-                    HStack(spacing: 8) {
-                        Text(L10n.Onboard.update(appVersion))
-                            .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                        Image(systemName: "arrow.up.circle.fill")
-                            .font(.system(size: 12, weight: .semibold))
-                    }
-                    .foregroundStyle(ConsolePalette.background)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(ConsolePalette.warning)
-                    .clipShape(RoundedRectangle(cornerRadius: 11))
-                }
-                .buttonStyle(.plain)
-            }
 
             Button(action: onRefresh) {
                 Image(systemName: "arrow.clockwise")
