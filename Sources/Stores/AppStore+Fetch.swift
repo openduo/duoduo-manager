@@ -53,6 +53,7 @@ extension AppStore {
     }
 
     func checkForUpdates(force: Bool) async {
+        // Check GitHub for latest release version (for update badge visibility)
         if let result = await appUpdateService.fetchLatestRelease() {
             updates.appLatestVersion = result.version
             updates.appLatestReleaseURL = result.url

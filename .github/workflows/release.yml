@@ -69,6 +69,7 @@ jobs:
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          SPARKLE_PUBLIC_ED_KEY: ${{ secrets.SPARKLE_PUBLIC_ED_KEY }}
         run: make publish
 
       - name: Clean temporary keychain
@@ -89,6 +90,7 @@ jobs:
       - name: Create GitHub Release (tag push)
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
+        id: create_release
         with:
           files: dist/*.dmg
           generate_release_notes: true
@@ -102,6 +104,7 @@ jobs:
             ## Notes
 
             - All builds are signed with Apple Developer ID and notarized.
+            - Auto-update is supported via Sparkle for all variants.
             - Prefer `with-nodejs` builds for zero-setup usage.
             - Choose `universal-lite` only if you explicitly want to use your system Node.js.
 
@@ -127,3 +130,121 @@ jobs:
             - This is an automated sync build triggered by a `cc-reader` release.
             - Prefer `with-nodejs` builds for zero-setup usage.
             - Choose `universal-lite` only if you explicitly want to use your system Node.js.
+
+      - name: Generate and deploy Sparkle appcast
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          SPARKLE_PRIVATE_ED_KEY: ${{ secrets.SPARKLE_PRIVATE_ED_KEY }}
+          SPARKLE_PUBLIC_ED_KEY: ${{ secrets.SPARKLE_PUBLIC_ED_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+          REPO="openduo/duoduo-manager"
+          BASE_URL="https://github.com/${REPO}/releases/download/${TAG}"
+
+          # Get release asset download URLs
+          ARM64_URL="${BASE_URL}/DuoduoManager-${VERSION}-arm64-with-nodejs.dmg"
+          X64_URL="${BASE_URL}/DuoduoManager-${VERSION}-x86_64-with-nodejs.dmg"
+          LITE_URL="${BASE_URL}/DuoduoManager-${VERSION}-universal-lite.dmg"
+
+          # Get file sizes
+          ARM64_SIZE=$(stat -f%z "dist/DuoduoManager-${VERSION}-arm64-with-nodejs.dmg")
+          X64_SIZE=$(stat -f%z "dist/DuoduoManager-${VERSION}-x86_64-with-nodejs.dmg")
+          LITE_SIZE=$(stat -f%z "dist/DuoduoManager-${VERSION}-universal-lite.dmg")
+
+          # Download Sparkle for signing tools
+          SPARKLE_VERSION="2.9.1"
+          curl -sL "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-for-Swift-Package-Manager.zip" -o /tmp/sparkle.zip
+          unzip -o /tmp/sparkle.zip -d /tmp/sparkle-dist
+
+          SIGN_UPDATE=$(find /tmp/sparkle-dist -name "sign_update" -type f 2>/dev/null | head -1)
+          if [ -z "$SIGN_UPDATE" ]; then
+            echo "::warning::sign_update tool not found, skipping appcast"
+            exit 0
+          fi
+          chmod +x "$SIGN_UPDATE"
+
+          # Export private key to keychain for sign_update
+          KEYCHAIN_PATH="${RUNNER_TEMP}/build.keychain-db"
+          security create-keychain -p "temp" "${KEYCHAIN_PATH}" 2>/dev/null || true
+          security unlock-keychain -p "temp" "${KEYCHAIN_PATH}" 2>/dev/null || true
+          security add-generic-password -a "ed25519" -s "https://sparkle-project.org" -w "${SPARKLE_PRIVATE_ED_KEY}" -U "${KEYCHAIN_PATH}" 2>/dev/null || true
+
+          # Sign each DMG
+          ARM64_SIG=$("$SIGN_UPDATE" -f "dist/DuoduoManager-${VERSION}-arm64-with-nodejs.dmg" 2>&1 | sed 's/.*sparkle:edSignature="\([^"]*\)".*/\1/')
+          X64_SIG=$("$SIGN_UPDATE" -f "dist/DuoduoManager-${VERSION}-x86_64-with-nodejs.dmg" 2>&1 | sed 's/.*sparkle:edSignature="\([^"]*\)".*/\1/')
+          LITE_SIG=$("$SIGN_UPDATE" -f "dist/DuoduoManager-${VERSION}-universal-lite.dmg" 2>&1 | sed 's/.*sparkle:edSignature="\([^"]*\)".*/\1/')
+
+          # Generate appcast.xml
+          cat > /tmp/appcast.xml <<APPLECAST
+          <?xml version="1.0" encoding="utf-8"?>
+          <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
+            <channel>
+              <title>DuoduoManager</title>
+              <link>https://openduo.github.io/duoduo-manager/appcast.xml</link>
+              <description>DuoduoManager Updates</description>
+              <language>en</language>
+              <item>
+                <title>DuoduoManager ${VERSION}</title>
+                <pubDate>$(date -u +"%a, %d %b %Y %H:%M:%S +0000")</pubDate>
+                <sparkle:channel>arm64-with-nodejs</sparkle:channel>
+                <enclosure
+                  url="${ARM64_URL}"
+                  sparkle:version="${VERSION}"
+                  sparkle:shortVersionString="${VERSION}"
+                  sparkle:edSignature="${ARM64_SIG}"
+                  length="${ARM64_SIZE}"
+                  type="application/octet-stream"
+                />
+                <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+              </item>
+              <item>
+                <title>DuoduoManager ${VERSION}</title>
+                <pubDate>$(date -u +"%a, %d %b %Y %H:%M:%S +0000")</pubDate>
+                <sparkle:channel>x86_64-with-nodejs</sparkle:channel>
+                <enclosure
+                  url="${X64_URL}"
+                  sparkle:version="${VERSION}"
+                  sparkle:shortVersionString="${VERSION}"
+                  sparkle:edSignature="${X64_SIG}"
+                  length="${X64_SIZE}"
+                  type="application/octet-stream"
+                />
+                <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+              </item>
+              <item>
+                <title>DuoduoManager ${VERSION}</title>
+                <pubDate>$(date -u +"%a, %d %b %Y %H:%M:%S +0000")</pubDate>
+                <sparkle:channel>universal-lite</sparkle:channel>
+                <enclosure
+                  url="${LITE_URL}"
+                  sparkle:version="${VERSION}"
+                  sparkle:shortVersionString="${VERSION}"
+                  sparkle:edSignature="${LITE_SIG}"
+                  length="${LITE_SIZE}"
+                  type="application/octet-stream"
+                />
+                <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+              </item>
+            </channel>
+          </rss>
+          APPLECAST
+
+          echo "Generated appcast.xml:"
+          cat /tmp/appcast.xml
+
+          # Deploy to gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages
+          git checkout gh-pages
+          cp /tmp/appcast.xml appcast.xml
+          git add appcast.xml
+          git commit -m "update appcast for ${TAG}" || true
+          git push origin gh-pages
+
+          # Return to feature branch
+          git checkout "${GITHUB_REF_NAME}" 2>/dev/null || git checkout main

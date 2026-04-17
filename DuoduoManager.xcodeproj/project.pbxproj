@@ -52,6 +52,7 @@
 		C96C679274ED41CD859A7290 /* StatusBarSharedViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = C306376319589909FF3AF1D1 /* StatusBarSharedViews.swift */; };
 		C97570B220A94D83DF959CC4 /* SessionsContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 383647EF2C49D5F7595B6F3E /* SessionsContentView.swift */; };
 		CD22515C383306E95C3EC463 /* StatusBarHeaderSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4C329E703E0DD9203EA29BF /* StatusBarHeaderSection.swift */; };
+		CFF4088417BD7CBDC548E612 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 40EDB38FE7C72A70CB4E071A /* Sparkle */; };
 		D015D59BC93A38CCEB6C4480 /* BrandIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1BE2BFCB55011DE4EE5208E /* BrandIconView.swift */; };
 		D0DF3F1980B048444A509AB0 /* ConfigStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2528FBA2BF72BF1A03D7A7EA /* ConfigStore.swift */; };
 		D2BE4E4DF0173E7FC1821406 /* DaemonStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63FD10798EC2CABC731AE9AB /* DaemonStatus.swift */; };
@@ -132,6 +133,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				788D30A4900C9B63050009AC /* CCReaderKit in Frameworks */,
+				CFF4088417BD7CBDC548E612 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -346,6 +348,7 @@
 			name = DuoduoManager;
 			packageProductDependencies = (
 				CC64276C4E99EC947B05A95B /* CCReaderKit */,
+				40EDB38FE7C72A70CB4E071A /* Sparkle */,
 			);
 			productName = DuoduoManager;
 			productReference = 26F554D4114DA0C65758F78F /* DuoduoManager.app */;
@@ -373,6 +376,7 @@
 			mainGroup = D267197F6CA5EA965B09508D;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				587A10F192364BA38F8B4015 /* XCRemoteSwiftPackageReference "Sparkle" */,
 				659CCEBBE5385EA5E30D67F4 /* XCRemoteSwiftPackageReference "cc-reader" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -669,6 +673,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		587A10F192364BA38F8B4015 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.4.0;
+			};
+		};
 		659CCEBBE5385EA5E30D67F4 /* XCRemoteSwiftPackageReference "cc-reader" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/kuaner/cc-reader.git";
@@ -680,6 +692,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		40EDB38FE7C72A70CB4E071A /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 587A10F192364BA38F8B4015 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
 		CC64276C4E99EC947B05A95B /* CCReaderKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 659CCEBBE5385EA5E30D67F4 /* XCRemoteSwiftPackageReference "cc-reader" */;

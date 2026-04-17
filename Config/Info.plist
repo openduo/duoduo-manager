@@ -41,5 +41,9 @@
     <string>Requires access to Desktop folder</string>
     <key>NSDocumentsFolderUsageDescription</key>
     <string>Requires access to Documents folder</string>
+    <key>SUFeedURL</key>
+    <string>https://openduo.github.io/duoduo-manager/appcast.xml</string>
+    <key>SUPublicEDKey</key>
+    <string>6/V32qkzE1rCvd12XrUtkw7kY0pdbdZc3YsWZZmKcYo=</string>
 </dict>
 </plist>
