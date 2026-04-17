@@ -18,7 +18,8 @@ struct StatusBarPresentationMapper {
                 showAppUpdate: store.hasAppUpdate,
                 appVersion: store.updates.appLatestVersion ?? AppUpdateService.currentVersion,
                 showRuntimeUpdate: showRuntimeUpdate,
-                isLoading: store.command.isLoading
+                isLoading: store.command.isLoading,
+                currentVersion: AppUpdateService.currentVersion
             ),
             topology: StatusTopologyPresentation(
                 endpoint: store.runtime.daemonConfig.daemonURL,

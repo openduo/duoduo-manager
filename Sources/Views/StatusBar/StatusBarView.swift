@@ -37,6 +37,7 @@ struct StatusBarView: View {
                 appVersion: statusBarPresentation.header.appVersion,
                 showRuntimeUpdate: statusBarPresentation.header.showRuntimeUpdate,
                 isLoading: statusBarPresentation.header.isLoading,
+                currentVersion: statusBarPresentation.header.currentVersion,
                 onAppUpdate: { store.openReleasesPage() },
                 onRefresh: { store.refreshVisibleContentWithFeedback() },
                 onUpgrade: { store.upgradeAll() }

@@ -18,6 +18,7 @@ struct StatusHeaderPresentation {
     let appVersion: String
     let showRuntimeUpdate: Bool
     let isLoading: Bool
+    let currentVersion: String
 }
 
 struct StatusTopologyPresentation {

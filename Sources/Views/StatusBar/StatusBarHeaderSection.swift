@@ -8,6 +8,7 @@ struct StatusHeaderBar: View {
     let appVersion: String
     let showRuntimeUpdate: Bool
     let isLoading: Bool
+    let currentVersion: String
     let onAppUpdate: () -> Void
     let onRefresh: () -> Void
     let onUpgrade: () -> Void
@@ -22,6 +23,7 @@ struct StatusHeaderBar: View {
                     .foregroundStyle(ConsolePalette.primaryText)
 
                 HStack(spacing: 8) {
+                    StatusBadge(title: "v\(currentVersion)", tint: ConsolePalette.accent)
                     StatusBadge(
                         title: runtimeLive ? "runtime live" : "runtime offline",
                         tint: runtimeLive ? ConsolePalette.signal : ConsolePalette.critical
