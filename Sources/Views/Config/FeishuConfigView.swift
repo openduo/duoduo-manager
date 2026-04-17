@@ -72,7 +72,26 @@ struct FeishuConfigView: View {
 
     private var authSection: some View {
         Group {
-            configSectionLabel(L10n.FeishuConfig.auth)
+            HStack {
+                configSectionLabel(L10n.FeishuConfig.auth)
+                Spacer()
+                Button {
+                    if let url = URL(string: "https://open.feishu.cn/page/openclaw?form=multiAgent") {
+                        NSWorkspace.shared.open(url)
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "plus.circle")
+                            .font(.system(size: 10))
+                        Text("创建机器人")
+                            .font(.system(size: 10, weight: .medium))
+                    }
+                    .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, 14)
+                .padding(.top, 14)
+            }
             configRow(label: "App ID", required: true, hint: "FEISHU_APP_ID") {
                 TextField("cli_xxxxxxxxxx", text: $config.appId)
                     .textFieldStyle(.roundedBorder)

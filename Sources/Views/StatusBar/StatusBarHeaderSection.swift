@@ -24,14 +24,6 @@ struct StatusHeaderBar: View {
 
                 HStack(spacing: 8) {
                     StatusBadge(title: "v\(currentVersion)", tint: ConsolePalette.accent)
-                    StatusBadge(
-                        title: runtimeLive ? "runtime live" : "runtime offline",
-                        tint: runtimeLive ? ConsolePalette.signal : ConsolePalette.critical
-                    )
-                    StatusBadge(
-                        title: controlBusy ? "control busy" : "control ready",
-                        tint: controlBusy ? ConsolePalette.warning : ConsolePalette.secondaryText
-                    )
                     StatusBadge(title: "events \(eventCount)", tint: ConsolePalette.accent)
                 }
             }
@@ -41,7 +33,7 @@ struct StatusHeaderBar: View {
             if showAppUpdate {
                 Button(action: onAppUpdate) {
                     HStack(spacing: 8) {
-                        Text("app \(appVersion)")
+                        Text("更新 \(appVersion)")
                             .font(.system(size: 11, weight: .semibold, design: .monospaced))
                         Image(systemName: "arrow.up.circle.fill")
                             .font(.system(size: 12, weight: .semibold))
