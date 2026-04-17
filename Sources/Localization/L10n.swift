@@ -32,6 +32,7 @@ enum L10n {
         static let install = String(localized: "status.install", bundle: bundle)
         static let clear = String(localized: "status.clear", bundle: bundle)
         static let quit = String(localized: "status.quit", bundle: bundle)
+        static let terminal = String(localized: "status.terminal", bundle: bundle)
     }
 
     // MARK: - Config

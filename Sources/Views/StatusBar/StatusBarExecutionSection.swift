@@ -94,6 +94,7 @@ struct StatusFooterBar: View {
     let onDashboard: () -> Void
     let onOnboard: () -> Void
     let onReader: () -> Void
+    let onTerminal: () -> Void
     let onQuit: () -> Void
 
     var body: some View {
@@ -116,6 +117,7 @@ struct StatusFooterBar: View {
                 footerButton(title: "ATC", systemImage: "square.grid.2x2", action: onDashboard)
                 footerButton(title: "Onboard", systemImage: "slider.horizontal.3", action: onOnboard)
                 footerButton(title: "Reader", systemImage: "book.closed", action: onReader)
+                footerButton(title: L10n.Status.terminal, systemImage: "terminal", action: onTerminal)
 
                 Spacer()
 

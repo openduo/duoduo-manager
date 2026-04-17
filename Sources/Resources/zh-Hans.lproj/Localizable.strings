@@ -7,6 +7,7 @@
 "status.install" = "安装";
 "status.clear" = "清除";
 "status.quit" = "退出";
+"status.terminal" = "终端";
 
 /* Config */
 "config.save" = "保存";
