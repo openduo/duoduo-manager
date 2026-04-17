@@ -10,6 +10,8 @@
 		010BD62B88EE96606B80D4B2 /* DaemonConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18799A79169815D636D94496 /* DaemonConfigView.swift */; };
 		017084BD3C6DE881D64F1663 /* NodeRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E9E00A5B0A8B3275C899A48 /* NodeRuntime.swift */; };
 		046BEAA5887839B7621DCEE1 /* ChannelRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F90A264797A448DDFA20BF /* ChannelRegistry.swift */; };
+		13D3A0E3DFD59142E77996D3 /* OnboardingState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89411076C4002FBEAE791367 /* OnboardingState.swift */; };
+		14354D2B7A708F52C3FDB43B /* OnboardingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C747F9FD7584F55E6DB0CF /* OnboardingService.swift */; };
 		18F89BEAF2BBD471D20C580E /* VersionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B18C58A264D7928F215FD2C1 /* VersionService.swift */; };
 		1AE91AE673A239BECE21292F /* StatusBarExecutionSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBA3BA1559ACB5B8DEC5DC72 /* StatusBarExecutionSection.swift */; };
 		1C109FCAF4464502FCB1D76B /* AppStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B63D809AA1DFB4E9079738E0 /* AppStore.swift */; };
@@ -39,6 +41,7 @@
 		77B740AE23180F0A8A274FA2 /* JobsContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B128C5ABF94ABDF761C5B57C /* JobsContentView.swift */; };
 		788D30A4900C9B63050009AC /* CCReaderKit in Frameworks */ = {isa = PBXBuildFile; productRef = CC64276C4E99EC947B05A95B /* CCReaderKit */; };
 		7F4CFB13A97E23FC5F3D6D95 /* AppStore+Actions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54840B6846285AED341E1271 /* AppStore+Actions.swift */; };
+		7FF1731F71DAE350C34EA241 /* OnboardingWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434F837F54C3ACF3FE2C30AA /* OnboardingWindow.swift */; };
 		8411541E31AA0B794EA8AFE4 /* DaemonService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8355C197B1A02286E7764494 /* DaemonService.swift */; };
 		84B87284D0CFC7204F39037A /* ShellService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F54D68D0A4635B98DE788042 /* ShellService.swift */; };
 		88E8A60676091CE351ED2CEA /* UpgradeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1AD037DDD7C23ACFA1C9D8 /* UpgradeService.swift */; };
@@ -55,12 +58,14 @@
 		CFF4088417BD7CBDC548E612 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 40EDB38FE7C72A70CB4E071A /* Sparkle */; };
 		D015D59BC93A38CCEB6C4480 /* BrandIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1BE2BFCB55011DE4EE5208E /* BrandIconView.swift */; };
 		D0DF3F1980B048444A509AB0 /* ConfigStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2528FBA2BF72BF1A03D7A7EA /* ConfigStore.swift */; };
+		D16D454824A600FDE4AB37FC /* ClaudeAuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBDDA8B25C6AAF6D04A90EAD /* ClaudeAuthService.swift */; };
 		D2BE4E4DF0173E7FC1821406 /* DaemonStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63FD10798EC2CABC731AE9AB /* DaemonStatus.swift */; };
 		DCD14982263FD265DD213F3D /* AppWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCAE8BA826F3F2FC84989E8E /* AppWindowController.swift */; };
 		E08920046FF8BCA7E8693D74 /* DuoduoManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5175981D0FA6FAD90921DCE /* DuoduoManagerApp.swift */; };
 		E0C6E810FA94AE64B35500DF /* AppUpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C4EACF47B7EFB6FD7EE9677 /* AppUpdateService.swift */; };
 		E29D739D6216455B4D6F60CA /* UpdateStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77280A851FF3D40035BCF49 /* UpdateStore.swift */; };
 		E4ABAFFE00ECC2A03DED886F /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = EDBE1098D012D8D7423DE84F /* Localizable.strings */; };
+		EE570707F73271A03DFA2C64 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC685DCE1F6A1F29867B8AF /* OnboardingView.swift */; };
 		F7A144EB6254AE07E38EBB12 /* DaemonConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F208FDB32EE95280C59DE480 /* DaemonConfig.swift */; };
 		F97089A9A67B81FF81F9BB4C /* DashboardPresentationMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D50E480BA7922E6B4768AAD /* DashboardPresentationMapper.swift */; };
 		FA953AF57994D9DB7B81424A /* StatusBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 905C0CACFCF03BAA771CC96E /* StatusBarView.swift */; };
@@ -81,17 +86,21 @@
 		383647EF2C49D5F7595B6F3E /* SessionsContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionsContentView.swift; sourceTree = "<group>"; };
 		3BEA40D33E29FED5A01BEB28 /* EventStreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventStreamView.swift; sourceTree = "<group>"; };
 		4342751622BFA0637BB62E76 /* CommandStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandStore.swift; sourceTree = "<group>"; };
+		434F837F54C3ACF3FE2C30AA /* OnboardingWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingWindow.swift; sourceTree = "<group>"; };
 		4D50E480BA7922E6B4768AAD /* DashboardPresentationMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardPresentationMapper.swift; sourceTree = "<group>"; };
 		4E4A80BA81B497FFF0F2F949 /* ConfigLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigLayout.swift; sourceTree = "<group>"; };
 		51F90A264797A448DDFA20BF /* ChannelRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelRegistry.swift; sourceTree = "<group>"; };
 		52ABF56B3A67B044533AB057 /* DashboardPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardPresentation.swift; sourceTree = "<group>"; };
 		54840B6846285AED341E1271 /* AppStore+Actions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppStore+Actions.swift"; sourceTree = "<group>"; };
+		5AC685DCE1F6A1F29867B8AF /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		63FD10798EC2CABC731AE9AB /* DaemonStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonStatus.swift; sourceTree = "<group>"; };
 		657074B7EFCDAC93A1F55DD8 /* FeishuConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeishuConfigView.swift; sourceTree = "<group>"; };
 		6C4EACF47B7EFB6FD7EE9677 /* AppUpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdateService.swift; sourceTree = "<group>"; };
 		6E9E00A5B0A8B3275C899A48 /* NodeRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeRuntime.swift; sourceTree = "<group>"; };
 		6FD413F335364A6203A47A3D /* AppStatusController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStatusController.swift; sourceTree = "<group>"; };
 		8355C197B1A02286E7764494 /* DaemonService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonService.swift; sourceTree = "<group>"; };
+		83C747F9FD7584F55E6DB0CF /* OnboardingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingService.swift; sourceTree = "<group>"; };
+		89411076C4002FBEAE791367 /* OnboardingState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingState.swift; sourceTree = "<group>"; };
 		8EE22FC1681BA2F7F2FC4C6F /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		905C0CACFCF03BAA771CC96E /* StatusBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarView.swift; sourceTree = "<group>"; };
 		9222F0BCE466A5D13746D15B /* L10n.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = L10n.swift; sourceTree = "<group>"; };
@@ -114,6 +123,7 @@
 		CEC650582C38EC2C96D4C1D5 /* StatusBarView+Support.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StatusBarView+Support.swift"; sourceTree = "<group>"; };
 		D007A22CF7A3EFDA50D85248 /* DashboardStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardStore.swift; sourceTree = "<group>"; };
 		D77280A851FF3D40035BCF49 /* UpdateStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateStore.swift; sourceTree = "<group>"; };
+		DBDDA8B25C6AAF6D04A90EAD /* ClaudeAuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeAuthService.swift; sourceTree = "<group>"; };
 		DF6F495D583E2F5B24E230D0 /* ChannelInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelInfo.swift; sourceTree = "<group>"; };
 		E0734A84D6BD5B7B46F95A44 /* AppStore+Fetch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppStore+Fetch.swift"; sourceTree = "<group>"; };
 		E29BB270BCC709AA4E4A82B6 /* FeishuConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeishuConfig.swift; sourceTree = "<group>"; };
@@ -168,9 +178,19 @@
 				63FD10798EC2CABC731AE9AB /* DaemonStatus.swift */,
 				BBAA39C3D4832508EC728871 /* DashboardModels.swift */,
 				E29BB270BCC709AA4E4A82B6 /* FeishuConfig.swift */,
+				89411076C4002FBEAE791367 /* OnboardingState.swift */,
 				CD3062CC1C88B89EE363866C /* PackageVersion.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		4C0848B5CAF7C10AB527B516 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				5AC685DCE1F6A1F29867B8AF /* OnboardingView.swift */,
+				434F837F54C3ACF3FE2C30AA /* OnboardingWindow.swift */,
+			);
+			path = Onboarding;
 			sourceTree = "<group>";
 		};
 		4C5A645C213587FB99087D24 /* Shared */ = {
@@ -206,9 +226,11 @@
 			children = (
 				6C4EACF47B7EFB6FD7EE9677 /* AppUpdateService.swift */,
 				926633CA04F758F9BC2A5064 /* ChannelService.swift */,
+				DBDDA8B25C6AAF6D04A90EAD /* ClaudeAuthService.swift */,
 				8355C197B1A02286E7764494 /* DaemonService.swift */,
 				210C266E6749AEA8B72E0E08 /* DashboardRPCService.swift */,
 				6E9E00A5B0A8B3275C899A48 /* NodeRuntime.swift */,
+				83C747F9FD7584F55E6DB0CF /* OnboardingService.swift */,
 				F54D68D0A4635B98DE788042 /* ShellService.swift */,
 				1E1AD037DDD7C23ACFA1C9D8 /* UpgradeService.swift */,
 				B18C58A264D7928F215FD2C1 /* VersionService.swift */,
@@ -231,6 +253,7 @@
 			children = (
 				86048B60EE189196D5617CD8 /* Config */,
 				FAE99F0C705E238FFC1B8338 /* Dashboard */,
+				4C0848B5CAF7C10AB527B516 /* Onboarding */,
 				4C5A645C213587FB99087D24 /* Shared */,
 				9C0BF804C628BF856A4E44CE /* StatusBar */,
 			);
@@ -418,6 +441,7 @@
 				6DB4DAD1E2EE5E6470EA02E8 /* ChannelInfo.swift in Sources */,
 				046BEAA5887839B7621DCEE1 /* ChannelRegistry.swift in Sources */,
 				4DEC4D220CA3E1F92EF901CF /* ChannelService.swift in Sources */,
+				D16D454824A600FDE4AB37FC /* ClaudeAuthService.swift in Sources */,
 				91FA18C55A51123CDDF890C6 /* CommandStore.swift in Sources */,
 				2224CCBCC47C74BB0F7C1CED /* ConfigContentView.swift in Sources */,
 				67919609723E49BE8D1FC602 /* ConfigLayout.swift in Sources */,
@@ -441,6 +465,10 @@
 				77B740AE23180F0A8A274FA2 /* JobsContentView.swift in Sources */,
 				223709C12B9D941FF19956CF /* L10n.swift in Sources */,
 				017084BD3C6DE881D64F1663 /* NodeRuntime.swift in Sources */,
+				14354D2B7A708F52C3FDB43B /* OnboardingService.swift in Sources */,
+				13D3A0E3DFD59142E77996D3 /* OnboardingState.swift in Sources */,
+				EE570707F73271A03DFA2C64 /* OnboardingView.swift in Sources */,
+				7FF1731F71DAE350C34EA241 /* OnboardingWindow.swift in Sources */,
 				35F3E9C29A2F992A3B84784C /* PackageVersion.swift in Sources */,
 				8C76D7C9F2A6E4BAA14B967A /* RuntimeStore.swift in Sources */,
 				C97570B220A94D83DF959CC4 /* SessionsContentView.swift in Sources */,

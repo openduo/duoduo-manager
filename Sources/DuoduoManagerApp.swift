@@ -57,6 +57,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
     private var store: AppStore?
     private var statusController: AppStatusController?
     private var windowController: AppWindowController?
+    private var onboardingController: OnboardingWindowController?
     private var openReaderWindowAction: (() -> Void)?
     lazy var updaterController = SPUStandardUpdaterController(
         startingUpdater: true,
@@ -113,6 +114,28 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         }
         updatePopoverContent()
         updateStatusBarIcon()
+        checkAndShowOnboarding()
+    }
+
+    private func checkAndShowOnboarding() {
+        Task {
+            await store?.refreshRuntime()
+            let snapshot = await OnboardingService.detect(appStore: store)
+            let critical = snapshot.unmetRequirements.filter { $0 != .daemon }
+            if !critical.isEmpty {
+                await MainActor.run { showOnboarding() }
+            }
+        }
+    }
+
+    private func showOnboarding(at preferredRequirement: OnboardingRequirement? = nil) {
+        guard onboardingController == nil else { return }
+        let controller = OnboardingWindowController(appStore: store, preferredRequirement: preferredRequirement)
+        controller.onClose = { [weak self] in
+            self?.onboardingController = nil
+        }
+        onboardingController = controller
+        controller.show()
     }
 
     private func updatePopoverContent() {
@@ -120,7 +143,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         statusController?.setPopoverContent(StatusBarView(
             store: store,
             openDashboard: { [weak self] in self?.openDashboard() },
-            openReader: { [weak self] in self?.openReader() }
+            openReader: { [weak self] in self?.openReader() },
+            openOnboard: { [weak self] in self?.openOnboarding(at: .claudeAccess) }
         ))
         updateStatusBarIcon()
     }
@@ -139,6 +163,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         statusController?.dismissPopover()
         guard let store else { return }
         windowController?.showDashboard(store: store)
+    }
+
+    private func openOnboarding(at preferredRequirement: OnboardingRequirement?) {
+        statusController?.dismissPopover()
+        showOnboarding(at: preferredRequirement)
     }
 
     // MARK: - CC Reader

@@ -92,6 +92,7 @@ struct StatusFooterBar: View {
     let statusMessage: String?
     let statusIsError: Bool
     let onDashboard: () -> Void
+    let onOnboard: () -> Void
     let onReader: () -> Void
     let onQuit: () -> Void
 
@@ -113,6 +114,7 @@ struct StatusFooterBar: View {
 
             HStack(spacing: 8) {
                 footerButton(title: "ATC", systemImage: "square.grid.2x2", action: onDashboard)
+                footerButton(title: "Onboard", systemImage: "slider.horizontal.3", action: onOnboard)
                 footerButton(title: "Reader", systemImage: "book.closed", action: onReader)
 
                 Spacer()
