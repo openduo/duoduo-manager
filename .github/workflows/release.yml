@@ -252,6 +252,3 @@ jobs:
           git add appcast.xml
           git commit -m "update appcast for ${TAG}" || true
           git push origin gh-pages
-
-          # Return to main
-          git checkout main
