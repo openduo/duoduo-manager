@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>DuoduoManager</title>
+    <link>https://openduo.github.io/duoduo-manager/appcast.xml</link>
+    <description>DuoduoManager Updates</description>
+    <language>en</language>
+    <item>
+      <title>DuoduoManager 1.6.2</title>
+      <pubDate>Fri, 17 Apr 2026 02:22:01 +0000</pubDate>
+      <sparkle:channel>arm64-with-nodejs</sparkle:channel>
+      <enclosure
+        url="https://github.com/openduo/duoduo-manager/releases/download/v1.6.2/DuoduoManager-1.6.2-arm64-with-nodejs.dmg"
+        sparkle:version="1.6.2"
+        sparkle:shortVersionString="1.6.2"
+        sparkle:edSignature="mNDeSFQHE9dnE6I5fEUVbA+8qdtFuyDAXymOS6nHCxO59HLc98S2KfjVfIhC+DZC5Be/Th6tVda5bTDrCr8rBg=="
+        length="95268760"
+        type="application/octet-stream"
+      />
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+    </item>
+    <item>
+      <title>DuoduoManager 1.6.2</title>
+      <pubDate>Fri, 17 Apr 2026 02:22:01 +0000</pubDate>
+      <sparkle:channel>x86_64-with-nodejs</sparkle:channel>
+      <enclosure
+        url="https://github.com/openduo/duoduo-manager/releases/download/v1.6.2/DuoduoManager-1.6.2-x86_64-with-nodejs.dmg"
+        sparkle:version="1.6.2"
+        sparkle:shortVersionString="1.6.2"
+        sparkle:edSignature="ZXWdf2cViU9YLag6Q1upm36FzsTrlR7doRBCIzTkMRNrBiWTtKscDh664XhAZMPGuECLTxC9mp8JToMXIGVkBA=="
+        length="98868071"
+        type="application/octet-stream"
+      />
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+    </item>
+    <item>
+      <title>DuoduoManager 1.6.2</title>
+      <pubDate>Fri, 17 Apr 2026 02:22:01 +0000</pubDate>
+      <sparkle:channel>universal-lite</sparkle:channel>
+      <enclosure
+        url="https://github.com/openduo/duoduo-manager/releases/download/v1.6.2/DuoduoManager-1.6.2-universal-lite.dmg"
+        sparkle:version="1.6.2"
+        sparkle:shortVersionString="1.6.2"
+        sparkle:edSignature="k7qibVku5H+euZWqJZx4BWH2p/4rnwP63fGwwUbQxASnhq4GzOhAMjrMJhkP00j0wKkB2+OLypws+Dr2nN9NDA=="
+        length="5166756"
+        type="application/octet-stream"
+      />
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+    </item>
+  </channel>
+</rss>
