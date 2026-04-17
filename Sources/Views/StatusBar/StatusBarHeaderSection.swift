@@ -33,7 +33,7 @@ struct StatusHeaderBar: View {
             if showAppUpdate {
                 Button(action: onAppUpdate) {
                     HStack(spacing: 8) {
-                        Text("更新 \(appVersion)")
+                        Text(L10n.Onboard.update(appVersion))
                             .font(.system(size: 11, weight: .semibold, design: .monospaced))
                         Image(systemName: "arrow.up.circle.fill")
                             .font(.system(size: 12, weight: .semibold))

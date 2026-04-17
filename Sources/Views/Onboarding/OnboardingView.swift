@@ -54,7 +54,7 @@ struct OnboardingView: View {
                     .foregroundStyle(ConsolePalette.secondaryText)
                     .frame(width: 18)
 
-                Text("Onboard")
+                Text(L10n.Onboard.headerTitle)
                     .font(.system(size: 22, weight: .semibold))
                     .foregroundStyle(ConsolePalette.primaryText)
             }
@@ -156,26 +156,26 @@ struct OnboardingView: View {
             case .claudeCLI:
                 return installedLabel(store.state.snapshot.claudeVersion)
             case .claudeAccess:
-                return "已连接"
+                return L10n.Onboard.connected
             case .daemon:
                 return daemonCompletionLabel
             }
         case .current:
             if store.state.step == .detecting {
-                return "检测中..."
+                return L10n.Onboard.detecting
             }
             switch requirement {
             case .duoduoCLI:
-                return "安装中..."
+                return L10n.Onboard.installing
             case .claudeCLI:
-                return "安装中..."
+                return L10n.Onboard.installing
             case .claudeAccess:
-                return "需要填写 Token"
+                return L10n.Onboard.needToken
             case .daemon:
-                return "启动中..."
+                return L10n.Onboard.starting
             }
         case .upcoming:
-            return "等待中"
+            return L10n.Onboard.waiting
         }
     }
 
@@ -199,7 +199,7 @@ struct OnboardingView: View {
 
     private var completionHeroColumn: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("SETUP COMPLETE")
+            Text(L10n.Onboard.setupComplete)
                 .font(.system(size: 11, weight: .semibold, design: .monospaced))
                 .tracking(1.2)
                 .foregroundStyle(ConsolePalette.secondaryText)
@@ -219,7 +219,7 @@ struct OnboardingView: View {
                 .frame(width: 108, height: 3)
                 .clipShape(Capsule())
 
-            Text("Duoduo 已就绪。你随时都可以回到第三步修改模型配置。")
+            Text(L10n.Onboard.readyHint)
                 .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(ConsolePalette.secondaryText)
                 .fixedSize(horizontal: false, vertical: true)
@@ -252,17 +252,17 @@ struct OnboardingView: View {
             VStack(spacing: 0) {
                 completionMetricRow("Duoduo", installedLabel(store.state.snapshot.duoduoVersion))
                 completionMetricRow("Claude SDK", installedLabel(store.state.snapshot.claudeVersion))
-                completionMetricRow("模型", "已连接")
+                completionMetricRow(L10n.Onboard.metricModel, L10n.Onboard.connected)
                 completionMetricRow("Daemon", daemonCompletionLabel, showsDivider: false)
             }
 
             HStack(spacing: 12) {
-                primaryButton(title: "修改模型配置", tint: ConsolePalette.accent, disabled: false) {
+                primaryButton(title: L10n.Onboard.editConfig, tint: ConsolePalette.accent, disabled: false) {
                     store.send(.editRequirementRequested(.claudeAccess))
                 }
 
                 Button(action: onClose) {
-                    Text("关闭")
+                    Text(L10n.Onboard.close)
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(ConsolePalette.secondaryText)
                 }
@@ -440,7 +440,7 @@ private struct TaskRow: View {
 
                 if store.state.selectedPreset == .custom {
                     simpleField(
-                        placeholder: "Base URL",
+                        placeholder: L10n.Onboard.baseUrlPlaceholder,
                         text: Binding(
                             get: { store.state.customBaseURL },
                             set: { store.send(.customBaseURLChanged($0)) }
@@ -448,7 +448,7 @@ private struct TaskRow: View {
                     )
 
                     simpleField(
-                        placeholder: "模型名称",
+                        placeholder: L10n.Onboard.modelPlaceholder,
                         text: Binding(
                             get: { store.state.customModel },
                             set: { store.send(.customModelChanged($0)) }
@@ -458,14 +458,14 @@ private struct TaskRow: View {
 
                 HStack(spacing: 10) {
                     primaryButton(
-                        title: store.state.isBusy ? "保存中..." : "继续",
+                        title: store.state.isBusy ? L10n.Onboard.saving : L10n.Onboard.continue_,
                         tint: ConsolePalette.accent,
                         disabled: store.state.isBusy || !store.state.canSaveProvider
                     ) {
                         store.send(.saveProviderRequested)
                     }
 
-                    secondaryButton(title: "检查") {
+                    secondaryButton(title: L10n.Onboard.verify) {
                         store.send(.verifyClaudeStatusRequested)
                     }
                 }
@@ -525,12 +525,12 @@ private struct TaskRow: View {
 
     private var officialLoginUI: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("将通过浏览器登录 Anthropic 官方账号。")
+            Text(L10n.Onboard.officialHint)
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(ConsolePalette.secondaryText)
 
             primaryButton(
-                title: store.state.isBusy ? "等待登录..." : "浏览器登录",
+                title: store.state.isBusy ? L10n.Onboard.waitingLogin : L10n.Onboard.browserLogin,
                 tint: ConsolePalette.accent,
                 disabled: store.state.isBusy
             ) {
@@ -543,12 +543,12 @@ private struct TaskRow: View {
         HStack(spacing: 8) {
             Group {
                 if store.state.showSecret {
-                    TextField("输入 Token", text: Binding(
+                    TextField(L10n.Onboard.tokenPlaceholder, text: Binding(
                         get: { store.state.authToken },
                         set: { store.send(.authTokenChanged($0)) }
                     ))
                 } else {
-                    SecureField("输入 Token", text: Binding(
+                    SecureField(L10n.Onboard.tokenPlaceholder, text: Binding(
                         get: { store.state.authToken },
                         set: { store.send(.authTokenChanged($0)) }
                     ))

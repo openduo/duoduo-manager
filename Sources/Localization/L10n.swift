@@ -131,6 +131,81 @@ enum L10n {
         static let systemNodeMissing = String(localized: "setup.systemNodeMissing", bundle: bundle)
     }
 
+    // MARK: - Onboard
+
+    enum Onboard {
+        static let headerTitle = String(localized: "onboard.headerTitle", bundle: bundle)
+        static let setupComplete = String(localized: "onboard.setupComplete", bundle: bundle)
+        static let enjoy = String(localized: "onboard.enjoy", bundle: bundle)
+        static let readyHint = String(localized: "onboard.readyHint", bundle: bundle)
+        static let editConfig = String(localized: "onboard.editConfig", bundle: bundle)
+        static let close = String(localized: "onboard.close", bundle: bundle)
+        static let detecting = String(localized: "onboard.detecting", bundle: bundle)
+        static let installing = String(localized: "onboard.installing", bundle: bundle)
+        static let starting = String(localized: "onboard.starting", bundle: bundle)
+        static let waiting = String(localized: "onboard.waiting", bundle: bundle)
+        static let connected = String(localized: "onboard.connected", bundle: bundle)
+        static let needToken = String(localized: "onboard.needToken", bundle: bundle)
+        static let tokenPlaceholder = String(localized: "onboard.tokenPlaceholder", bundle: bundle)
+        static let baseUrlPlaceholder = String(localized: "onboard.baseUrlPlaceholder", bundle: bundle)
+        static let modelPlaceholder = String(localized: "onboard.modelPlaceholder", bundle: bundle)
+        static let continue_ = String(localized: "onboard.continue", bundle: bundle)
+        static let saving = String(localized: "onboard.saving", bundle: bundle)
+        static let verify = String(localized: "onboard.verify", bundle: bundle)
+        static let browserLogin = String(localized: "onboard.browserLogin", bundle: bundle)
+        static let waitingLogin = String(localized: "onboard.waitingLogin", bundle: bundle)
+        static let officialHint = String(localized: "onboard.officialHint", bundle: bundle)
+        static let customProvider = String(localized: "onboard.customProvider", bundle: bundle)
+        static let createBot = String(localized: "onboard.createBot", bundle: bundle)
+        static func update(_ version: String) -> String {
+            String(localized: "onboard.update \(version)", bundle: bundle)
+        }
+        static let metricModel = String(localized: "onboard.metricModel", bundle: bundle)
+
+        // Requirement titles
+        static let reqDuoduoCLI = String(localized: "onboard.req.duoduoCLI", bundle: bundle)
+        static let reqClaudeCLI = String(localized: "onboard.req.claudeCLI", bundle: bundle)
+        static let reqClaudeAccess = String(localized: "onboard.req.claudeAccess", bundle: bundle)
+        static let reqDaemon = String(localized: "onboard.req.daemon", bundle: bundle)
+
+        // Requirement summaries
+        static let summaryDuoduoCLI = String(localized: "onboard.summary.duoduoCLI", bundle: bundle)
+        static let summaryClaudeCLI = String(localized: "onboard.summary.claudeCLI", bundle: bundle)
+        static let summaryClaudeAccess = String(localized: "onboard.summary.claudeAccess", bundle: bundle)
+        static let summaryDaemon = String(localized: "onboard.summary.daemon", bundle: bundle)
+
+        // Status messages
+        static let statusDetecting = String(localized: "onboard.status.detecting", bundle: bundle)
+        static let statusRedetecting = String(localized: "onboard.status.redetecting", bundle: bundle)
+        static func statusEditing(_ title: String) -> String {
+            String(localized: "onboard.status.editing \(title)", bundle: bundle)
+        }
+        static let statusInstallingDuoduo = String(localized: "onboard.status.installingDuoduo", bundle: bundle)
+        static let statusInstallingClaude = String(localized: "onboard.status.installingClaude", bundle: bundle)
+        static let statusReadingAuth = String(localized: "onboard.status.readingAuth", bundle: bundle)
+        static let statusWritingSettings = String(localized: "onboard.status.writingSettings", bundle: bundle)
+        static let statusProviderSaved = String(localized: "onboard.status.providerSaved", bundle: bundle)
+        static let statusBrowserLogin = String(localized: "onboard.status.browserLogin", bundle: bundle)
+        static let statusStartingDaemon = String(localized: "onboard.status.startingDaemon", bundle: bundle)
+        static let statusSystemReady = String(localized: "onboard.status.systemReady", bundle: bundle)
+        static func statusNext(_ title: String) -> String {
+            String(localized: "onboard.status.next \(title)", bundle: bundle)
+        }
+        static let statusLoginSuccess = String(localized: "onboard.status.loginSuccess", bundle: bundle)
+        static let statusDaemonStarted = String(localized: "onboard.status.daemonStarted", bundle: bundle)
+        static let statusLlmVerified = String(localized: "onboard.status.llmVerified", bundle: bundle)
+
+        // Error messages
+        static let errClaudeNotInstalled = String(localized: "onboard.error.claudeNotInstalled", bundle: bundle)
+        static let errLoginTimeout = String(localized: "onboard.error.loginTimeout", bundle: bundle)
+        static let errSettingsInvalid = String(localized: "onboard.error.settingsInvalid", bundle: bundle)
+        static let errAuthOutputParse = String(localized: "onboard.error.authOutputParse", bundle: bundle)
+        static let errAuthNotVerified = String(localized: "onboard.error.authNotVerified", bundle: bundle)
+        static let errConfigSavedButAuthFailed = String(localized: "onboard.error.configSavedButAuthFailed", bundle: bundle)
+        static let errBrowserLoginIncomplete = String(localized: "onboard.error.browserLoginIncomplete", bundle: bundle)
+        static let errDaemonNotHealthy = String(localized: "onboard.error.daemonNotHealthy", bundle: bundle)
+    }
+
 }
 
 // swiftlint:enable line_length

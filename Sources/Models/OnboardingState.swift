@@ -11,13 +11,13 @@ enum OnboardingRequirement: String, CaseIterable, Identifiable, Hashable {
     var title: String {
         switch self {
         case .duoduoCLI:
-            return "安装 duoduo"
+            return L10n.Onboard.reqDuoduoCLI
         case .claudeCLI:
-            return "安装 Claude CLI"
+            return L10n.Onboard.reqClaudeCLI
         case .claudeAccess:
-            return "连接 LLM"
+            return L10n.Onboard.reqClaudeAccess
         case .daemon:
-            return "启动 daemon"
+            return L10n.Onboard.reqDaemon
         }
     }
 
@@ -37,13 +37,13 @@ enum OnboardingRequirement: String, CaseIterable, Identifiable, Hashable {
     var summary: String {
         switch self {
         case .duoduoCLI:
-            return "把 manager 需要的 duoduo CLI 安装到当前运行环境。"
+            return L10n.Onboard.summaryDuoduoCLI
         case .claudeCLI:
-            return "安装 claude 命令行工具，后续认证和 provider 配置都依赖它。"
+            return L10n.Onboard.summaryClaudeCLI
         case .claudeAccess:
-            return "使用浏览器登录或写入 ~/.claude/settings.json，让 `claude auth status` 通过。"
+            return L10n.Onboard.summaryClaudeAccess
         case .daemon:
-            return "启动 duoduo daemon，让菜单栏主界面可以继续管理运行时。"
+            return L10n.Onboard.summaryDaemon
         }
     }
 }
@@ -166,10 +166,10 @@ enum OnboardingReducer {
     static func reduce(state: inout OnboardingState, event: OnboardingEvent) -> OnboardingCommand? {
         switch event {
         case .bootstrap:
-            return state.hydratedSettings ? startDetection(state: &state, status: "正在读取 duoduo、claude 和 daemon 状态。") : .hydrateSettings
+            return state.hydratedSettings ? startDetection(state: &state, status: L10n.Onboard.statusDetecting) : .hydrateSettings
 
         case .refreshRequested:
-            return startDetection(state: &state, status: "正在重新读取本机状态。")
+            return startDetection(state: &state, status: L10n.Onboard.statusRedetecting)
 
         case .editRequirementRequested(let requirement):
             state.preferredRequirement = requirement
@@ -177,18 +177,18 @@ enum OnboardingReducer {
             state.step = .ready
             state.isBusy = false
             state.errorMessage = nil
-            state.statusMessage = "继续修改\(requirement.title)。"
+            state.statusMessage = L10n.Onboard.statusEditing(requirement.title)
             return nil
 
         case .settingsHydrated(let env):
             state.hydratedSettings = true
             hydrate(state: &state, env: env)
-            return startDetection(state: &state, status: "正在读取 duoduo、claude 和 daemon 状态。")
+            return startDetection(state: &state, status: L10n.Onboard.statusDetecting)
 
         case .hydrateSettingsFailed(let message):
             state.hydratedSettings = true
             state.errorMessage = message
-            return startDetection(state: &state, status: "正在读取 duoduo、claude 和 daemon 状态。")
+            return startDetection(state: &state, status: L10n.Onboard.statusDetecting)
 
         case .useMirrorChanged(let value):
             state.useNpmMirror = value
@@ -221,35 +221,35 @@ enum OnboardingReducer {
 
         case .installDuoduoRequested:
             guard !state.isBusy else { return nil }
-            beginBusy(state: &state, message: "正在安装 duoduo CLI。")
+            beginBusy(state: &state, message: L10n.Onboard.statusInstallingDuoduo)
             return .installDuoduo(useMirror: state.useNpmMirror)
 
         case .installClaudeRequested:
             guard !state.isBusy else { return nil }
-            beginBusy(state: &state, message: "正在安装 Claude CLI。")
+            beginBusy(state: &state, message: L10n.Onboard.statusInstallingClaude)
             return .installClaude(useMirror: state.useNpmMirror)
 
         case .verifyClaudeStatusRequested:
             guard !state.isBusy else { return nil }
-            beginBusy(state: &state, message: "正在读取 `claude auth status`。")
+            beginBusy(state: &state, message: L10n.Onboard.statusReadingAuth)
             return .verifyClaudeStatus
 
         case .saveProviderRequested:
             guard !state.isBusy, state.canSaveProvider else { return nil }
-            beginBusy(state: &state, message: "正在写入 ~/.claude/settings.json。")
+            beginBusy(state: &state, message: L10n.Onboard.statusWritingSettings)
             return .saveProviderConfig(
                 envVars: providerEnvVars(from: state),
-                successStatus: "provider 配置已生效，正在继续。"
+                successStatus: L10n.Onboard.statusProviderSaved
             )
 
         case .oauthLoginRequested:
             guard !state.isBusy else { return nil }
-            beginBusy(state: &state, message: "正在打开浏览器登录...")
+            beginBusy(state: &state, message: L10n.Onboard.statusBrowserLogin)
             return .performOAuthLogin
 
         case .startDaemonRequested:
             guard !state.isBusy else { return nil }
-            beginBusy(state: &state, message: "正在启动 duoduo daemon。")
+            beginBusy(state: &state, message: L10n.Onboard.statusStartingDaemon)
             return .startDaemon
 
         case .detectionFinished(let snapshot, let status):
@@ -266,9 +266,9 @@ enum OnboardingReducer {
             if let status {
                 state.statusMessage = status
             } else if snapshot.unmetRequirements.isEmpty {
-                state.statusMessage = "系统已经就绪。"
+                state.statusMessage = L10n.Onboard.statusSystemReady
             } else if let requirement = state.currentRequirement {
-                state.statusMessage = "下一步：\(requirement.title)"
+                state.statusMessage = L10n.Onboard.statusNext(requirement.title)
             }
             return nil
 
@@ -392,9 +392,9 @@ final class OnboardingStore {
                         knownClaudeInstalled: true,
                         knownClaudeAuthStatus: status
                     )
-                    send(.detectionFinished(snapshot, status: "LLM 连接已验证，正在继续。"))
+                    send(.detectionFinished(snapshot, status: L10n.Onboard.statusLlmVerified))
                 } else {
-                    send(.operationFailed("尚未通过 `claude auth status` 校验。"))
+                    send(.operationFailed(L10n.Onboard.errAuthNotVerified))
                 }
             } catch {
                 send(.operationFailed(error.localizedDescription))
@@ -412,7 +412,7 @@ final class OnboardingStore {
                     )
                     send(.detectionFinished(snapshot, status: successStatus))
                 } else {
-                    send(.operationFailed("配置已写入，但 `claude auth status` 仍未通过。请检查 Base URL、Token 或模型配置。"))
+                    send(.operationFailed(L10n.Onboard.errConfigSavedButAuthFailed))
                 }
             } catch {
                 send(.operationFailed(error.localizedDescription))
@@ -428,9 +428,9 @@ final class OnboardingStore {
                         knownClaudeInstalled: true,
                         knownClaudeAuthStatus: authStatus
                     )
-                    send(.detectionFinished(snapshot, status: "登录成功，正在继续。"))
+                    send(.detectionFinished(snapshot, status: L10n.Onboard.statusLoginSuccess))
                 } else {
-                    send(.operationFailed("浏览器登录未完成，请重试。"))
+                    send(.operationFailed(L10n.Onboard.errBrowserLoginIncomplete))
                 }
             } catch {
                 send(.operationFailed(error.localizedDescription))
@@ -448,9 +448,9 @@ final class OnboardingStore {
                         await appStore.refreshRuntime()
                     }
                     let snapshot = await OnboardingService.detect(appStore: appStore)
-                    send(.detectionFinished(snapshot, status: "daemon 已启动，正在重新检测。"))
+                    send(.detectionFinished(snapshot, status: L10n.Onboard.statusDaemonStarted))
                 } else {
-                    send(.operationFailed("daemon 未进入 healthy 状态。"))
+                    send(.operationFailed(L10n.Onboard.errDaemonNotHealthy))
                 }
             } catch {
                 send(.operationFailed(error.localizedDescription))

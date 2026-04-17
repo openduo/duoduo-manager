@@ -9,13 +9,13 @@ enum ClaudeCLIError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notInstalled:
-            return "claude CLI 未安装。"
+            return L10n.Onboard.errClaudeNotInstalled
         case .loginFailed:
-            return "认证超时，请在浏览器中完成登录。"
+            return L10n.Onboard.errLoginTimeout
         case .configureFailed(let message):
             return message
         case .invalidSettingsFile:
-            return "~/.claude/settings.json 不是有效的 JSON，无法安全更新。"
+            return L10n.Onboard.errSettingsInvalid
         }
     }
 }
@@ -31,7 +31,7 @@ struct ClaudeCLIService: Sendable {
         let output = try await ShellService.run("claude", arguments: ["auth", "status"])
         guard let data = output.data(using: .utf8),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            throw ClaudeCLIError.configureFailed("`claude auth status` 输出无法解析。")
+            throw ClaudeCLIError.configureFailed(L10n.Onboard.errAuthOutputParse)
         }
 
         return ClaudeAuthStatus(
@@ -215,7 +215,7 @@ struct LLMProviderPreset: Identifiable, Hashable {
 
     static let custom = LLMProviderPreset(
         id: "custom",
-        name: "自定义",
+        name: L10n.Onboard.customProvider,
         icon: "slider.horizontal.3",
         envVars: [:]
     )

@@ -83,7 +83,7 @@ struct FeishuConfigView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "plus.circle")
                             .font(.system(size: 10))
-                        Text("创建机器人")
+                        Text(L10n.Onboard.createBot)
                             .font(.system(size: 10, weight: .medium))
                     }
                     .foregroundStyle(.secondary)
