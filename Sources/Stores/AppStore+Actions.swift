@@ -130,7 +130,7 @@ extension AppStore {
     }
 
     func openReleasesPage() {
-        AppUpdateService.openReleasesPage()
+        checkForSparkleUpdate?()
     }
 
     func fetchConfig() async {

@@ -10,6 +10,9 @@ packages:
   cc-reader:
     url: https://github.com/kuaner/cc-reader.git
     from: 1.6.0
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: 2.4.0
 
 settings:
   base:
@@ -39,6 +42,7 @@ targets:
     dependencies:
       - package: cc-reader
         product: CCReaderKit
+      - package: Sparkle
     settings:
       base:
         PRODUCT_MODULE_NAME: DuoduoManager

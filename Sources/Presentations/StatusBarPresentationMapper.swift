@@ -16,7 +16,7 @@ struct StatusBarPresentationMapper {
                 controlBusy: store.command.isLoading,
                 eventCount: store.dashboard.events.count,
                 showAppUpdate: store.hasAppUpdate,
-                appVersion: store.updates.appLatestVersion ?? "1.5.0",
+                appVersion: store.updates.appLatestVersion ?? AppUpdateService.currentVersion,
                 showRuntimeUpdate: showRuntimeUpdate,
                 isLoading: store.command.isLoading
             ),

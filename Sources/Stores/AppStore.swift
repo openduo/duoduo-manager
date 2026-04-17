@@ -16,6 +16,7 @@ final class AppStore {
     let versionService = VersionService()
     let upgradeService = UpgradeService()
     let appUpdateService = AppUpdateService()
+    var checkForSparkleUpdate: (() -> Void)?
 
     var daemonService: DaemonService
     var channelService: ChannelService

@@ -1,5 +1,6 @@
 import SwiftUI
 import CCReaderKit
+import Sparkle
 
 @main
 struct DuoduoManagerApp: App {
@@ -52,11 +53,21 @@ private struct CCReaderSceneView: View {
 }
 
 @MainActor
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
     private var store: AppStore?
     private var statusController: AppStatusController?
     private var windowController: AppWindowController?
     private var openReaderWindowAction: (() -> Void)?
+    lazy var updaterController = SPUStandardUpdaterController(
+        startingUpdater: true,
+        updaterDelegate: self,
+        userDriverDelegate: nil
+    )
+
+    /// The build variant channel from Info.plist (e.g. "arm64-with-nodejs", "universal-lite")
+    private var buildVariantChannel: String? {
+        Bundle.main.object(forInfoDictionaryKey: "DuoduoBuildVariant") as? String
+    }
 
     nonisolated func applicationDidFinishLaunching(_ notification: Notification) {
         Task { @MainActor in
@@ -88,6 +99,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func initViewModel() {
         store = AppStore()
+        store?.checkForSparkleUpdate = { [weak self] in
+            self?.updaterController.checkForUpdates(nil)
+        }
         store?.updateStatusBarIcon = { [weak self] in
             self?.updateStatusBarIcon()
         }
@@ -149,5 +163,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if !hasOtherVisibleWindow {
             NSApp.setActivationPolicy(.accessory)
         }
+    }
+
+    // MARK: - SPUUpdaterDelegate
+
+    nonisolated func allowedChannels(for updater: SPUUpdater) -> Set<String> {
+        if let channel = Bundle.main.object(forInfoDictionaryKey: "DuoduoBuildVariant") as? String {
+            return [channel]
+        }
+        return []
     }
 }

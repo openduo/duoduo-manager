@@ -162,12 +162,20 @@ build_variant() {
     cp -R "$source_app" "$app_path"
     chmod -R u+w "$app_path"
 
-    # Mark runtime mode in Info.plist
+    # Mark runtime mode and build variant in Info.plist
     local info_plist_path="${app_path}/Contents/Info.plist"
     local runtime_mode
     runtime_mode=$(runtime_mode_for_variant "$include_node")
     /usr/libexec/PlistBuddy -c "Delete :DuoduoNodeRuntimeMode" "$info_plist_path" >/dev/null 2>&1 || true
     /usr/libexec/PlistBuddy -c "Add :DuoduoNodeRuntimeMode string $runtime_mode" "$info_plist_path"
+    /usr/libexec/PlistBuddy -c "Delete :DuoduoBuildVariant" "$info_plist_path" >/dev/null 2>&1 || true
+    /usr/libexec/PlistBuddy -c "Add :DuoduoBuildVariant string $variant" "$info_plist_path"
+
+    # Inject Sparkle EdDSA public key if available
+    if [ -n "${SPARKLE_PUBLIC_ED_KEY:-}" ]; then
+        /usr/libexec/PlistBuddy -c "Delete :SUPublicEDKey" "$info_plist_path" >/dev/null 2>&1 || true
+        /usr/libexec/PlistBuddy -c "Add :SUPublicEDKey string ${SPARKLE_PUBLIC_ED_KEY}" "$info_plist_path"
+    fi
 
     # Bundle matching-arch Node.js runtime (use tar to preserve symlinks)
     if [ "$include_node" = "yes" ]; then
