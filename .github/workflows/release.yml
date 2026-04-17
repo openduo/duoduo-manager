@@ -145,38 +145,49 @@ jobs:
           REPO="openduo/duoduo-manager"
           BASE_URL="https://github.com/${REPO}/releases/download/${TAG}"
 
-          # Get release asset download URLs
           ARM64_URL="${BASE_URL}/DuoduoManager-${VERSION}-arm64-with-nodejs.dmg"
           X64_URL="${BASE_URL}/DuoduoManager-${VERSION}-x86_64-with-nodejs.dmg"
           LITE_URL="${BASE_URL}/DuoduoManager-${VERSION}-universal-lite.dmg"
 
-          # Get file sizes
           ARM64_SIZE=$(stat -f%z "dist/DuoduoManager-${VERSION}-arm64-with-nodejs.dmg")
           X64_SIZE=$(stat -f%z "dist/DuoduoManager-${VERSION}-x86_64-with-nodejs.dmg")
           LITE_SIZE=$(stat -f%z "dist/DuoduoManager-${VERSION}-universal-lite.dmg")
 
-          # Download Sparkle for signing tools
+          # Download Sparkle binary distribution (contains bin/sign_update)
           SPARKLE_VERSION="2.9.1"
-          curl -sL "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-for-Swift-Package-Manager.zip" -o /tmp/sparkle.zip
-          unzip -o /tmp/sparkle.zip -d /tmp/sparkle-dist
+          curl -sL "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz" -o /tmp/sparkle.tar.xz
+          mkdir -p /tmp/sparkle-dist
+          tar xf /tmp/sparkle.tar.xz -C /tmp/sparkle-dist --strip-components=1
 
-          SIGN_UPDATE=$(find /tmp/sparkle-dist -name "sign_update" -type f 2>/dev/null | head -1)
-          if [ -z "$SIGN_UPDATE" ]; then
+          SIGN_UPDATE="/tmp/sparkle-dist/bin/sign_update"
+          if [ ! -f "$SIGN_UPDATE" ]; then
             echo "::warning::sign_update tool not found, skipping appcast"
             exit 0
           fi
           chmod +x "$SIGN_UPDATE"
 
-          # Export private key to keychain for sign_update
-          KEYCHAIN_PATH="${RUNNER_TEMP}/build.keychain-db"
-          security create-keychain -p "temp" "${KEYCHAIN_PATH}" 2>/dev/null || true
-          security unlock-keychain -p "temp" "${KEYCHAIN_PATH}" 2>/dev/null || true
-          security add-generic-password -a "ed25519" -s "https://sparkle-project.org" -w "${SPARKLE_PRIVATE_ED_KEY}" -U "${KEYCHAIN_PATH}" 2>/dev/null || true
+          # sign_update reads EdDSA private key from keychain
+          # Add it to the login keychain (the only one available on CI)
+          security add-generic-password -a "ed25519" -s "https://sparkle-project.org" -w "${SPARKLE_PRIVATE_ED_KEY}" -U login.keychain-db 2>/dev/null || true
 
-          # Sign each DMG
-          ARM64_SIG=$("$SIGN_UPDATE" -f "dist/DuoduoManager-${VERSION}-arm64-with-nodejs.dmg" 2>&1 | sed 's/.*sparkle:edSignature="\([^"]*\)".*/\1/')
-          X64_SIG=$("$SIGN_UPDATE" -f "dist/DuoduoManager-${VERSION}-x86_64-with-nodejs.dmg" 2>&1 | sed 's/.*sparkle:edSignature="\([^"]*\)".*/\1/')
-          LITE_SIG=$("$SIGN_UPDATE" -f "dist/DuoduoManager-${VERSION}-universal-lite.dmg" 2>&1 | sed 's/.*sparkle:edSignature="\([^"]*\)".*/\1/')
+          # Sign each DMG and extract EdDSA signature
+          echo "Signing arm64 DMG..."
+          ARM64_SIG=$("$SIGN_UPDATE" -f "dist/DuoduoManager-${VERSION}-arm64-with-nodejs.dmg" 2>&1 | grep -oE 'sparkle:edSignature="[^"]+"' | sed 's/sparkle:edSignature="//;s/"//')
+          echo "Signing x86_64 DMG..."
+          X64_SIG=$("$SIGN_UPDATE" -f "dist/DuoduoManager-${VERSION}-x86_64-with-nodejs.dmg" 2>&1 | grep -oE 'sparkle:edSignature="[^"]+"' | sed 's/sparkle:edSignature="//;s/"//')
+          echo "Signing universal-lite DMG..."
+          LITE_SIG=$("$SIGN_UPDATE" -f "dist/DuoduoManager-${VERSION}-universal-lite.dmg" 2>&1 | grep -oE 'sparkle:edSignature="[^"]+"' | sed 's/sparkle:edSignature="//;s/"//')
+
+          echo "ARM64 sig: ${ARM64_SIG}"
+          echo "X64 sig: ${X64_SIG}"
+          echo "LITE sig: ${LITE_SIG}"
+
+          if [ -z "$ARM64_SIG" ] || [ -z "$X64_SIG" ] || [ -z "$LITE_SIG" ]; then
+            echo "::warning::Failed to sign one or more DMGs, skipping appcast"
+            exit 0
+          fi
+
+          PUB_DATE=$(date -u +"%a, %d %b %Y %H:%M:%S +0000")
 
           # Generate appcast.xml
           cat > /tmp/appcast.xml <<APPLECAST
@@ -189,7 +200,7 @@ jobs:
               <language>en</language>
               <item>
                 <title>DuoduoManager ${VERSION}</title>
-                <pubDate>$(date -u +"%a, %d %b %Y %H:%M:%S +0000")</pubDate>
+                <pubDate>${PUB_DATE}</pubDate>
                 <sparkle:channel>arm64-with-nodejs</sparkle:channel>
                 <enclosure
                   url="${ARM64_URL}"
@@ -203,7 +214,7 @@ jobs:
               </item>
               <item>
                 <title>DuoduoManager ${VERSION}</title>
-                <pubDate>$(date -u +"%a, %d %b %Y %H:%M:%S +0000")</pubDate>
+                <pubDate>${PUB_DATE}</pubDate>
                 <sparkle:channel>x86_64-with-nodejs</sparkle:channel>
                 <enclosure
                   url="${X64_URL}"
@@ -217,7 +228,7 @@ jobs:
               </item>
               <item>
                 <title>DuoduoManager ${VERSION}</title>
-                <pubDate>$(date -u +"%a, %d %b %Y %H:%M:%S +0000")</pubDate>
+                <pubDate>${PUB_DATE}</pubDate>
                 <sparkle:channel>universal-lite</sparkle:channel>
                 <enclosure
                   url="${LITE_URL}"
@@ -246,5 +257,5 @@ jobs:
           git commit -m "update appcast for ${TAG}" || true
           git push origin gh-pages
 
-          # Return to feature branch
-          git checkout "${GITHUB_REF_NAME}" 2>/dev/null || git checkout main
+          # Return to main
+          git checkout main
