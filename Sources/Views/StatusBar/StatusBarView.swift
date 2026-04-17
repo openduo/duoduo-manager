@@ -5,6 +5,7 @@ struct StatusBarView: View {
     @Bindable var store: AppStore
     var openDashboard: (() -> Void)?
     var openReader: (() -> Void)?
+    var openOnboard: (() -> Void)?
 
     @State var expandedEventIDs: Set<String> = []
     @State var expandedConfigTarget: InlineConfigTarget?
@@ -19,10 +20,11 @@ struct StatusBarView: View {
     let panelContentInset: CGFloat = 12
     let overviewDividerWidth: CGFloat = 1
 
-    init(store: AppStore, openDashboard: (() -> Void)? = nil, openReader: (() -> Void)? = nil) {
+    init(store: AppStore, openDashboard: (() -> Void)? = nil, openReader: (() -> Void)? = nil, openOnboard: (() -> Void)? = nil) {
         self.store = store
         self.openDashboard = openDashboard
         self.openReader = openReader
+        self.openOnboard = openOnboard
         _daemonDraft = State(initialValue: store.runtime.daemonConfig)
         _feishuDraft = State(initialValue: store.runtime.feishuConfig)
     }
@@ -66,6 +68,7 @@ struct StatusBarView: View {
                 statusMessage: statusBarPresentation.footer.statusMessage,
                 statusIsError: statusBarPresentation.footer.statusIsError,
                 onDashboard: { openDashboard?() },
+                onOnboard: { openOnboard?() },
                 onReader: { openCCReader() },
                 onQuit: { NSApplication.shared.terminate(nil) }
             )

@@ -3,6 +3,9 @@
 APP_NAME = DuoduoManager
 PROJECT_YML = project.yml
 VERSION ?= $(shell grep 'MARKETING_VERSION:' $(PROJECT_YML) | sed 's/.*: *//')
+RUN_DERIVED_DATA = .build/run-system
+RUN_APP = $(RUN_DERIVED_DATA)/Build/Products/Debug/$(APP_NAME).app
+RUN_INFO_PLIST = $(RUN_APP)/Contents/Info.plist
 
 all: build
 
@@ -17,8 +20,14 @@ release:
 	xcodegen generate
 	xcodebuild -project $(APP_NAME).xcodeproj -scheme $(APP_NAME) -configuration Release build
 
-run: build
-	.build/debug/DuoduoManager
+run: project
+	pkill -x $(APP_NAME) || true
+	xcodebuild -project $(APP_NAME).xcodeproj -scheme $(APP_NAME) -configuration Debug -derivedDataPath $(RUN_DERIVED_DATA) build
+	/usr/libexec/PlistBuddy -c "Delete :DuoduoNodeRuntimeMode" $(RUN_INFO_PLIST) >/dev/null 2>&1 || true
+	/usr/libexec/PlistBuddy -c "Add :DuoduoNodeRuntimeMode string system" $(RUN_INFO_PLIST)
+	/usr/libexec/PlistBuddy -c "Delete :DuoduoBuildVariant" $(RUN_INFO_PLIST) >/dev/null 2>&1 || true
+	/usr/libexec/PlistBuddy -c "Add :DuoduoBuildVariant string universal-lite" $(RUN_INFO_PLIST)
+	open $(RUN_APP)
 
 run-release: release
 	.build/release/DuoduoManager
