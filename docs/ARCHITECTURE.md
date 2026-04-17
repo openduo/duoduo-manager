@@ -18,7 +18,7 @@ Host -> Views -> Presentations -> Stores -> Services -> Models
 DuoduoManagerApp.swift
 ├── Host/
 │   ├── AppStatusController.swift   (NSStatusItem + NSPopover host shell)
-│   └── AppWindowController.swift   (ATC / Reader NSWindow lifecycle)
+│   └── AppWindowController.swift   (Dashboard NSWindow lifecycle)
 ├── Stores/
 │   ├── AppStore.swift              (root orchestration store)
 │   ├── AppStore+Visibility.swift   (surface-driven polling lifecycle)
@@ -29,13 +29,16 @@ DuoduoManagerApp.swift
 │   ├── UpdateStore.swift
 │   └── CommandStore.swift
 ├── Presentations/
-│   ├── StatusBarPresentation*.swift
-│   ├── DashboardPresentation*.swift
+│   ├── StatusBarPresentation.swift
+│   ├── StatusBarPresentationMapper.swift
+│   ├── DashboardPresentation.swift
+│   ├── DashboardPresentationMapper.swift
 │   └── SharedPresentationFormatting.swift
 ├── Views/
 │   ├── StatusBar/
 │   ├── Dashboard/
 │   ├── Config/
+│   ├── Onboarding/
 │   └── Shared/
 ├── Services/
 │   ├── NodeRuntime.swift
@@ -45,7 +48,9 @@ DuoduoManagerApp.swift
 │   ├── DashboardRPCService.swift
 │   ├── VersionService.swift
 │   ├── UpgradeService.swift
-│   └── AppUpdateService.swift
+│   ├── AppUpdateService.swift
+│   ├── ClaudeAuthService.swift
+│   └── OnboardingService.swift
 ├── Models/
 │   ├── ConfigStore.swift
 │   ├── DaemonConfig.swift
@@ -54,7 +59,8 @@ DuoduoManagerApp.swift
 │   ├── ChannelInfo.swift
 │   ├── ChannelRegistry.swift
 │   ├── PackageVersion.swift
-│   └── DashboardModels.swift
+│   ├── DashboardModels.swift
+│   └── OnboardingState.swift
 └── Localization/
     └── L10n.swift
 ```
@@ -66,7 +72,7 @@ DuoduoManagerApp.swift
 The `Host` layer is the AppKit shell around the app:
 
 - `AppStatusController` owns the menu bar item, popover presentation, and status icon updates
-- `AppWindowController` owns ATC and Reader window creation, show/hide behavior, and activation policy
+- `AppWindowController` owns the Dashboard window lifecycle. CC Reader uses a SwiftUI `WindowGroup`, and Onboarding uses `OnboardingWindowController`
 
 `DuoduoManagerApp.swift` now acts mainly as the composition root that wires `Host` to `AppStore` and root SwiftUI views.
 
@@ -106,12 +112,13 @@ These mappers produce concise display-oriented models for the popover and ATC Da
 
 Views are now grouped by feature instead of being flat:
 
-- `Views/StatusBar`
-- `Views/Dashboard`
-- `Views/Config`
-- `Views/Shared`
+- `Views/StatusBar` — popover UI
+- `Views/Dashboard` — ATC dashboard panes
+- `Views/Config` — daemon and channel inline config
+- `Views/Onboarding` — first-time setup wizard
+- `Views/Shared` — reusable components
 
-The `StatusBar` feature is split into a root view plus section components. `Dashboard` contains the dashboard shell and its content panes.
+The `StatusBar` feature is split into a root view plus section components. `Dashboard` contains the dashboard shell and its content panes. `Onboarding` provides a guided checklist for installing duoduo CLI, Claude CLI, connecting an LLM provider, and starting the daemon.
 
 ## Runtime Environment
 
@@ -119,7 +126,7 @@ The `StatusBar` feature is split into a root view plus section components. `Dash
 
 - **Bundled Node.js runtime**: packaged under `.app/Contents/Resources/node/`, architecture-specific (arm64/x86_64 built separately)
 - **Global npm prefix**: `~/.duoduo-manager` (`NodeRuntime.npmGlobalDir`) for writable persistence across app upgrades
-- **duoduo binary path**: `~/.duoduo-manager/bin/duoduo` (`NodeRuntime.duoduoPath`)
+- **duoduo binary path**: resolved via PATH (includes `~/.duoduo-manager/bin/duoduo`), `NodeRuntime.duoduoPath` returns bare `"duoduo"`
 - **Subprocess env assembly**: `NodeRuntime.environment` builds `PATH` as:
   1) bundled `node/bin`
   2) npm global `bin`
@@ -200,8 +207,20 @@ Event retention is capped in memory at 2000 entries.
 ### App update lifecycle
 
 - **Source**: GitHub Releases API (`/repos/openduo/duoduo-manager/releases/latest`)
+- **Sparkle**: In-app updates via `SPUStandardUpdaterController` with channel-based rollouts per build variant (`DuoduoBuildVariant`)
 - **State**: `UpdateStore.appLatestVersion` + `appLatestReleaseURL`
-- **UI signal**: status bar icon switches to update badge when a newer app version exists
+- **UI signal**: status bar header shows a "New v{x.x.x}" badge when a newer app version exists
+
+### Onboarding flow
+
+The onboarding system uses a reducer pattern (`OnboardingEvent` → `OnboardingReducer` → `OnboardingCommand`) with an `@Observable` `OnboardingStore`:
+
+- `OnboardingService.detect()` — checks duoduo CLI, Claude CLI, `claude auth status`, and daemon health
+- `ClaudeCLIService` — installs Claude CLI, runs OAuth login, reads auth status
+- `ClaudeSettingsStore` — reads and writes `~/.claude/settings.json` with format-preserving JSON merge
+- `LLMProviderPreset` — predefined configurations for Official (Anthropic OAuth), 智谱 GLM, Z.AI, Kimi, 百炼, MiniMax, DeepSeek, and custom endpoints
+
+The flow auto-advances through install steps and presents the LLM provider configuration (token/base URL or browser login) before starting the daemon. Accessible from the popover footer or automatically on first launch.
 
 ## Key Design Decisions
 
@@ -256,9 +275,10 @@ The project previously had a flatter `Views/` layout and generic directories lik
 4. Copy localized `.lproj` resources into app bundle
 5. Extract matching-arch Node runtime into `Contents/Resources/node` (tar-based to preserve symlinks)
 6. Optional signing/notarization (if `.secret.env` exists)
-7. Generate per-arch DMGs:
-   - `DuoduoManager-{version}-arm64.dmg`
-   - `DuoduoManager-{version}-x86_64.dmg`
+7. Generate per-variant DMGs:
+   - `DuoduoManager-{version}-arm64-with-nodejs.dmg`
+   - `DuoduoManager-{version}-x86_64-with-nodejs.dmg`
+   - `DuoduoManager-{version}-universal-lite.dmg`
 
 For repository releases, the normal workflow is:
 
