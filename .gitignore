@@ -11,6 +11,9 @@ dist/
 # Signing secrets
 .secret.env
 
+# Local-only Claude notes (private context, not for upstream)
+CLAUDE.local.md
+
 # macOS
 .DS_Store
 *.dmg
