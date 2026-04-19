@@ -30,7 +30,11 @@ final class DaemonService: Sendable {
             environment: daemonEnv,
             workingDirectory: NodeRuntime.duoduoPackageDir
         )
-        if let range = output.range(of: "version: ([\\d.]+)", options: .regularExpression) {
+        // Match the full semver token, including pre-release suffix
+        // (e.g. `0.5.0-rc.1`, `0.5.0-pre.22`). The previous `[\d.]+`
+        // pattern silently truncated `-rc.1` / `-pre.22`, which would
+        // let pre-releases pass version gates aimed at the released rc.
+        if let range = output.range(of: "version: ([\\w.-]+)", options: .regularExpression) {
             return String(output[range]).replacingOccurrences(of: "version: ", with: "")
         }
         return ""

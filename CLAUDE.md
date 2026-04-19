@@ -49,11 +49,13 @@ The app does not embed daemon logic — it shells out to the `duoduo` CLI and ta
 - duoduo's global config is `~/.config/duoduo/config.json`; channel plugins live in `~/.aladuo/`.
 - If `duoduo` is missing on first interactive surface, `AppStore.ensureDuoduoInstalledIfNeeded()` runs `npm install -g @openduo/duoduo`.
 
-### Daemon lifecycle (LaunchAgent, not detached subprocess)
+### Daemon lifecycle (delegated to the duoduo CLI)
 
-The daemon is managed by a macOS **LaunchAgent** (`ai.openduo.manager.daemon` under `~/Library/LaunchAgents/`), not by `duoduo daemon start`. This is a deliberate fix for macOS TCC/FDA breakage — a detached daemon (PPID=1) cannot inherit the app's TCC authorization, causing repeated permission prompts. Read [docs/LAUNCHD-MIGRATION.md](docs/LAUNCHD-MIGRATION.md) before touching `DaemonService` or `LaunchAgentService`. Channel lifecycle (e.g. Feishu) still goes through `duoduo channel <type> start|stop`.
+`DaemonService` calls `duoduo daemon start | stop | restart` and lets the duoduo CLI itself decide how to manage the underlying process — on macOS that means the CLI installs a LaunchAgent and uses `launchctl bootstrap / bootout / kickstart`; on other platforms it falls back to a detached `child_process.spawn`. The manager does **not** write the LaunchAgent plist directly. An earlier branch implemented a manager-side `LaunchAgentService` (PR #1, merged 2026-03-28); that approach was removed in commit `2abd281` once the CLI's native launchd support landed in duoduo `v0.4.3`. If you find yourself reaching for a LaunchAgent abstraction in this codebase, you're probably re-introducing that removed layer — talk to the CLI instead.
 
-Status checks still hit `/healthz` and `/rpc` over HTTP — they are independent of how the daemon was started.
+[docs/LAUNCHD-MIGRATION.md](docs/LAUNCHD-MIGRATION.md) is preserved as a record of the TCC/FDA reasoning behind the migration. It describes the original manager-side LaunchAgent approach; the conclusion (that launchd-managed daemon avoids repeated permission prompts) is still load-bearing, but the implementation is now upstream in the CLI.
+
+Channel lifecycle (e.g. Feishu) goes through `duoduo channel <type> start | stop`. Status checks hit `/healthz` and `/rpc` over HTTP and are independent of how the daemon was brought up.
 
 ### Polling cadence (defined in stores, not views)
 

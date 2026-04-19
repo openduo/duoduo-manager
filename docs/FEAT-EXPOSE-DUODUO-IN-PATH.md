@@ -1,6 +1,6 @@
 # Feature: Expose `duoduo` to agent subprocess shells (all-in-one mode)
 
-> Working notes for branch `feat/expose-duoduo-in-path`. Implementation gated on duoduo ≥ `0.5.0`, the version that ships the `DUODUO_NODE_BIN` env var (upstream change merged in [openduo/duoduo#50](https://github.com/openduo/duoduo/issues/50); shipping in the 0.5.0 series — current `0.5.0-pre.22`).
+> Working notes for branch `feat/expose-duoduo-in-path`. Implementation gated on duoduo ≥ `0.5.0-rc.1`, the first tagged release whose `bin/duoduo` wrapper honors `DUODUO_NODE_BIN` (upstream change merged via [openduo/duoduo#50](https://github.com/openduo/duoduo/issues/50)).
 
 ## Goal
 
@@ -12,7 +12,7 @@ Verified on a real bundled install (`arm64-with-nodejs`, duoduo `0.4.6`):
 
 - The duoduo daemon process (spawned via the `duoduo daemon start` CLI) inherits a PATH that includes `~/.duoduo-manager/bin` and the bundled `…/node/bin`. Inside the daemon, `duoduo` is resolvable.
 - Daemon-spawned children (e.g. the `claude` agent runner) also fully inherit that PATH.
-- **But** any further `bash -lc "…"` / `zsh -lc "…"` invoked from those children re-runs `/etc/zprofile`, `~/.zprofile`, `~/.zshrc` — which **completely replaces** the inherited PATH with the user's interactive PATH. That user PATH never contains `~/.duoduo-manager/bin` (it's a manager-private prefix the user's shell doesn't know about) nor the `.app`-bundled `node/bin`.
+- **But** any further `bash -lc "…"` / `zsh -lc "…"` invoked from those children re-runs the shell's *login*-shell startup files (for bash: `/etc/profile` plus the first existing of `~/.bash_profile` / `~/.bash_login` / `~/.profile`; for zsh: `/etc/zprofile` plus `~/.zprofile`). `~/.zshrc` is **not** sourced — it is interactive-only. These login-shell startup files **completely replace** the inherited PATH with the user's login PATH. That PATH never contains `~/.duoduo-manager/bin` (it's a manager-private prefix the user's shell doesn't know about) nor the `.app`-bundled `node/bin`.
 - Net effect: in any login-shell descendant of an agent tool run (the default execution mode of `claude-code`'s Bash tool), `duoduo: command not found`.
 
 ## Root cause (after first-principles re-analysis)
