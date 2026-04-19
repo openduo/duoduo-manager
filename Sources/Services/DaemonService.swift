@@ -81,7 +81,9 @@ final class DaemonService: Sendable {
     // MARK: - Environment
 
     private var daemonEnv: [String: String] {
-        ["ALADUO_DAEMON_URL": daemonURL]
+        var env = NodeRuntime.duoduoSpawnEnv
+        env["ALADUO_DAEMON_URL"] = daemonURL
+        return env
     }
 
     // MARK: - Private

@@ -256,6 +256,8 @@ struct OnboardingView: View {
                 completionMetricRow("Daemon", daemonCompletionLabel, showsDivider: false)
             }
 
+            AgentShellPathPanel(duoduoVersion: store.state.snapshot.duoduoVersion)
+
             HStack(spacing: 12) {
                 primaryButton(title: L10n.Onboard.editConfig, tint: ConsolePalette.accent, disabled: false) {
                     store.send(.editRequirementRequested(.claudeAccess))
@@ -672,4 +674,142 @@ private func secondaryButton(title: String, action: @escaping () -> Void) -> som
             )
     }
     .buttonStyle(.plain)
+}
+
+/// Post-completion enhancement: lets the user opt into having
+/// `~/.duoduo-manager/bin` on their interactive shell PATH so agent
+/// subprocesses can resolve `duoduo`. Gated on the installed duoduo
+/// version actually honoring `DUODUO_NODE_BIN`.
+private struct AgentShellPathPanel: View {
+    let duoduoVersion: String?
+
+    @State private var status: ShellPathInstaller.Status = .notInstalled
+    @State private var errorMessage: String?
+    @State private var isBusy = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(L10n.Onboard.ShellPath.title)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(ConsolePalette.primaryText)
+
+                Spacer()
+
+                statePill
+            }
+
+            Text(L10n.Onboard.ShellPath.summary)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(ConsolePalette.secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if let gateMessage {
+                Text(gateMessage)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(ConsolePalette.warning)
+            } else {
+                actionRow
+            }
+
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(ConsolePalette.critical)
+            }
+        }
+        .padding(14)
+        .background(ConsolePalette.panelRaised)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(ConsolePalette.divider, lineWidth: 1)
+        )
+        .task {
+            status = ShellPathInstaller.detect()
+        }
+    }
+
+    private var gateMessage: String? {
+        guard duoduoVersion != nil else {
+            return L10n.Onboard.ShellPath.gateRequiresInstall
+        }
+        if !DuoduoCompat.meetsMinimum(installed: duoduoVersion, minimum: DuoduoCompat.minVersionForNodeBinEnv) {
+            return L10n.Onboard.ShellPath.gateRequiresUpgrade(DuoduoCompat.minVersionForNodeBinEnv)
+        }
+        return nil
+    }
+
+    private var statePill: some View {
+        let label: String
+        let tint: Color
+        switch status {
+        case .installed:
+            label = L10n.Onboard.ShellPath.stateInstalled
+            tint = ConsolePalette.signal
+        case .notInstalled:
+            label = L10n.Onboard.ShellPath.stateNotInstalled
+            tint = ConsolePalette.mutedText
+        case .partiallyInstalled:
+            label = L10n.Onboard.ShellPath.statePartial
+            tint = ConsolePalette.warning
+        }
+        return Text(label)
+            .font(.system(size: 10, weight: .semibold, design: .monospaced))
+            .tracking(0.6)
+            .foregroundStyle(tint)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+            .background(tint.opacity(0.12))
+            .clipShape(Capsule())
+    }
+
+    @ViewBuilder
+    private var actionRow: some View {
+        HStack(spacing: 10) {
+            switch status {
+            case .installed:
+                secondaryButton(title: L10n.Onboard.ShellPath.actionRefresh, action: refresh)
+                secondaryButton(title: L10n.Onboard.ShellPath.actionRemove, action: remove)
+            case .notInstalled, .partiallyInstalled:
+                primaryButton(
+                    title: L10n.Onboard.ShellPath.actionInstall,
+                    tint: ConsolePalette.accent,
+                    disabled: isBusy,
+                    action: install
+                )
+                if status == .partiallyInstalled {
+                    secondaryButton(title: L10n.Onboard.ShellPath.actionRemove, action: remove)
+                }
+            }
+        }
+    }
+
+    private func install() {
+        run {
+            try ShellPathInstaller.install()
+            status = ShellPathInstaller.detect()
+        }
+    }
+
+    private func refresh() { install() }
+
+    private func remove() {
+        run {
+            try ShellPathInstaller.uninstall()
+            status = ShellPathInstaller.detect()
+        }
+    }
+
+    private func run(_ work: () throws -> Void) {
+        guard !isBusy else { return }
+        isBusy = true
+        errorMessage = nil
+        defer { isBusy = false }
+        do {
+            try work()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
 }

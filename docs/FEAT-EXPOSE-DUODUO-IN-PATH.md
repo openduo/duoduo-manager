@@ -1,6 +1,6 @@
 # Feature: Expose `duoduo` to agent subprocess shells (all-in-one mode)
 
-> Working notes for branch `feat/expose-duoduo-in-path`. Pending [openduo/duoduo#50](https://github.com/openduo/duoduo/issues/50) — implementation is gated on a duoduo release that supports `DUODUO_NODE_BIN`.
+> Working notes for branch `feat/expose-duoduo-in-path`. Implementation gated on duoduo ≥ `0.5.0`, the version that ships the `DUODUO_NODE_BIN` env var (upstream change merged in [openduo/duoduo#50](https://github.com/openduo/duoduo/issues/50); shipping in the 0.5.0 series — current `0.5.0-pre.22`).
 
 ## Goal
 
@@ -35,53 +35,58 @@ We can't fix this by having the daemon push a richer PATH into spawned children'
 1. The user's shell startup files (so `duoduo` gets onto every interactive PATH), and
 2. The wrapper learning to find `node` without PATH (so we don't have to inject `node`/`npm` into the user's PATH alongside `duoduo` and pollute their Node resolution).
 
-## Design (gated on duoduo#50)
+## Design (relies on duoduo ≥ 0.5.0)
 
-This feature **only ships** for a duoduo version that implements [openduo/duoduo#50](https://github.com/openduo/duoduo/issues/50) — a `DUODUO_NODE_BIN` environment variable that lets the wrapper bypass PATH-based node resolution. Older duoduo versions explicitly will **not** be supported; manager will surface a clear "requires duoduo ≥ vX.Y.Z" message instead of attempting any wrapper-overwrite or symlink-based workaround.
+This feature relies on the upstream `bin/duoduo` wrapper honoring the `DUODUO_NODE_BIN` env var. That landed in the duoduo `0.5.0` series (PR for [openduo/duoduo#50](https://github.com/openduo/duoduo/issues/50) merged at `0.5.0-pre.22`). Older duoduo versions explicitly will **not** support this manager feature; manager surfaces a clear "requires duoduo ≥ 0.5.0" message instead of attempting any wrapper-overwrite or symlink-based workaround.
 
-Rationale: a wrapper-overwrite workaround would have to (a) replace the npm-installed wrapper with a manager-generated absolute-path launcher, (b) re-replace it after every `npm install -g @openduo/duoduo` upgrade, and (c) handle `.app` relocation. That is real surface area, real bugs, real upgrade-window race conditions. Waiting for upstream to expose `DUODUO_NODE_BIN` collapses all of that into "set one env var."
+Rationale: a wrapper-overwrite workaround would have to (a) replace the npm-installed wrapper with a manager-generated absolute-path launcher, (b) re-replace it after every `npm install -g @openduo/duoduo` upgrade, and (c) handle `.app` relocation. That is real surface area, real bugs, real upgrade-window race conditions. The `DUODUO_NODE_BIN` upstream entrypoint collapses all of that into "set one env var."
 
-### Manager-side implementation (post-duoduo#50)
+### Manager-side implementation
 
-1. **Daemon env**: when starting the daemon (and any duoduo-spawned subprocess we control), export `DUODUO_NODE_BIN=<abs path to bundled node>`. This lets the wrapper resolve `node` without PATH.
-2. **Shell PATH inject**: append a marked block to `~/.zshrc` / `~/.bash_profile`:
+1. **Single source of truth** — `Sources/Services/DuoduoCompat.swift` holds the env var name and `minVersionForNodeBinEnv`. All gating reads from this file; bumping the minimum version is a one-line change.
+
+2. **Daemon and channel env** — `NodeRuntime.duoduoSpawnEnv` returns `[DUODUO_NODE_BIN: <abs path to bundled node>]` whenever a bundled node exists. `DaemonService.daemonEnv` and `ChannelService.env` merge it in. Older wrappers ignore the variable, so the injection is always backward-safe — but only on a wrapper that honors it does the value actually take effect.
+
+3. **Shell PATH inject** — `Sources/Services/ShellPathInstaller.swift` writes a marked block into `~/.zshrc` and `~/.bash_profile`:
 
    ```sh
    # >>> duoduo-manager (managed) >>>
-   [ -d "$HOME/.duoduo-manager/bin" ] && export PATH="$HOME/.duoduo-manager/bin:$PATH"
+   if [ -d "$HOME/.duoduo-manager/bin" ]; then
+       export PATH="$HOME/.duoduo-manager/bin:$PATH"
+   fi
    # <<< duoduo-manager (managed) <<<
    ```
 
-   The directory check makes the export a no-op if the user removes the manager directory — no stale-PATH pollution.
+   The directory check makes the export a no-op if the user removes the manager directory — no stale PATH entry. The installer is idempotent (re-install replaces the block in place) and provides explicit `uninstall`.
 
-3. **Onboarding step**: a visible "Add to shell PATH" panel that explains exactly what file is touched and what line is added, with an Undo control.
+4. **Onboarding panel** — `AgentShellPathPanel` (in `OnboardingView.swift`) appears in the completion view and shows the current state pill (Enabled / Not enabled / Partially installed) with Enable / Refresh / Remove actions. Below the gate (no duoduo installed, or duoduo < 0.5.0), the action row is replaced with a "requires duoduo ≥ 0.5.0" message — no destructive action is available until the gate clears.
 
-4. **No node/npm symlinks** in `~/.duoduo-manager/bin/`. The user's `node` / `npm` resolution remains entirely untouched. This is the key non-pollution property and it's what `DUODUO_NODE_BIN` buys us.
+5. **No node/npm symlinks** in `~/.duoduo-manager/bin/`. The user's `node` / `npm` resolution remains entirely untouched. This is the key non-pollution property and is exactly what `DUODUO_NODE_BIN` buys us — the wrapper finds node via the env var, so we don't have to inject node into PATH alongside duoduo.
 
-5. **Version gate**: detect installed duoduo version via the existing channel-status / package.json read path. If below the minimum, the onboarding step is disabled with a clear "upgrade duoduo to enable" message.
+### Out of scope (deferred)
 
-### Out of scope
-
+- Status bar popover or Settings entry for the PATH installer (currently only reachable through the Onboarding completion view).
 - Changes to where duoduo is installed (still `npm install -g @openduo/duoduo` into `~/.duoduo-manager`).
 - Any sudo-requiring system-wide installer (e.g. `/usr/local/bin/duoduo` symlink, `/etc/paths.d/` entry).
 - Any wrapper-overwrite or upgrade-hook workaround for older duoduo versions.
 - LaunchAgent / daemon-startup mechanism changes (this feature is about subprocess PATH, not how the daemon itself is brought up).
 
-## Files likely to touch (post-duoduo#50)
+## Files touched
 
-- `Sources/Services/NodeRuntime.swift` — expose absolute path to bundled node for `DUODUO_NODE_BIN`.
-- `Sources/Services/DaemonService.swift` — inject `DUODUO_NODE_BIN` into daemon env on start/restart.
-- `Sources/Services/ChannelService.swift` — same env injection for channel start.
-- New: `Sources/Services/ShellPathInstaller.swift` — manage the `~/.zshrc` / `~/.bash_profile` block (install / detect / uninstall).
-- `Sources/Views/Onboarding/` — add the PATH-setup step + version gate.
-- Localization: new strings under `Sources/Resources/{en,zh-Hans}.lproj/Localizable.strings`.
+- `Sources/Services/DuoduoCompat.swift` (new) — env var name + min version constants.
+- `Sources/Services/NodeRuntime.swift` — `duoduoSpawnEnv` computed property.
+- `Sources/Services/DaemonService.swift` — merge `duoduoSpawnEnv` into `daemonEnv`.
+- `Sources/Services/ChannelService.swift` — same merge in channel `env`.
+- `Sources/Services/ShellPathInstaller.swift` (new) — marked-block install / detect / uninstall.
+- `Sources/Views/Onboarding/OnboardingView.swift` — `AgentShellPathPanel` in the completion view.
+- `Sources/Localization/L10n.swift` + `Sources/Resources/{en,zh-Hans}.lproj/Localizable.strings` — `Onboard.ShellPath.*` strings.
 
 ## Status
 
 - [x] Branch `feat/expose-duoduo-in-path` created from `main`
 - [x] Root cause verified on a real bundled install
 - [x] Upstream issue filed: [openduo/duoduo#50](https://github.com/openduo/duoduo/issues/50)
-- [ ] Upstream `DUODUO_NODE_BIN` shipped in a tagged duoduo release
-- [ ] Manager implementation (per "Manager-side implementation" above)
-- [ ] Manual verification on a fresh bundled install: from inside a `claude` Bash tool run, `duoduo --help` works
-- [ ] PR ready for merge
+- [x] Upstream `DUODUO_NODE_BIN` merged (in `0.5.0-pre.22`); awaiting tagged `0.5.0` release
+- [x] Manager implementation
+- [ ] End-to-end verification on a fresh bundled install with duoduo ≥ 0.5.0: from inside a `claude` Bash tool run, `duoduo --help` works
+- [ ] Un-draft PR after upstream tags `v0.5.0`

@@ -135,3 +135,13 @@
 "onboard.error.configSavedButAuthFailed" = "配置已写入，但 `claude auth status` 仍未通过。请检查 Base URL、Token 或模型配置。";
 "onboard.error.browserLoginIncomplete" = "浏览器登录未完成，请重试。";
 "onboard.error.daemonNotHealthy" = "daemon 未进入 healthy 状态。";
+"onboard.shellPath.title" = "Agent shell 访问";
+"onboard.shellPath.summary" = "把 ~/.duoduo-manager/bin 加入用户 shell 的 PATH，让 agent 子进程（claude-code 的 bash tool）能找到 `duoduo`。会在 ~/.zshrc 和 ~/.bash_profile 里写入一段带标记、可自动失效的代码。";
+"onboard.shellPath.stateInstalled" = "已启用";
+"onboard.shellPath.stateNotInstalled" = "未启用";
+"onboard.shellPath.statePartial" = "部分启用";
+"onboard.shellPath.actionInstall" = "启用";
+"onboard.shellPath.actionRemove" = "移除";
+"onboard.shellPath.actionRefresh" = "刷新";
+"onboard.shellPath.gateRequiresUpgrade %@" = "需要 duoduo ≥ %@，请先升级 duoduo。";
+"onboard.shellPath.gateRequiresInstall" = "请先完成 duoduo 安装。";

@@ -8,10 +8,10 @@ struct ChannelService: Sendable {
     }
 
     private var env: [String: String] {
-        [
-            "ALADUO_DAEMON_URL": daemonURL,
-            "ALADUO_LOG_LEVEL": "debug",
-        ]
+        var merged = NodeRuntime.duoduoSpawnEnv
+        merged["ALADUO_DAEMON_URL"] = daemonURL
+        merged["ALADUO_LOG_LEVEL"] = "debug"
+        return merged
     }
 
     // MARK: - Channel Commands

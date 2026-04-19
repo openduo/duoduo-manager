@@ -45,6 +45,17 @@ struct NodeRuntime: Sendable {
     static var isDuoduoInstalled: Bool { runtime.isDuoduoInstalled }
     static func installDuoduo() async throws -> String { try await runtime.installDuoduo() }
 
+    /// Env vars that callers spawning `duoduo …` should layer onto their
+    /// own command-specific env. Currently this is `DUODUO_NODE_BIN`,
+    /// which lets the wrapper bypass PATH-based node resolution (see
+    /// openduo/duoduo#50). When no bundled node is available (system
+    /// runtime), returns an empty dictionary — system mode relies on the
+    /// user's own node, which is already on their PATH.
+    static var duoduoSpawnEnv: [String: String] {
+        guard let nodePath = bundledNodePath, hasBundledNode else { return [:] }
+        return [DuoduoCompat.nodeBinEnvVar: nodePath]
+    }
+
     static var hasSystemNode: Bool { SystemRuntime.hasSystemNode }
     static var hasSystemDuoduo: Bool { SystemRuntime.hasSystemDuoduo }
 
