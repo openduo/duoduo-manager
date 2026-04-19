@@ -34,12 +34,17 @@ struct ShellPathInstaller {
     static let beginMarker = "# >>> duoduo-manager (managed) >>>"
     static let endMarker = "# <<< duoduo-manager (managed) <<<"
 
-    /// Files we manage. Order matters only for `detect` reporting.
-    /// `~/.zshrc` covers macOS default zsh; `~/.bash_profile` covers
-    /// users who explicitly run bash. We intentionally do not touch
-    /// `/etc/*` files — managing user-level state needs no sudo.
+    /// Files we manage. We target the *login*-shell startup files,
+    /// because the failing scenario is a daemon-spawned `bash -lc` /
+    /// `zsh -lc` invocation: those run as login shells but not as
+    /// interactive shells, so `~/.zshrc` (interactive-only) is the
+    /// wrong file. `~/.zprofile` covers macOS default zsh's login
+    /// path; `~/.bash_profile` covers bash login shells (e.g. the
+    /// default mode of claude-code's Bash tool). We intentionally do
+    /// not touch `/etc/*` files — managing user-level state needs no
+    /// sudo.
     static let targetFiles: [String] = [
-        "~/.zshrc",
+        "~/.zprofile",
         "~/.bash_profile",
     ]
 

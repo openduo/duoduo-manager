@@ -18,7 +18,7 @@ enum DuoduoCompat {
     ///
     /// Set to the first tagged 0.5.0 release candidate that includes
     /// the wrapper change merged in 0.5.0-pre.22.
-    static let minVersionForNodeBinEnv = "0.5.0-rc1"
+    static let minVersionForNodeBinEnv = "0.5.0-rc.1"
 
     /// Returns true if `installed` is at or above `minimum` under a
     /// simplified semver order: compare the numeric `MAJOR.MINOR.PATCH`

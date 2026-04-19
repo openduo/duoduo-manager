@@ -47,7 +47,7 @@ Rationale: a wrapper-overwrite workaround would have to (a) replace the npm-inst
 
 2. **Daemon and channel env** — `NodeRuntime.duoduoSpawnEnv` returns `[DUODUO_NODE_BIN: <abs path to bundled node>]` whenever a bundled node exists. `DaemonService.daemonEnv` and `ChannelService.env` merge it in. Older wrappers ignore the variable, so the injection is always backward-safe — but only on a wrapper that honors it does the value actually take effect.
 
-3. **Shell PATH inject** — `Sources/Services/ShellPathInstaller.swift` writes a marked block into `~/.zshrc` and `~/.bash_profile`:
+3. **Shell PATH inject** — `Sources/Services/ShellPathInstaller.swift` writes a marked block into `~/.zprofile` and `~/.bash_profile` (the login-shell startup files; `~/.zshrc` is interactive-only and would not be read by daemon-spawned `zsh -lc` invocations):
 
    ```sh
    # >>> duoduo-manager (managed) >>>
