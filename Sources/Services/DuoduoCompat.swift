@@ -23,11 +23,14 @@ enum DuoduoCompat {
     /// Returns true if `installed` is at or above `minimum` under a
     /// simplified semver order: compare the numeric `MAJOR.MINOR.PATCH`
     /// triple first; if equal, a build with a pre-release suffix
-    /// (e.g. `-pre.22`, `-rc1`) is considered earlier than the same
+    /// (e.g. `-pre.22`, `-rc.1`) is considered earlier than the same
     /// triple with no suffix; pre-release suffixes against each other
-    /// are compared lexicographically (good enough for `pre.N` and
-    /// `rcN` ordering as long as both sides use the same scheme).
-    /// Empty / unparseable inputs return false (assume too old).
+    /// are compared with numeric-aware string ordering — `String.compare`
+    /// with `.numeric`, so `rc.10 > rc.2` and `pre.22 > pre.9` work
+    /// correctly. Different pre-release prefixes (e.g. `pre.*` vs
+    /// `rc.*`) fall back to alphabetical order, which happens to give
+    /// the desired `pre < rc` ordering. Empty / unparseable inputs
+    /// return false (assume too old).
     static func meetsMinimum(installed: String?, minimum: String) -> Bool {
         guard let installed, !installed.isEmpty else { return false }
         let lhs = parseVersion(installed)

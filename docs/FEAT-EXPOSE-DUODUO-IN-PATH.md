@@ -35,9 +35,9 @@ We can't fix this by having the daemon push a richer PATH into spawned children'
 1. The user's shell startup files (so `duoduo` gets onto every interactive PATH), and
 2. The wrapper learning to find `node` without PATH (so we don't have to inject `node`/`npm` into the user's PATH alongside `duoduo` and pollute their Node resolution).
 
-## Design (relies on duoduo ≥ 0.5.0)
+## Design (relies on duoduo ≥ 0.5.0-rc.1)
 
-This feature relies on the upstream `bin/duoduo` wrapper honoring the `DUODUO_NODE_BIN` env var. That landed in the duoduo `0.5.0` series (PR for [openduo/duoduo#50](https://github.com/openduo/duoduo/issues/50) merged at `0.5.0-pre.22`). Older duoduo versions explicitly will **not** support this manager feature; manager surfaces a clear "requires duoduo ≥ 0.5.0" message instead of attempting any wrapper-overwrite or symlink-based workaround.
+This feature relies on the upstream `bin/duoduo` wrapper honoring the `DUODUO_NODE_BIN` env var. That capability first shipped in the tagged duoduo release `0.5.0-rc.1` (PR for [openduo/duoduo#50](https://github.com/openduo/duoduo/issues/50) merged at `0.5.0-pre.22`). Older duoduo versions explicitly will **not** support this manager feature; manager surfaces a clear "requires duoduo ≥ 0.5.0-rc.1" message instead of attempting any wrapper-overwrite or symlink-based workaround.
 
 Rationale: a wrapper-overwrite workaround would have to (a) replace the npm-installed wrapper with a manager-generated absolute-path launcher, (b) re-replace it after every `npm install -g @openduo/duoduo` upgrade, and (c) handle `.app` relocation. That is real surface area, real bugs, real upgrade-window race conditions. The `DUODUO_NODE_BIN` upstream entrypoint collapses all of that into "set one env var."
 
@@ -59,7 +59,7 @@ Rationale: a wrapper-overwrite workaround would have to (a) replace the npm-inst
 
    The directory check makes the export a no-op if the user removes the manager directory — no stale PATH entry. The installer is idempotent (re-install replaces the block in place) and provides explicit `uninstall`.
 
-4. **Onboarding panel** — `AgentShellPathPanel` (in `OnboardingView.swift`) appears in the completion view and shows the current state pill (Enabled / Not enabled / Partially installed) with Enable / Refresh / Remove actions. Below the gate (no duoduo installed, or duoduo < 0.5.0), the action row is replaced with a "requires duoduo ≥ 0.5.0" message — no destructive action is available until the gate clears.
+4. **Onboarding panel** — `AgentShellPathPanel` (in `OnboardingView.swift`) appears in the completion view and shows the current state pill (Enabled / Not enabled / Partially installed) with Enable / Refresh / Remove actions. Below the gate (no duoduo installed, or duoduo < `0.5.0-rc.1`), the action row is replaced with a "requires duoduo ≥ 0.5.0-rc.1" message — no destructive action is available until the gate clears.
 
 5. **No node/npm symlinks** in `~/.duoduo-manager/bin/`. The user's `node` / `npm` resolution remains entirely untouched. This is the key non-pollution property and is exactly what `DUODUO_NODE_BIN` buys us — the wrapper finds node via the env var, so we don't have to inject node into PATH alongside duoduo.
 
@@ -86,7 +86,7 @@ Rationale: a wrapper-overwrite workaround would have to (a) replace the npm-inst
 - [x] Branch `feat/expose-duoduo-in-path` created from `main`
 - [x] Root cause verified on a real bundled install
 - [x] Upstream issue filed: [openduo/duoduo#50](https://github.com/openduo/duoduo/issues/50)
-- [x] Upstream `DUODUO_NODE_BIN` merged (in `0.5.0-pre.22`); awaiting tagged `0.5.0` release
+- [x] Upstream `DUODUO_NODE_BIN` merged (in `0.5.0-pre.22`) and shipped in the tagged release `0.5.0-rc.1`
 - [x] Manager implementation
-- [ ] End-to-end verification on a fresh bundled install with duoduo ≥ 0.5.0: from inside a `claude` Bash tool run, `duoduo --help` works
-- [ ] Un-draft PR after upstream tags `v0.5.0`
+- [x] End-to-end verification on a fresh bundled install with duoduo `0.5.0-rc.1`: from inside a `bash -lc` invocation, `duoduo --help` works with `DUODUO_NODE_BIN` exported
+- [x] PR un-drafted

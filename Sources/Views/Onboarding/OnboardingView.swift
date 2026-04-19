@@ -788,7 +788,7 @@ private struct AgentShellPathPanel: View {
     private func install() {
         run {
             try ShellPathInstaller.install()
-            status = ShellPathInstaller.detect()
+            return ShellPathInstaller.detect()
         }
     }
 
@@ -797,19 +797,30 @@ private struct AgentShellPathPanel: View {
     private func remove() {
         run {
             try ShellPathInstaller.uninstall()
-            status = ShellPathInstaller.detect()
+            return ShellPathInstaller.detect()
         }
     }
 
-    private func run(_ work: () throws -> Void) {
+    /// Runs the provided file IO off the main actor and re-syncs UI
+    /// state on completion. Profile files are tiny so the actual cost
+    /// is microseconds, but blocking the main thread on disk IO is a
+    /// regression we don't want to introduce — sandbox mediation,
+    /// network-mounted homes, etc. can all turn microseconds into
+    /// noticeable hitches.
+    private func run(_ work: @escaping @Sendable () throws -> ShellPathInstaller.Status) {
         guard !isBusy else { return }
         isBusy = true
         errorMessage = nil
-        defer { isBusy = false }
-        do {
-            try work()
-        } catch {
-            errorMessage = error.localizedDescription
+        Task {
+            do {
+                let newStatus = try await Task.detached(priority: .userInitiated) {
+                    try work()
+                }.value
+                status = newStatus
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isBusy = false
         }
     }
 }

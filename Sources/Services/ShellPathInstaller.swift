@@ -37,40 +37,60 @@ struct ShellPathInstaller {
     static let beginMarker = "# >>> duoduo-manager (managed) >>>"
     static let endMarker = "# <<< duoduo-manager (managed) <<<"
 
-    /// Files we manage. We target the *login*-shell startup files,
+    /// Files we manage. We target the *login*-shell startup files
     /// because the failing scenario is a daemon-spawned `bash -lc` /
     /// `zsh -lc` invocation: those run as login shells but not as
     /// interactive shells, so `~/.zshrc` (interactive-only) is the
     /// wrong file.
     ///
-    /// For zsh: `~/.zprofile` is unconditional. There is no precedence
-    /// trap on the zsh side — login shells always source it (in
-    /// addition to `/etc/zprofile`).
+    /// `install` and `detect` / `uninstall` use **different** file
+    /// lists on purpose:
     ///
-    /// For bash: bash login shells source the *first* of
-    /// `~/.bash_profile`, `~/.bash_login`, `~/.profile`. If we
-    /// unconditionally created `~/.bash_profile`, we would silently
-    /// stop bash from sourcing a pre-existing `~/.profile` — which can
-    /// break a user's PATH / env setup (NIX install, asdf, etc. often
-    /// land in `~/.profile`). So we pick the bash target dynamically:
-    ///   - if `~/.bash_profile` exists → use it (already authoritative)
-    ///   - else if `~/.profile` exists → update it (preserve precedence)
-    ///   - else → create `~/.bash_profile` (no pre-existing files to
-    ///     shadow)
+    /// - `installTargets` is the single bash file we *write* to,
+    ///   chosen by bash's own startup-file precedence so we never
+    ///   silently shadow what bash is already sourcing.
+    /// - `bashScanCandidates` is *every* bash login file; detect and
+    ///   uninstall walk all of them so a previously installed block
+    ///   doesn't become orphaned if the precedence target shifts
+    ///   later (e.g. user creates `~/.bash_profile` after we wrote to
+    ///   `~/.profile`).
     ///
     /// We intentionally do not touch `/etc/*` files — managing
     /// user-level state needs no sudo.
-    static var targetFiles: [String] {
-        ["~/.zprofile", bashTargetFile()]
+    static let zshTarget = "~/.zprofile"
+
+    /// All bash login startup files, in bash's own precedence order.
+    /// bash sources the first one that exists; we list them in the
+    /// same order so callers can pick deterministically.
+    static let bashScanCandidates: [String] = [
+        "~/.bash_profile",
+        "~/.bash_login",
+        "~/.profile",
+    ]
+
+    /// Files we *install into*. For bash, we write to whichever of
+    /// `bashScanCandidates` already exists (to preserve bash's own
+    /// precedence) or create `~/.bash_profile` if none do.
+    static var installTargets: [String] {
+        [zshTarget, bashInstallTarget()]
     }
 
-    private static func bashTargetFile() -> String {
-        if pathExists("~/.bash_profile") {
-            return "~/.bash_profile"
+    /// Files we *scan* for an existing managed block. Always the
+    /// full set, regardless of which one a previous install picked,
+    /// so detect/uninstall don't lose track of a block when the
+    /// precedence target moves under our feet.
+    static var allManagedCandidates: [String] {
+        [zshTarget] + bashScanCandidates
+    }
+
+    private static func bashInstallTarget() -> String {
+        // Walk bash's own precedence: first existing wins. This is
+        // the file bash itself will source, so writing here is the
+        // only way to be guaranteed-effective without shadowing.
+        for candidate in bashScanCandidates where pathExists(candidate) {
+            return candidate
         }
-        if pathExists("~/.profile") {
-            return "~/.profile"
-        }
+        // Nothing exists — create the canonical primary.
         return "~/.bash_profile"
     }
 
@@ -78,31 +98,43 @@ struct ShellPathInstaller {
         FileManager.default.fileExists(atPath: resolve(path))
     }
 
-    /// Installs (or refreshes) the managed block in every target file.
-    /// Creates files that don't exist. Idempotent: re-running replaces
-    /// the existing block in place rather than appending duplicates.
+    /// Installs (or refreshes) the managed block in every install
+    /// target. Creates files that don't exist. Idempotent: re-running
+    /// replaces the existing block in place rather than appending
+    /// duplicates.
     static func install() throws {
         let block = managedBlock()
-        for file in targetFiles {
+        for file in installTargets {
             try writeBlock(block, into: file)
         }
     }
 
-    /// Removes the managed block from every target file. Files that
-    /// don't exist or don't contain the block are silently skipped.
+    /// Removes the managed block from every candidate file (not just
+    /// the current install target), so a block written into a file
+    /// that has since lost precedence doesn't survive uninstall.
+    /// Files that don't exist or don't contain the block are silently
+    /// skipped.
     static func uninstall() throws {
-        for file in targetFiles {
+        for file in allManagedCandidates {
             try removeBlock(from: file)
         }
     }
 
-    /// Reports whether the block is present in target files. Used by
-    /// the onboarding panel to render the current state.
+    /// Reports whether the block is present. zsh and bash are
+    /// reported independently and aggregated:
+    /// - `installed`     iff zsh target has the block AND at least
+    ///                   one bash candidate has it
+    /// - `notInstalled`  iff neither side has any block anywhere
+    /// - `partiallyInstalled` otherwise (zsh-only, bash-only, or
+    ///                   bash block in a now-shadowed candidate)
     static func detect() -> Status {
-        let presence = targetFiles.map { fileContainsBlock($0) }
-        if presence.allSatisfy({ $0 }) { return .installed }
-        if presence.allSatisfy({ !$0 }) { return .notInstalled }
-        return .partiallyInstalled
+        let zshHasBlock = fileContainsBlock(zshTarget)
+        let bashHasBlock = bashScanCandidates.contains(where: fileContainsBlock)
+        switch (zshHasBlock, bashHasBlock) {
+        case (true, true):   return .installed
+        case (false, false): return .notInstalled
+        default:             return .partiallyInstalled
+        }
     }
 
     // MARK: - Block content
