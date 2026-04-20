@@ -220,6 +220,7 @@ enum L10n {
             static let stateNotInstalled = String(localized: "onboard.shellPath.stateNotInstalled", bundle: bundle)
             static let statePartial = String(localized: "onboard.shellPath.statePartial", bundle: bundle)
             static let actionInstall = String(localized: "onboard.shellPath.actionInstall", bundle: bundle)
+            static let actionRepair = String(localized: "onboard.shellPath.actionRepair", bundle: bundle)
             static let actionRemove = String(localized: "onboard.shellPath.actionRemove", bundle: bundle)
             static let actionRefresh = String(localized: "onboard.shellPath.actionRefresh", bundle: bundle)
             static func gateRequiresUpgrade(_ minVersion: String) -> String {

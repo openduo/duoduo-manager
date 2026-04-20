@@ -89,7 +89,7 @@
 "onboard.headerTitle" = "Onboard";
 "onboard.setupComplete" = "SETUP COMPLETE";
 "onboard.enjoy" = "Enjoy.";
-"onboard.readyHint" = "";
+"onboard.readyHint" = "Duoduo is ready. You can come back here anytime to reconfigure your model.";
 "onboard.editConfig" = "Edit Model Config";
 "onboard.close" = "Close";
 "onboard.detecting" = "Detecting...";
@@ -148,6 +148,7 @@
 "onboard.shellPath.stateNotInstalled" = "Not enabled";
 "onboard.shellPath.statePartial" = "Partially installed";
 "onboard.shellPath.actionInstall" = "Enable";
+"onboard.shellPath.actionRepair" = "Repair";
 "onboard.shellPath.actionRemove" = "Remove";
 "onboard.shellPath.actionRefresh" = "Refresh";
 "onboard.shellPath.gateRequiresUpgrade %@" = "Requires duoduo ≥ %@. Upgrade duoduo to enable.";

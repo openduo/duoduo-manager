@@ -14,6 +14,7 @@ struct OnboardingView: View {
     var onPreferredHeightChange: (CGFloat) -> Void = { _ in }
     @State private var completionReveal = false
     @State private var completionAxisShift = false
+    @State private var shellPathStatus: ShellPathInstaller.Status = .installed
 
     var body: some View {
         VStack(spacing: 0) {
@@ -55,8 +56,10 @@ struct OnboardingView: View {
             guard store.state.step == .complete else {
                 completionReveal = false
                 completionAxisShift = false
+                shellPathStatus = .installed
                 return
             }
+            shellPathStatus = NodeRuntime.hasBundledNode ? ShellPathInstaller.detect() : .installed
             withAnimation(.easeOut(duration: 0.35)) {
                 completionReveal = true
             }
@@ -236,10 +239,25 @@ struct OnboardingView: View {
                 .frame(width: 108, height: 3)
                 .clipShape(Capsule())
 
-            AgentShellPathPanel(duoduoVersion: store.state.snapshot.duoduoVersion)
-                .padding(.top, 2)
+            if showsCompletionSupplementaryPanel {
+                AgentShellPathPanel(
+                    duoduoVersion: store.state.snapshot.duoduoVersion,
+                    status: $shellPathStatus
+                )
+                    .padding(.top, 2)
+            } else {
+                Text(L10n.Onboard.readyHint)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(ConsolePalette.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 4)
+            }
         }
         .frame(width: 236, alignment: .leading)
+    }
+
+    private var showsCompletionSupplementaryPanel: Bool {
+        NodeRuntime.hasBundledNode && shellPathStatus != .installed
     }
 
     private var completionAxis: some View {
@@ -695,8 +713,8 @@ private func secondaryButton(title: String, action: @escaping () -> Void) -> som
 /// version actually honoring `DUODUO_NODE_BIN`.
 private struct AgentShellPathPanel: View {
     let duoduoVersion: String?
+    @Binding var status: ShellPathInstaller.Status
 
-    @State private var status: ShellPathInstaller.Status = .notInstalled
     @State private var errorMessage: String?
     @State private var isBusy = false
 
@@ -709,7 +727,7 @@ private struct AgentShellPathPanel: View {
 
                 Spacer()
 
-                statePill
+                statusControl
             }
 
             Text(L10n.Onboard.ShellPath.summary)
@@ -738,9 +756,6 @@ private struct AgentShellPathPanel: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(ConsolePalette.divider, lineWidth: 1)
         )
-        .task {
-            status = ShellPathInstaller.detect()
-        }
     }
 
     private var gateMessage: String? {
@@ -753,21 +768,17 @@ private struct AgentShellPathPanel: View {
         return nil
     }
 
-    private var statePill: some View {
-        let label: String
-        let tint: Color
-        switch status {
-        case .installed:
-            label = L10n.Onboard.ShellPath.stateInstalled
-            tint = ConsolePalette.signal
-        case .notInstalled:
-            label = L10n.Onboard.ShellPath.stateNotInstalled
-            tint = ConsolePalette.mutedText
-        case .partiallyInstalled:
-            label = L10n.Onboard.ShellPath.statePartial
-            tint = ConsolePalette.warning
-        }
-        return Text(label)
+    @ViewBuilder
+    private var statusControl: some View {
+        statusButton(
+            label: L10n.Onboard.ShellPath.actionRepair,
+            tint: ConsolePalette.warning,
+            action: install
+        )
+    }
+
+    private func statePill(label: String, tint: Color) -> some View {
+        Text(label)
             .font(.system(size: 10, weight: .semibold, design: .monospaced))
             .tracking(0.6)
             .foregroundStyle(tint)
@@ -777,23 +788,29 @@ private struct AgentShellPathPanel: View {
             .clipShape(Capsule())
     }
 
+    private func statusButton(label: String, tint: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            statePill(label: label, tint: tint)
+                .overlay(
+                    Capsule()
+                        .stroke(tint.opacity(0.32), lineWidth: 1)
+                )
+        }
+        .buttonStyle(.plain)
+        .disabled(isBusy || gateMessage != nil)
+        .opacity(isBusy ? 0.7 : 1)
+    }
+
     @ViewBuilder
     private var actionRow: some View {
-        HStack(spacing: 8) {
-            switch status {
-            case .installed:
-                secondaryButton(title: L10n.Onboard.ShellPath.actionRefresh, action: refresh)
+        switch status {
+        case .installed:
+            EmptyView()
+        case .notInstalled:
+            EmptyView()
+        case .partiallyInstalled:
+            HStack(spacing: 8) {
                 secondaryButton(title: L10n.Onboard.ShellPath.actionRemove, action: remove)
-            case .notInstalled, .partiallyInstalled:
-                primaryButton(
-                    title: L10n.Onboard.ShellPath.actionInstall,
-                    tint: ConsolePalette.accent,
-                    disabled: isBusy,
-                    action: install
-                )
-                if status == .partiallyInstalled {
-                    secondaryButton(title: L10n.Onboard.ShellPath.actionRemove, action: remove)
-                }
             }
         }
     }
@@ -804,8 +821,6 @@ private struct AgentShellPathPanel: View {
             return ShellPathInstaller.detect()
         }
     }
-
-    private func refresh() { install() }
 
     private func remove() {
         run {

@@ -89,7 +89,7 @@
 "onboard.headerTitle" = "Onboard";
 "onboard.setupComplete" = "SETUP COMPLETE";
 "onboard.enjoy" = "Enjoy.";
-"onboard.readyHint" = "";
+"onboard.readyHint" = "Duoduo 已就绪。你随时都可以回到第三步修改模型配置。";
 "onboard.editConfig" = "修改模型配置";
 "onboard.close" = "关闭";
 "onboard.detecting" = "检测中...";
@@ -148,6 +148,7 @@
 "onboard.shellPath.stateNotInstalled" = "未启用";
 "onboard.shellPath.statePartial" = "部分启用";
 "onboard.shellPath.actionInstall" = "启用";
+"onboard.shellPath.actionRepair" = "修复";
 "onboard.shellPath.actionRemove" = "移除";
 "onboard.shellPath.actionRefresh" = "刷新";
 "onboard.shellPath.gateRequiresUpgrade %@" = "需要 duoduo ≥ %@，请先升级 duoduo。";
