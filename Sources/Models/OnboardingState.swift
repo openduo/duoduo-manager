@@ -437,18 +437,17 @@ final class OnboardingStore {
             }
 
         case .startDaemon:
-            let config = DaemonConfig.load()
-            let service = DaemonService(daemonURL: config.daemonURL)
-
             do {
-                _ = try await service.start()
-                let status = try await service.getStatus()
-                if status.isRunning {
-                    if let appStore {
-                        await appStore.refreshRuntime()
+                if let appStore {
+                    _ = try await appStore.daemonService.start()
+                    await appStore.refreshRuntime()
+
+                    if appStore.runtime.status.isRunning {
+                        let snapshot = await OnboardingService.detect(appStore: appStore)
+                        send(.detectionFinished(snapshot, status: L10n.Onboard.statusDaemonStarted))
+                    } else {
+                        send(.operationFailed(L10n.Onboard.errDaemonNotHealthy))
                     }
-                    let snapshot = await OnboardingService.detect(appStore: appStore)
-                    send(.detectionFinished(snapshot, status: L10n.Onboard.statusDaemonStarted))
                 } else {
                     send(.operationFailed(L10n.Onboard.errDaemonNotHealthy))
                 }
