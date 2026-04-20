@@ -27,6 +27,34 @@ There is no test target in this project — do not invent test commands.
 
 `make run` patches the built Info.plist with `DuoduoNodeRuntimeMode=system` and `DuoduoBuildVariant=universal-lite` so dev runs use the system Node.js without bundling.
 
+## Scoping principle (read before adding any new manager-side feature)
+
+**The duoduo CLI self-bootstraps; manager only does what the CLI cannot or should not.**
+
+Manager's responsibilities are deliberately narrow:
+
+1. Install duoduo (and, in `*-with-nodejs` mode, ship the Node runtime it needs).
+2. Make duoduo reachable from the contexts that need it (agent subprocess shells, the manager's own UI surfaces).
+3. Provide a GUI surface (menu bar, popover, dashboard, onboarding) that exposes what the CLI already does.
+
+Everything else — daemon lifecycle (`duoduo daemon start | stop | restart`), channel install / upgrade / config (`duoduo channel …`), runtime configuration (`duoduo daemon config …`), interactive setup flows (`duoduo onboard`) — belongs to the CLI. Manager calls the CLI; manager does not reimplement what the CLI is already capable of.
+
+When you reach for new code in this repo, ask: **could the CLI own this instead?** If yes, the right move is usually to (a) file an upstream issue / PR against `openduo/duoduo` to make the CLI capable, then (b) have manager call it. If the answer is genuinely no — the action involves user-owned resources the CLI shouldn't touch (e.g. shell rc files), or it requires platform integration that only a GUI app can do (e.g. menu bar, NSWindow, codesigned launch) — then it belongs in manager.
+
+Concrete examples of "manager should not own this":
+
+- Channel version detection / upgrade orchestration → CLI knows its own packages; ask the CLI.
+- Daemon LaunchAgent plist generation → the CLI handles launchd internally since `v0.4.3`. The manager-side `LaunchAgentService` was removed in commit `2abd281`.
+- Config file mutation, env var validation, dependency probes → all should land as CLI subcommands, not Swift code in manager.
+
+Concrete examples of "manager genuinely owns this":
+
+- `Sources/Services/ShellPathInstaller.swift` — modifying `~/.zprofile` etc. The CLI cannot reach into a user's shell startup files; that's manager's job (with explicit user opt-in via onboarding).
+- `Sources/Services/NodeRuntime.swift` bundled-mode env composition — the CLI doesn't know which Node runtime manager has bundled; manager has to tell it via `DUODUO_NODE_BIN`.
+- Menu bar / popover / Sparkle auto-update / onboarding window chrome — all platform integration the CLI cannot do.
+
+Reviewers should push back on any new code that doesn't pass this test.
+
 ## Architecture (read before editing across layers)
 
 Layered root-store architecture: `Host -> Views -> Presentations -> Stores -> Services -> Models`. The full design rationale lives in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — read it before reorganizing layers, adding new stores, or changing polling cadence.
