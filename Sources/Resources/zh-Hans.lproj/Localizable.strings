@@ -144,12 +144,8 @@
 "onboard.error.daemonNotHealthy" = "daemon 未进入 healthy 状态。";
 "onboard.shellPath.title" = "Agent shell 访问";
 "onboard.shellPath.summary" = "把 ~/.duoduo-manager/bin 加入登录 shell 的 PATH，让 agent 子进程能找到 `duoduo`。会更新你的 shell profile。";
-"onboard.shellPath.stateInstalled" = "已启用";
-"onboard.shellPath.stateNotInstalled" = "未启用";
-"onboard.shellPath.statePartial" = "部分启用";
-"onboard.shellPath.actionInstall" = "启用";
-"onboard.shellPath.actionRepair" = "修复";
-"onboard.shellPath.actionRemove" = "移除";
-"onboard.shellPath.actionRefresh" = "刷新";
+"onboard.shellPath.summaryFailed" = "Duoduo 没能自动更新你的 shell profile。如果你需要让 agent 子进程找到 `duoduo`，请自行把 ~/.duoduo-manager/bin 加入登录 shell 的 PATH。";
+"onboard.shellPath.autoRepairFailed" = "自动修复 shell profile 未完成。";
+"onboard.shellPath.stateNeedsManualAction" = "需手动处理";
 "onboard.shellPath.gateRequiresUpgrade %@" = "需要 duoduo ≥ %@，请先升级 duoduo。";
 "onboard.shellPath.gateRequiresInstall" = "请先完成 duoduo 安装。";

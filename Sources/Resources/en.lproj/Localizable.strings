@@ -144,12 +144,8 @@
 "onboard.error.daemonNotHealthy" = "Daemon did not reach healthy state.";
 "onboard.shellPath.title" = "Agent shell access";
 "onboard.shellPath.summary" = "Add ~/.duoduo-manager/bin to your login-shell PATH so agent subprocesses can resolve `duoduo`. This updates your shell profile.";
-"onboard.shellPath.stateInstalled" = "Enabled";
-"onboard.shellPath.stateNotInstalled" = "Not enabled";
-"onboard.shellPath.statePartial" = "Partially installed";
-"onboard.shellPath.actionInstall" = "Enable";
-"onboard.shellPath.actionRepair" = "Repair";
-"onboard.shellPath.actionRemove" = "Remove";
-"onboard.shellPath.actionRefresh" = "Refresh";
+"onboard.shellPath.summaryFailed" = "Duoduo could not update your shell profile automatically. Add ~/.duoduo-manager/bin to your login-shell PATH yourself if you need agent subprocesses to find `duoduo`.";
+"onboard.shellPath.autoRepairFailed" = "Automatic profile repair did not complete.";
+"onboard.shellPath.stateNeedsManualAction" = "Manual Step";
 "onboard.shellPath.gateRequiresUpgrade %@" = "Requires duoduo ≥ %@. Upgrade duoduo to enable.";
 "onboard.shellPath.gateRequiresInstall" = "Install duoduo first to enable.";

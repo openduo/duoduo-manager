@@ -15,6 +15,7 @@ struct OnboardingView: View {
     @State private var completionReveal = false
     @State private var completionAxisShift = false
     @State private var shellPathStatus: ShellPathInstaller.Status = .installed
+    @State private var shellPathErrorMessage: String?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -57,9 +58,10 @@ struct OnboardingView: View {
                 completionReveal = false
                 completionAxisShift = false
                 shellPathStatus = .installed
+                shellPathErrorMessage = nil
                 return
             }
-            shellPathStatus = NodeRuntime.hasBundledNode ? ShellPathInstaller.detect() : .installed
+            await prepareCompletionSupplementaryPanel()
             withAnimation(.easeOut(duration: 0.35)) {
                 completionReveal = true
             }
@@ -242,7 +244,7 @@ struct OnboardingView: View {
             if showsCompletionSupplementaryPanel {
                 AgentShellPathPanel(
                     duoduoVersion: store.state.snapshot.duoduoVersion,
-                    status: $shellPathStatus
+                    errorMessage: $shellPathErrorMessage
                 )
                     .padding(.top, 2)
             } else {
@@ -257,7 +259,52 @@ struct OnboardingView: View {
     }
 
     private var showsCompletionSupplementaryPanel: Bool {
-        NodeRuntime.hasBundledNode && shellPathStatus != .installed
+        NodeRuntime.hasBundledNode && (shellPathGateMessage != nil || shellPathStatus != .installed || shellPathErrorMessage != nil)
+    }
+
+    private var shellPathGateMessage: String? {
+        guard store.state.snapshot.duoduoVersion != nil else {
+            return L10n.Onboard.ShellPath.gateRequiresInstall
+        }
+        if !DuoduoCompat.meetsMinimum(
+            installed: store.state.snapshot.duoduoVersion,
+            minimum: DuoduoCompat.minVersionForNodeBinEnv
+        ) {
+            return L10n.Onboard.ShellPath.gateRequiresUpgrade(DuoduoCompat.minVersionForNodeBinEnv)
+        }
+        return nil
+    }
+
+    private func prepareCompletionSupplementaryPanel() async {
+        guard NodeRuntime.hasBundledNode else {
+            shellPathStatus = .installed
+            shellPathErrorMessage = nil
+            return
+        }
+
+        let detectedStatus = ShellPathInstaller.detect()
+        shellPathStatus = detectedStatus
+
+        guard shellPathGateMessage == nil else {
+            shellPathErrorMessage = nil
+            return
+        }
+
+        guard detectedStatus != .installed else {
+            shellPathErrorMessage = nil
+            return
+        }
+
+        do {
+            let newStatus = try await Task.detached(priority: .userInitiated) {
+                try ShellPathInstaller.install()
+                return ShellPathInstaller.detect()
+            }.value
+            shellPathStatus = newStatus
+            shellPathErrorMessage = newStatus == .installed ? nil : L10n.Onboard.ShellPath.autoRepairFailed
+        } catch {
+            shellPathErrorMessage = error.localizedDescription
+        }
     }
 
     private var completionAxis: some View {
@@ -713,10 +760,7 @@ private func secondaryButton(title: String, action: @escaping () -> Void) -> som
 /// version actually honoring `DUODUO_NODE_BIN`.
 private struct AgentShellPathPanel: View {
     let duoduoVersion: String?
-    @Binding var status: ShellPathInstaller.Status
-
-    @State private var errorMessage: String?
-    @State private var isBusy = false
+    @Binding var errorMessage: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -730,7 +774,7 @@ private struct AgentShellPathPanel: View {
                 statusControl
             }
 
-            Text(L10n.Onboard.ShellPath.summary)
+            Text(summaryText)
                 .font(.system(size: 10, weight: .medium))
                 .foregroundStyle(ConsolePalette.secondaryText)
                 .fixedSize(horizontal: false, vertical: true)
@@ -739,8 +783,6 @@ private struct AgentShellPathPanel: View {
                 Text(gateMessage)
                     .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(ConsolePalette.warning)
-            } else {
-                actionRow
             }
 
             if let errorMessage {
@@ -770,11 +812,14 @@ private struct AgentShellPathPanel: View {
 
     @ViewBuilder
     private var statusControl: some View {
-        statusButton(
-            label: L10n.Onboard.ShellPath.actionRepair,
-            tint: ConsolePalette.warning,
-            action: install
+        statePill(
+            label: L10n.Onboard.ShellPath.stateNeedsManualAction,
+            tint: ConsolePalette.warning
         )
+    }
+
+    private var summaryText: String {
+        errorMessage == nil ? L10n.Onboard.ShellPath.summary : L10n.Onboard.ShellPath.summaryFailed
     }
 
     private func statePill(label: String, tint: Color) -> some View {
@@ -786,69 +831,5 @@ private struct AgentShellPathPanel: View {
             .padding(.vertical, 3)
             .background(tint.opacity(0.12))
             .clipShape(Capsule())
-    }
-
-    private func statusButton(label: String, tint: Color, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            statePill(label: label, tint: tint)
-                .overlay(
-                    Capsule()
-                        .stroke(tint.opacity(0.32), lineWidth: 1)
-                )
-        }
-        .buttonStyle(.plain)
-        .disabled(isBusy || gateMessage != nil)
-        .opacity(isBusy ? 0.7 : 1)
-    }
-
-    @ViewBuilder
-    private var actionRow: some View {
-        switch status {
-        case .installed:
-            EmptyView()
-        case .notInstalled:
-            EmptyView()
-        case .partiallyInstalled:
-            HStack(spacing: 8) {
-                secondaryButton(title: L10n.Onboard.ShellPath.actionRemove, action: remove)
-            }
-        }
-    }
-
-    private func install() {
-        run {
-            try ShellPathInstaller.install()
-            return ShellPathInstaller.detect()
-        }
-    }
-
-    private func remove() {
-        run {
-            try ShellPathInstaller.uninstall()
-            return ShellPathInstaller.detect()
-        }
-    }
-
-    /// Runs the provided file IO off the main actor and re-syncs UI
-    /// state on completion. Profile files are tiny so the actual cost
-    /// is microseconds, but blocking the main thread on disk IO is a
-    /// regression we don't want to introduce — sandbox mediation,
-    /// network-mounted homes, etc. can all turn microseconds into
-    /// noticeable hitches.
-    private func run(_ work: @escaping @Sendable () throws -> ShellPathInstaller.Status) {
-        guard !isBusy else { return }
-        isBusy = true
-        errorMessage = nil
-        Task {
-            do {
-                let newStatus = try await Task.detached(priority: .userInitiated) {
-                    try work()
-                }.value
-                status = newStatus
-            } catch {
-                errorMessage = error.localizedDescription
-            }
-            isBusy = false
-        }
     }
 }

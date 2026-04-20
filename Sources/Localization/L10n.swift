@@ -216,13 +216,9 @@ enum L10n {
         enum ShellPath {
             static let title = String(localized: "onboard.shellPath.title", bundle: bundle)
             static let summary = String(localized: "onboard.shellPath.summary", bundle: bundle)
-            static let stateInstalled = String(localized: "onboard.shellPath.stateInstalled", bundle: bundle)
-            static let stateNotInstalled = String(localized: "onboard.shellPath.stateNotInstalled", bundle: bundle)
-            static let statePartial = String(localized: "onboard.shellPath.statePartial", bundle: bundle)
-            static let actionInstall = String(localized: "onboard.shellPath.actionInstall", bundle: bundle)
-            static let actionRepair = String(localized: "onboard.shellPath.actionRepair", bundle: bundle)
-            static let actionRemove = String(localized: "onboard.shellPath.actionRemove", bundle: bundle)
-            static let actionRefresh = String(localized: "onboard.shellPath.actionRefresh", bundle: bundle)
+            static let summaryFailed = String(localized: "onboard.shellPath.summaryFailed", bundle: bundle)
+            static let autoRepairFailed = String(localized: "onboard.shellPath.autoRepairFailed", bundle: bundle)
+            static let stateNeedsManualAction = String(localized: "onboard.shellPath.stateNeedsManualAction", bundle: bundle)
             static func gateRequiresUpgrade(_ minVersion: String) -> String {
                 String(localized: "onboard.shellPath.gateRequiresUpgrade \(minVersion)", bundle: bundle)
             }
