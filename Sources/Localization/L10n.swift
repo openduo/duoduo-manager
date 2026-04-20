@@ -38,7 +38,10 @@ enum L10n {
 
     enum Config {
         static let save = String(localized: "config.save", bundle: bundle)
+        static let saved = String(localized: "config.saved", bundle: bundle)
         static let cancel = String(localized: "config.cancel", bundle: bundle)
+        static let enabled = String(localized: "config.enabled", bundle: bundle)
+        static let disabled = String(localized: "config.disabled", bundle: bundle)
     }
 
     // MARK: - Daemon Config
@@ -50,6 +53,8 @@ enum L10n {
         static let workDirSelect = String(localized: "daemonConfig.workDirSelect", bundle: bundle)
         static let workDirPanelMessage = String(localized: "daemonConfig.workDirPanelMessage", bundle: bundle)
         static let network = String(localized: "daemonConfig.network", bundle: bundle)
+        static let general = String(localized: "daemonConfig.general", bundle: bundle)
+        static let daemonHost = String(localized: "daemonConfig.daemonHost", bundle: bundle)
         static let listenPort = String(localized: "daemonConfig.listenPort", bundle: bundle)
         static let logging = String(localized: "daemonConfig.logging", bundle: bundle)
         static let logLevel = String(localized: "daemonConfig.logLevel", bundle: bundle)
@@ -71,6 +76,8 @@ enum L10n {
     enum FeishuConfig {
         static let title = String(localized: "feishuConfig.title", bundle: bundle)
         static let auth = String(localized: "feishuConfig.auth", bundle: bundle)
+        static let appID = String(localized: "feishuConfig.appID", bundle: bundle)
+        static let appSecret = String(localized: "feishuConfig.appSecret", bundle: bundle)
         static let connection = String(localized: "feishuConfig.connection", bundle: bundle)
         static let feishuDomain = String(localized: "feishuConfig.feishuDomain", bundle: bundle)
         static let accessControl = String(localized: "feishuConfig.accessControl", bundle: bundle)

@@ -52,16 +52,11 @@ final class OnboardingService {
             }
         }
 
-        if duoduoInstalled {
-            do {
-                let config = DaemonConfig.load()
-                let daemonService = DaemonService(daemonURL: config.daemonURL)
-                let daemonStatus = try await daemonService.getStatus()
-                daemonHealthy = daemonStatus.isRunning
-                if daemonPID == nil, !daemonStatus.pid.isEmpty {
-                    daemonPID = daemonStatus.pid
-                }
-            } catch { }
+        if let runtimeStatus {
+            daemonHealthy = runtimeStatus.isRunning
+            if daemonPID == nil {
+                daemonPID = runtimeStatus.pid.nilIfEmpty
+            }
         }
 
         return OnboardingSnapshot(

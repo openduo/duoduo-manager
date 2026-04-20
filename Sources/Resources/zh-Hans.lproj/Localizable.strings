@@ -10,7 +10,10 @@
 
 /* Config */
 "config.save" = "保存";
+"config.saved" = "已保存";
 "config.cancel" = "取消";
+"config.enabled" = "已开启";
+"config.disabled" = "已关闭";
 
 /* Daemon Config */
 "daemonConfig.title" = "Daemon 配置";
@@ -19,6 +22,8 @@
 "daemonConfig.workDirSelect" = "选择...";
 "daemonConfig.workDirPanelMessage" = "选择 duoduo 工作目录";
 "daemonConfig.network" = "网络";
+"daemonConfig.general" = "常规";
+"daemonConfig.daemonHost" = "Daemon 地址";
 "daemonConfig.listenPort" = "监听端口";
 "daemonConfig.logging" = "日志";
 "daemonConfig.logLevel" = "日志级别";
@@ -37,6 +42,8 @@
 /* Feishu Config */
 "feishuConfig.title" = "飞书配置";
 "feishuConfig.auth" = "认证";
+"feishuConfig.appID" = "App ID";
+"feishuConfig.appSecret" = "App Secret";
 "feishuConfig.connection" = "连接";
 "feishuConfig.feishuDomain" = "飞书域名";
 "feishuConfig.accessControl" = "访问控制";

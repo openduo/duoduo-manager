@@ -1,81 +1,83 @@
 import Foundation
 
-/// Daemon configuration, mapped to duoduo daemon environment variables
-struct DaemonConfig: Codable, Sendable, Equatable {
-
-    // MARK: - General
-    /// Working directory for the duoduo daemon
+struct DaemonConfig: Sendable, Equatable {
     var workDir: String = ""
-
-    // MARK: - Network
-    /// Listen port
+    var daemonHost: String = "127.0.0.1"
     var port: String = "20233"
-    /// Daemon host (default: 127.0.0.1)
-    var host: String = "127.0.0.1"
-
-    /// Computed daemon URL from host + port
-    var daemonURL: String {
-        "http://\(host):\(port)"
-    }
-
-    // MARK: - Logging
-    /// debug | info | warn | error
-    var logLevel: String = "debug"
-
-    // MARK: - Permissions
-    /// default | bypassPermissions
+    var logLevel: String = "info"
     var permissionMode: String = "default"
 
-    // MARK: - Session
-    /// Maximum concurrent sessions
-    var maxConcurrent: String = "10"
-
-    // MARK: - Advanced
-    /// Session idle timeout in milliseconds
-    var sessionIdleMs: String = "3600000"
-    /// Disable automatic main session creation
-    var disableAutoMain: Bool = false
-    /// Pull limit
-    var pullLimit: String = "50"
-
-    // MARK: - Helpers
-
-    /// Whether any value differs from defaults
-    var isCustomized: Bool {
-        port != "20233"
-            || host != "127.0.0.1"
-            || logLevel != "debug"
-            || permissionMode != "default"
-            || maxConcurrent != "10"
-            || sessionIdleMs != "3600000"
-            || disableAutoMain != false
-            || pullLimit != "50"
+    var daemonURL: String {
+        "http://\(daemonHost):\(port)"
     }
 
-    /// Only maps user-modified (non-default) values to avoid overriding daemon's own defaults
-    var envVars: [String: String] {
-        var env: [String: String] = [:]
-        if !workDir.isEmpty                      { env["ALADUO_WORK_DIR"] = workDir }
-        if port != "20233"                       { env["ALADUO_PORT"] = port }
-        if host != "127.0.0.1"                   { env["ALADUO_HOST"] = host }
-        if logLevel != "debug"                   { env["ALADUO_LOG_LEVEL"] = logLevel }
-        if permissionMode != "default"           { env["ALADUO_PERMISSION_MODE"] = permissionMode }
-        if maxConcurrent != "10"                 { env["ALADUO_SESSION_MAX_CONCURRENT"] = maxConcurrent }
-        if sessionIdleMs != "3600000"            { env["ALADUO_SESSION_IDLE_MS"] = sessionIdleMs }
-        if disableAutoMain                       { env["ALADUO_DISABLE_DAEMON_AUTO_MAIN"] = "true" }
-        if pullLimit != "50"                     { env["ALADUO_PULL_LIMIT"] = pullLimit }
-        return env
+    var host: String {
+        get { daemonHost }
+        set { daemonHost = newValue }
     }
-
-    // MARK: - Persistence
-
-    private static let udKey = "daemon_config_v1"
 
     static func load() -> DaemonConfig {
-        ConfigStore.load(defaultValue: DaemonConfig(), forKey: udKey)
+        let values = ConfigStore.loadValues()
+        var config = DaemonConfig()
+        config.workDir = values["ALADUO_WORK_DIR"] ?? config.workDir
+        config.daemonHost = values["ALADUO_DAEMON_HOST"] ?? values["ALADUO_HOST"] ?? config.daemonHost
+        config.port = values["ALADUO_PORT"] ?? config.port
+        config.logLevel = values["ALADUO_LOG_LEVEL"] ?? config.logLevel
+        config.permissionMode = values["ALADUO_PERMISSION_MODE"] ?? config.permissionMode
+        return config
     }
 
     func save() {
-        ConfigStore.save(self, forKey: DaemonConfig.udKey)
+        ConfigStore.save(entries: persistedEntries, managedKeys: Self.managedKeys)
     }
+
+    var persistedEntries: [(key: String, value: String)] {
+        var entries: [(String, String)] = []
+        appendIfNonEmpty(&entries, "ALADUO_WORK_DIR", workDir)
+        appendIfDifferent(&entries, "ALADUO_DAEMON_HOST", daemonHost, defaultValue: "127.0.0.1")
+        appendIfDifferent(&entries, "ALADUO_PORT", port, defaultValue: "20233")
+        appendIfDifferent(&entries, "ALADUO_LOG_LEVEL", logLevel, defaultValue: "info")
+        appendIfDifferent(&entries, "ALADUO_PERMISSION_MODE", permissionMode, defaultValue: "default")
+        return entries
+    }
+
+    private static let managedKeys: Set<String> = [
+        "ALADUO_WORK_DIR",
+        "ALADUO_DAEMON_HOST",
+        "ALADUO_HOST",
+        "ALADUO_PORT",
+        "ALADUO_LOG_LEVEL",
+        "ALADUO_PERMISSION_MODE",
+    ]
+}
+
+func boolValue(_ rawValue: String?, default defaultValue: Bool) -> Bool {
+    guard let value = rawValue?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() else {
+        return defaultValue
+    }
+    switch value {
+    case "1", "true", "yes", "on":
+        return true
+    case "0", "false", "no", "off":
+        return false
+    default:
+        return defaultValue
+    }
+}
+
+func appendIfNonEmpty(_ entries: inout [(String, String)], _ key: String, _ value: String) {
+    let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !trimmed.isEmpty else { return }
+    entries.append((key, trimmed))
+}
+
+func appendIfDifferent(_ entries: inout [(String, String)], _ key: String, _ value: String, defaultValue: String) {
+    let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !trimmed.isEmpty, trimmed != defaultValue else { return }
+    entries.append((key, trimmed))
+}
+
+func appendIfDifferent(_ entries: inout [(String, String)], _ key: String, _ value: Bool, defaultValue: Bool) {
+    guard value != defaultValue else { return }
+    entries.append((key, value ? "true" : "false"))
 }

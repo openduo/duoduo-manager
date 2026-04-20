@@ -8,11 +8,11 @@ struct FeishuConfigView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var revealSecret = false
-    @State private var showAdvanced = false
+    @State private var didSave = false
 
     private var isValid: Bool {
-        !config.appId.trimmingCharacters(in: .whitespaces).isEmpty &&
-        !config.appSecret.trimmingCharacters(in: .whitespaces).isEmpty
+        !config.appId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !config.appSecret.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     var body: some View {
@@ -26,9 +26,6 @@ struct FeishuConfigView: View {
                     authSection
                     connectionSection
                     accessSection
-                    renderSection
-                    advancedToggle
-                    if showAdvanced { advancedSection }
                 }
                 .padding(.bottom, 16)
             }
@@ -37,11 +34,9 @@ struct FeishuConfigView: View {
                 inlineActions
             }
         }
-        .frame(width: mode == .panel ? 380 : nil)
+        .frame(width: mode == .panel ? 420 : nil)
         .fixedSize(horizontal: false, vertical: mode == .panel)
     }
-
-    // MARK: - Title Bar
 
     private var titleBar: some View {
         HStack(spacing: 8) {
@@ -57,18 +52,14 @@ struct FeishuConfigView: View {
 
             Spacer()
 
-            Button(L10n.Config.save) {
-                saveConfig()
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.small)
-            .disabled(!isValid)
+            Button(saveButtonTitle, action: saveConfig)
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
+                .disabled(!isValid)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
     }
-
-    // MARK: - Authentication
 
     private var authSection: some View {
         Group {
@@ -92,13 +83,13 @@ struct FeishuConfigView: View {
                 .padding(.horizontal, 14)
                 .padding(.top, 14)
             }
-            configRow(label: "App ID", required: true, hint: "FEISHU_APP_ID") {
+            configRow(label: L10n.FeishuConfig.appID, required: true, hint: "FEISHU_APP_ID") {
                 TextField("cli_xxxxxxxxxx", text: $config.appId)
                     .textFieldStyle(.roundedBorder)
                     .font(.system(size: 12, design: .monospaced))
             }
             configRowDivider()
-            configRow(label: "App Secret", required: true, hint: "FEISHU_APP_SECRET") {
+            configRow(label: L10n.FeishuConfig.appSecret, required: true, hint: "FEISHU_APP_SECRET") {
                 HStack(spacing: 6) {
                     Group {
                         if revealSecret {
@@ -121,8 +112,6 @@ struct FeishuConfigView: View {
         }
     }
 
-    // MARK: - Connection
-
     private var connectionSection: some View {
         Group {
             configSectionLabel(L10n.FeishuConfig.connection)
@@ -138,15 +127,14 @@ struct FeishuConfigView: View {
         }
     }
 
-    // MARK: - Access Control
-
     private var accessSection: some View {
         Group {
             configSectionLabel(L10n.FeishuConfig.accessControl)
             configRow(label: L10n.FeishuConfig.dmPolicy, hint: "FEISHU_DM_POLICY") {
                 Picker("", selection: $config.dmPolicy) {
-                    Text(L10n.FeishuConfig.dmPolicyOpen).tag("open")
-                    Text(L10n.FeishuConfig.dmPolicyAllowlist).tag("allowlist")
+                    Text("open").tag("open")
+                    Text("allowlist").tag("allowlist")
+                    Text("pairing").tag("pairing")
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
@@ -162,102 +150,30 @@ struct FeishuConfigView: View {
                 .labelsHidden()
             }
             configRowDivider()
-            configRow(label: L10n.FeishuConfig.requireMention, hint: "FEISHU_REQUIRE_MENTION") {
-                HStack {
-                    Toggle("", isOn: $config.requireMention).labelsHidden()
-                    Text(config.requireMention ? L10n.FeishuConfig.requireMentionOn : L10n.FeishuConfig.requireMentionOff)
-                        .font(.system(size: 11))
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                }
-            }
-            if config.dmPolicy == "allowlist" || config.groupPolicy == "allowlist" {
-                configRowDivider()
-                configRow(label: L10n.FeishuConfig.allowedUsers, hint: "FEISHU_ALLOW_FROM") {
-                    TextField("ou_abc, ou_def", text: $config.allowFrom)
-                        .textFieldStyle(.roundedBorder)
-                        .font(.system(size: 12, design: .monospaced))
-                }
-            }
-            if config.groupPolicy == "allowlist" {
-                configRowDivider()
-                configRow(label: L10n.FeishuConfig.allowedGroups, hint: "FEISHU_ALLOW_GROUPS") {
-                    TextField("oc_abc, oc_def", text: $config.allowGroups)
-                        .textFieldStyle(.roundedBorder)
-                        .font(.system(size: 12, design: .monospaced))
-                }
-            }
-        }
-    }
-
-    // MARK: - Rendering
-
-    private var renderSection: some View {
-        Group {
-            configSectionLabel(L10n.FeishuConfig.render)
-            configRow(label: L10n.FeishuConfig.renderMode, hint: "FEISHU_RENDER_MODE") {
-                VStack(alignment: .leading, spacing: 4) {
-                    Picker("", selection: $config.renderMode) {
-                        Text("auto").tag("auto")
-                        Text("raw").tag("raw")
-                        Text("card").tag("card")
-                    }
-                    .pickerStyle(.segmented)
-                    .labelsHidden()
-                    Text(renderModeDescription)
-                        .font(.system(size: 10))
-                        .foregroundStyle(.tertiary)
-                }
-            }
-        }
-    }
-
-    private var renderModeDescription: String {
-        switch config.renderMode {
-        case "auto":  return L10n.FeishuConfig.renderModeDescAuto
-        case "raw":   return L10n.FeishuConfig.renderModeDescRaw
-        case "card":  return L10n.FeishuConfig.renderModeDescCard
-        default:      return ""
-        }
-    }
-
-    // MARK: - Advanced
-
-    private var advancedToggle: some View {
-        Button {
-            withAnimation(.easeInOut(duration: 0.15)) { showAdvanced.toggle() }
-        } label: {
-            HStack(spacing: 4) {
-                Image(systemName: showAdvanced ? "chevron.down" : "chevron.right")
-                    .font(.system(size: 9, weight: .semibold))
-                Text(L10n.FeishuConfig.advancedSettings)
-                    .font(.system(size: 11, weight: .medium))
-            }
-            .foregroundStyle(.secondary)
-        }
-        .buttonStyle(.plain)
-        .padding(.horizontal, 16)
-        .padding(.top, 14)
-        .padding(.bottom, 4)
-    }
-
-    private var advancedSection: some View {
-        Group {
-            configRow(label: L10n.FeishuConfig.botOpenId, hint: "FEISHU_BOT_OPEN_ID") {
-                TextField("ou_xxxxxxxxxx", text: $config.botOpenId)
+            boolRow(label: L10n.FeishuConfig.requireMention, hint: "FEISHU_REQUIRE_MENTION", value: $config.requireMention)
+            configRowDivider()
+            configRow(label: L10n.FeishuConfig.allowedUsers, hint: "FEISHU_ALLOW_FROM") {
+                TextField("ou_abc,ou_def", text: $config.allowFrom)
                     .textFieldStyle(.roundedBorder)
                     .font(.system(size: 12, design: .monospaced))
             }
             configRowDivider()
-            configRow(label: L10n.FeishuConfig.logLevel, hint: "FEISHU_LOG_LEVEL") {
-                Picker("", selection: $config.logLevel) {
-                    Text("debug").tag("debug")
-                    Text("info").tag("info")
-                    Text("warn").tag("warn")
-                    Text("error").tag("error")
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
+            configRow(label: L10n.FeishuConfig.allowedGroups, hint: "FEISHU_ALLOW_GROUPS") {
+                TextField("oc_abc,oc_def", text: $config.allowGroups)
+                    .textFieldStyle(.roundedBorder)
+                    .font(.system(size: 12, design: .monospaced))
+            }
+        }
+    }
+
+    private func boolRow(label: String, hint: String, value: Binding<Bool>) -> some View {
+        configRow(label: label, hint: hint) {
+            HStack {
+                Toggle("", isOn: value).labelsHidden()
+                Text(value.wrappedValue ? L10n.Config.enabled : L10n.Config.disabled)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                Spacer()
             }
         }
     }
@@ -272,24 +188,29 @@ struct FeishuConfigView: View {
             .buttonStyle(.bordered)
             .controlSize(.small)
 
-            Button(L10n.Config.save) {
-                saveConfig()
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.small)
-            .disabled(!isValid)
+            Button(saveButtonTitle, action: saveConfig)
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
+                .disabled(!isValid)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
     }
 
+    private var saveButtonTitle: String {
+        didSave ? L10n.Config.saved : L10n.Config.save
+    }
+
     private func saveConfig() {
         config.save()
+        didSave = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+            didSave = false
+        }
         if let onSave {
             onSave()
         } else {
             dismiss()
         }
     }
-
 }

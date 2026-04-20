@@ -70,13 +70,13 @@ extension AppStore {
         updateStatusBarIcon?()
     }
 
-    func startDaemon() { executeCommand { try await self.daemonService.start(extraEnv: self.runtime.daemonConfig.envVars) } }
+    func startDaemon() { executeCommand { try await self.daemonService.start() } }
     func stopDaemon() { executeCommand { try await self.daemonService.stop() } }
-    func restartDaemon() { executeCommand { try await self.daemonService.restart(extraEnv: self.runtime.daemonConfig.envVars) } }
+    func restartDaemon() { executeCommand { try await self.daemonService.restart() } }
 
     func startChannel(_ channelType: String) {
         executeCommand {
-            try await self.channelService.startChannel(channelType, extraEnv: self.extraEnv(for: channelType))
+            try await self.channelService.startChannel(channelType)
         }
     }
 
@@ -87,7 +87,7 @@ extension AppStore {
     func restartChannel(_ channelType: String) {
         executeCommand {
             let stopOutput = try await self.channelService.stopChannel(channelType)
-            let startOutput = try await self.channelService.startChannel(channelType, extraEnv: self.extraEnv(for: channelType))
+            let startOutput = try await self.channelService.startChannel(channelType)
             return stopOutput + "\n" + startOutput
         }
     }
@@ -108,11 +108,10 @@ extension AppStore {
                 daemonWasRunning: daemonWasRunning,
                 channels: self.runtime.channels,
                 latestVersions: self.updates.latestVersions,
-                extraEnv: { type in self.extraEnv(for: type) },
                 stopChannel: { type in try await self.channelService.stopChannel(type) },
                 syncChannel: { pkg in try await self.channelService.syncChannel(pkg) },
-                startChannel: { type, env in try await self.channelService.startChannel(type, extraEnv: env) },
-                restartDaemon: { try await self.daemonService.restart(extraEnv: self.runtime.daemonConfig.envVars) }
+                startChannel: { type in try await self.channelService.startChannel(type) },
+                restartDaemon: { try await self.daemonService.restart() }
             )
         }
     }

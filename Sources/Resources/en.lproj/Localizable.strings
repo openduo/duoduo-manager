@@ -10,7 +10,10 @@
 
 /* Config */
 "config.save" = "Save";
+"config.saved" = "Saved";
 "config.cancel" = "Cancel";
+"config.enabled" = "Enabled";
+"config.disabled" = "Disabled";
 
 /* Daemon Config */
 "daemonConfig.title" = "Daemon Settings";
@@ -19,6 +22,8 @@
 "daemonConfig.workDirSelect" = "Select...";
 "daemonConfig.workDirPanelMessage" = "Select duoduo working directory";
 "daemonConfig.network" = "Network";
+"daemonConfig.general" = "General";
+"daemonConfig.daemonHost" = "Daemon Host";
 "daemonConfig.listenPort" = "Listen Port";
 "daemonConfig.logging" = "Logging";
 "daemonConfig.logLevel" = "Log Level";
@@ -37,6 +42,8 @@
 /* Feishu Config */
 "feishuConfig.title" = "Feishu Settings";
 "feishuConfig.auth" = "Authentication";
+"feishuConfig.appID" = "App ID";
+"feishuConfig.appSecret" = "App Secret";
 "feishuConfig.connection" = "Connection";
 "feishuConfig.feishuDomain" = "Feishu Domain";
 "feishuConfig.accessControl" = "Access Control";
