@@ -2,7 +2,7 @@
 "status.running" = "运行中";
 "status.stopped" = "已停止";
 "status.hasUpdate" = "有更新";
-"status.appUpdate %@" = "v%@";
+"status.appUpdate %@" = "更新到 %@";
 "status.configure" = "配置";
 "status.install" = "安装";
 "status.clear" = "清除";

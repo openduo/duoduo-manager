@@ -2,7 +2,7 @@
 "status.running" = "Running";
 "status.stopped" = "Stopped";
 "status.hasUpdate" = "Update";
-"status.appUpdate %@" = "v%@";
+"status.appUpdate %@" = "Update to %@";
 "status.configure" = "Configure";
 "status.install" = "Install";
 "status.clear" = "Clear";

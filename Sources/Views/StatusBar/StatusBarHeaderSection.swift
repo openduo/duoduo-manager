@@ -23,12 +23,13 @@ struct StatusHeaderBar: View {
                     .foregroundStyle(ConsolePalette.primaryText)
 
                 HStack(spacing: 8) {
-                    StatusBadge(title: "v\(currentVersion)", tint: ConsolePalette.accent)
                     if showAppUpdate {
                         Button(action: onAppUpdate) {
-                            StatusBadge(title: "New v\(appVersion)", tint: ConsolePalette.warning)
+                            StatusBadge(title: L10n.Status.appUpdate(appVersion), tint: ConsolePalette.warning)
                         }
                         .buttonStyle(.plain)
+                    } else {
+                        StatusBadge(title: "v\(currentVersion)", tint: ConsolePalette.accent)
                     }
                     StatusBadge(title: "events \(eventCount)", tint: ConsolePalette.accent)
                 }
