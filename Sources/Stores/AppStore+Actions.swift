@@ -43,9 +43,9 @@ extension AppStore {
     }
 
     func ensureDuoduoInstalledIfNeeded() async {
-        guard !NodeRuntime.isDuoduoInstalled else { return }
+        guard !runtimeEnvironment.isDuoduoInstalled else { return }
         guard !runtime.isSettingUp else { return }
-        guard NodeRuntime.hasBundledNode || NodeRuntime.hasSystemNode else {
+        guard runtimeEnvironment.hasBundledNode || runtimeEnvironment.hasSystemNode else {
             command.lastOutput = L10n.Setup.systemNodeMissing
             command.errorMessage = L10n.Setup.systemNodeMissingTitle
             return
@@ -54,8 +54,8 @@ extension AppStore {
         runtime.isSettingUp = true
         command.lastOutput = L10n.Setup.installingDuoduo
         do {
-            let output = try await NodeRuntime.installDuoduo()
-            if NodeRuntime.isDuoduoInstalled {
+            let output = try await runtimeEnvironment.installDuoduo()
+            if runtimeEnvironment.isDuoduoInstalled {
                 command.lastOutput = L10n.Setup.installSuccess
             } else {
                 command.lastOutput = L10n.Setup.installFailed + "\n" + output
@@ -70,13 +70,13 @@ extension AppStore {
         updateStatusBarIcon?()
     }
 
-    func startDaemon() { executeCommand { try await self.daemonService.start() } }
+    func startDaemon() { executeCommand { try await self.daemonService.start(extraEnv: [:]) } }
     func stopDaemon() { executeCommand { try await self.daemonService.stop() } }
-    func restartDaemon() { executeCommand { try await self.daemonService.restart() } }
+    func restartDaemon() { executeCommand { try await self.daemonService.restart(extraEnv: [:]) } }
 
     func startChannel(_ channelType: String) {
         executeCommand {
-            try await self.channelService.startChannel(channelType)
+            try await self.channelService.startChannel(channelType, extraEnv: [:])
         }
     }
 
@@ -87,7 +87,7 @@ extension AppStore {
     func restartChannel(_ channelType: String) {
         executeCommand {
             let stopOutput = try await self.channelService.stopChannel(channelType)
-            let startOutput = try await self.channelService.startChannel(channelType)
+            let startOutput = try await self.channelService.startChannel(channelType, extraEnv: [:])
             return stopOutput + "\n" + startOutput
         }
     }
@@ -110,8 +110,8 @@ extension AppStore {
                 latestVersions: self.updates.latestVersions,
                 stopChannel: { type in try await self.channelService.stopChannel(type) },
                 syncChannel: { pkg in try await self.channelService.syncChannel(pkg) },
-                startChannel: { type in try await self.channelService.startChannel(type) },
-                restartDaemon: { try await self.daemonService.restart() }
+                startChannel: { type in try await self.channelService.startChannel(type, extraEnv: [:]) },
+                restartDaemon: { try await self.daemonService.restart(extraEnv: [:]) }
             )
         }
     }

@@ -47,14 +47,31 @@ targets:
       base:
         PRODUCT_MODULE_NAME: DuoduoManager
         EXECUTABLE_NAME: DuoduoManager
+  DuoduoManagerTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Tests
+    dependencies:
+      - target: DuoduoManager
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ai.openduo.manager.tests
+        PRODUCT_MODULE_NAME: DuoduoManagerTests
 
 schemes:
   DuoduoManager:
     build:
       targets:
         DuoduoManager: all
+        DuoduoManagerTests: [test]
     run:
       config: Debug
+    test:
+      config: Debug
+      targets:
+        - DuoduoManagerTests
     archive:
       config: Release
     profile:

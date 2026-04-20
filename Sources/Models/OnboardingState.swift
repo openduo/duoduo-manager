@@ -151,7 +151,7 @@ enum OnboardingEvent {
     case operationFailed(String)
 }
 
-enum OnboardingCommand {
+enum OnboardingCommand: Equatable {
     case hydrateSettings
     case detect(status: String)
     case installDuoduo(useMirror: Bool)
@@ -439,7 +439,7 @@ final class OnboardingStore {
         case .startDaemon:
             do {
                 if let appStore {
-                    _ = try await appStore.daemonService.start()
+                    _ = try await appStore.daemonService.start(extraEnv: [:])
                     await appStore.refreshRuntime()
 
                     if appStore.runtime.status.isRunning {

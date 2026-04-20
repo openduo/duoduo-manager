@@ -36,6 +36,7 @@ struct ShellPathInstaller {
 
     static let beginMarker = "# >>> duoduo-manager (managed) >>>"
     static let endMarker = "# <<< duoduo-manager (managed) <<<"
+    static var homeDirectoryOverride: String?
 
     /// Files we manage. We target the *login*-shell startup files
     /// because the failing scenario is a daemon-spawned `bash -lc` /
@@ -158,7 +159,12 @@ struct ShellPathInstaller {
     // MARK: - File operations
 
     private static func resolve(_ path: String) -> String {
-        (path as NSString).expandingTildeInPath
+        guard path.hasPrefix("~") else { return path }
+        let homeDirectory = homeDirectoryOverride ?? NSHomeDirectory()
+        if path == "~" {
+            return homeDirectory
+        }
+        return homeDirectory + String(path.dropFirst())
     }
 
     private static func fileContainsBlock(_ path: String) -> Bool {
