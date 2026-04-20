@@ -50,6 +50,7 @@
 		8C76D7C9F2A6E4BAA14B967A /* RuntimeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC9C2D3B574FE326D021356D /* RuntimeStore.swift */; };
 		91FA18C55A51123CDDF890C6 /* CommandStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4342751622BFA0637BB62E76 /* CommandStore.swift */; };
 		A03503D709DAAF9C4AA91B36 /* StatusBarTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AEA42E718AE2B948BAB6FB /* StatusBarTheme.swift */; };
+		BA58BFF1B0477069153EA297 /* DuoduoCompat.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3A7532E537E99FEEAFBCBE /* DuoduoCompat.swift */; };
 		C4056C27635EC363B56C3248 /* FeishuConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657074B7EFCDAC93A1F55DD8 /* FeishuConfigView.swift */; };
 		C64BB4DB3FE3CEAD4ACE3950 /* StatusBarPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03599F7BD1273B95205930E6 /* StatusBarPresentation.swift */; };
 		C96C679274ED41CD859A7290 /* StatusBarSharedViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = C306376319589909FF3AF1D1 /* StatusBarSharedViews.swift */; };
@@ -65,6 +66,7 @@
 		E0C6E810FA94AE64B35500DF /* AppUpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C4EACF47B7EFB6FD7EE9677 /* AppUpdateService.swift */; };
 		E29D739D6216455B4D6F60CA /* UpdateStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77280A851FF3D40035BCF49 /* UpdateStore.swift */; };
 		E4ABAFFE00ECC2A03DED886F /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = EDBE1098D012D8D7423DE84F /* Localizable.strings */; };
+		E7CEAFC11D802BE358E07367 /* ShellPathInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 677F998568B75268A4907439 /* ShellPathInstaller.swift */; };
 		EE570707F73271A03DFA2C64 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC685DCE1F6A1F29867B8AF /* OnboardingView.swift */; };
 		F7A144EB6254AE07E38EBB12 /* DaemonConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F208FDB32EE95280C59DE480 /* DaemonConfig.swift */; };
 		F97089A9A67B81FF81F9BB4C /* DashboardPresentationMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D50E480BA7922E6B4768AAD /* DashboardPresentationMapper.swift */; };
@@ -95,6 +97,7 @@
 		5AC685DCE1F6A1F29867B8AF /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		63FD10798EC2CABC731AE9AB /* DaemonStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonStatus.swift; sourceTree = "<group>"; };
 		657074B7EFCDAC93A1F55DD8 /* FeishuConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeishuConfigView.swift; sourceTree = "<group>"; };
+		677F998568B75268A4907439 /* ShellPathInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellPathInstaller.swift; sourceTree = "<group>"; };
 		6C4EACF47B7EFB6FD7EE9677 /* AppUpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdateService.swift; sourceTree = "<group>"; };
 		6E9E00A5B0A8B3275C899A48 /* NodeRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeRuntime.swift; sourceTree = "<group>"; };
 		6FD413F335364A6203A47A3D /* AppStatusController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStatusController.swift; sourceTree = "<group>"; };
@@ -110,6 +113,7 @@
 		A5175981D0FA6FAD90921DCE /* DuoduoManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuoduoManagerApp.swift; sourceTree = "<group>"; };
 		A614BA165C938FF6F95D053D /* ConfigContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigContentView.swift; sourceTree = "<group>"; };
 		A795E79331D51BCF51211353 /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
+		AA3A7532E537E99FEEAFBCBE /* DuoduoCompat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuoduoCompat.swift; sourceTree = "<group>"; };
 		B128C5ABF94ABDF761C5B57C /* JobsContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobsContentView.swift; sourceTree = "<group>"; };
 		B18C58A264D7928F215FD2C1 /* VersionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionService.swift; sourceTree = "<group>"; };
 		B63D809AA1DFB4E9079738E0 /* AppStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStore.swift; sourceTree = "<group>"; };
@@ -229,8 +233,10 @@
 				DBDDA8B25C6AAF6D04A90EAD /* ClaudeAuthService.swift */,
 				8355C197B1A02286E7764494 /* DaemonService.swift */,
 				210C266E6749AEA8B72E0E08 /* DashboardRPCService.swift */,
+				AA3A7532E537E99FEEAFBCBE /* DuoduoCompat.swift */,
 				6E9E00A5B0A8B3275C899A48 /* NodeRuntime.swift */,
 				83C747F9FD7584F55E6DB0CF /* OnboardingService.swift */,
+				677F998568B75268A4907439 /* ShellPathInstaller.swift */,
 				F54D68D0A4635B98DE788042 /* ShellService.swift */,
 				1E1AD037DDD7C23ACFA1C9D8 /* UpgradeService.swift */,
 				B18C58A264D7928F215FD2C1 /* VersionService.swift */,
@@ -457,6 +463,7 @@
 				5DF5E97F1DD4F835663B8976 /* DashboardStore.swift in Sources */,
 				5C201FFD868C1924954A8C52 /* DashboardTheme.swift in Sources */,
 				6753CC35BF8CACE4298B7501 /* DashboardView.swift in Sources */,
+				BA58BFF1B0477069153EA297 /* DuoduoCompat.swift in Sources */,
 				E08920046FF8BCA7E8693D74 /* DuoduoManagerApp.swift in Sources */,
 				8B4D212F543C9D136745A3EB /* EventStreamView.swift in Sources */,
 				5343FC419AF1A6736058519F /* EventsContentView.swift in Sources */,
@@ -473,6 +480,7 @@
 				8C76D7C9F2A6E4BAA14B967A /* RuntimeStore.swift in Sources */,
 				C97570B220A94D83DF959CC4 /* SessionsContentView.swift in Sources */,
 				5626E057C5F55FFA555E32E4 /* SharedPresentationFormatting.swift in Sources */,
+				E7CEAFC11D802BE358E07367 /* ShellPathInstaller.swift in Sources */,
 				84B87284D0CFC7204F39037A /* ShellService.swift in Sources */,
 				3E5A505F3C91E1C0F4DC2336 /* StatusBarControlSection.swift in Sources */,
 				1AE91AE673A239BECE21292F /* StatusBarExecutionSection.swift in Sources */,

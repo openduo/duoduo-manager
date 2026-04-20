@@ -142,3 +142,13 @@
 "onboard.error.configSavedButAuthFailed" = "Config saved, but `claude auth status` still not passing. Check Base URL, Token or model config.";
 "onboard.error.browserLoginIncomplete" = "Browser login not completed. Please try again.";
 "onboard.error.daemonNotHealthy" = "Daemon did not reach healthy state.";
+"onboard.shellPath.title" = "Agent shell access";
+"onboard.shellPath.summary" = "Add ~/.duoduo-manager/bin to your shell PATH so agent subprocesses (claude-code's bash tool) can resolve `duoduo`. Updates your login-shell profile file (for example ~/.zprofile, ~/.bash_profile, ~/.bash_login, or ~/.profile) with a marked, self-disabling block.";
+"onboard.shellPath.stateInstalled" = "Enabled";
+"onboard.shellPath.stateNotInstalled" = "Not enabled";
+"onboard.shellPath.statePartial" = "Partially installed";
+"onboard.shellPath.actionInstall" = "Enable";
+"onboard.shellPath.actionRemove" = "Remove";
+"onboard.shellPath.actionRefresh" = "Refresh";
+"onboard.shellPath.gateRequiresUpgrade %@" = "Requires duoduo ≥ %@. Upgrade duoduo to enable.";
+"onboard.shellPath.gateRequiresInstall" = "Install duoduo first to enable.";

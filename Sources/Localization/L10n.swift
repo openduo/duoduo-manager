@@ -211,6 +211,22 @@ enum L10n {
         static let errConfigSavedButAuthFailed = String(localized: "onboard.error.configSavedButAuthFailed", bundle: bundle)
         static let errBrowserLoginIncomplete = String(localized: "onboard.error.browserLoginIncomplete", bundle: bundle)
         static let errDaemonNotHealthy = String(localized: "onboard.error.daemonNotHealthy", bundle: bundle)
+
+        // Agent shell PATH (post-completion enhancement)
+        enum ShellPath {
+            static let title = String(localized: "onboard.shellPath.title", bundle: bundle)
+            static let summary = String(localized: "onboard.shellPath.summary", bundle: bundle)
+            static let stateInstalled = String(localized: "onboard.shellPath.stateInstalled", bundle: bundle)
+            static let stateNotInstalled = String(localized: "onboard.shellPath.stateNotInstalled", bundle: bundle)
+            static let statePartial = String(localized: "onboard.shellPath.statePartial", bundle: bundle)
+            static let actionInstall = String(localized: "onboard.shellPath.actionInstall", bundle: bundle)
+            static let actionRemove = String(localized: "onboard.shellPath.actionRemove", bundle: bundle)
+            static let actionRefresh = String(localized: "onboard.shellPath.actionRefresh", bundle: bundle)
+            static func gateRequiresUpgrade(_ minVersion: String) -> String {
+                String(localized: "onboard.shellPath.gateRequiresUpgrade \(minVersion)", bundle: bundle)
+            }
+            static let gateRequiresInstall = String(localized: "onboard.shellPath.gateRequiresInstall", bundle: bundle)
+        }
     }
 
 }
