@@ -6,43 +6,43 @@
     <description>DuoduoManager Updates</description>
     <language>en</language>
     <item>
-      <title>DuoduoManager 1.6.7</title>
-      <pubDate>Mon, 20 Apr 2026 06:21:56 +0000</pubDate>
+      <title>DuoduoManager 1.6.8</title>
+      <pubDate>Mon, 20 Apr 2026 08:29:12 +0000</pubDate>
       <sparkle:channel>arm64-with-nodejs</sparkle:channel>
       <enclosure
-        url="https://github.com/openduo/duoduo-manager/releases/download/v1.6.7/DuoduoManager-1.6.7-arm64-with-nodejs.dmg"
-        sparkle:version="1.6.7"
-        sparkle:shortVersionString="1.6.7"
-        sparkle:edSignature="CAKLTAUJMJ1wFtocw+vIRQQ3lBy3w8UlUlbcuQyjtEN8TbbUUs/sEfJudlShJMfr9XvqmrWjcfPIetKDcvmABg=="
-        length="96478338"
+        url="https://github.com/openduo/duoduo-manager/releases/download/v1.6.8/DuoduoManager-1.6.8-arm64-with-nodejs.dmg"
+        sparkle:version="1.6.8"
+        sparkle:shortVersionString="1.6.8"
+        sparkle:edSignature="4Wk8bKlRCmTUA9Q+C78ThbDLIhuNYXM+/M0Yvzm3CqklkE6yS/YJbrdlcYa+cCnHzWQRoijGiV3nLiuBmouvDw=="
+        length="95232447"
         type="application/octet-stream"
       />
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
     </item>
     <item>
-      <title>DuoduoManager 1.6.7</title>
-      <pubDate>Mon, 20 Apr 2026 06:21:56 +0000</pubDate>
+      <title>DuoduoManager 1.6.8</title>
+      <pubDate>Mon, 20 Apr 2026 08:29:12 +0000</pubDate>
       <sparkle:channel>x86_64-with-nodejs</sparkle:channel>
       <enclosure
-        url="https://github.com/openduo/duoduo-manager/releases/download/v1.6.7/DuoduoManager-1.6.7-x86_64-with-nodejs.dmg"
-        sparkle:version="1.6.7"
-        sparkle:shortVersionString="1.6.7"
-        sparkle:edSignature="C+Y0HqEISEvxvwGzEFOTlOfDzpt5u7i9XKuCL0+9e4Kn+sdd37ppcWWjbZGqOL/9AqED5pR4WDuZMDQviFRcCw=="
-        length="94700614"
+        url="https://github.com/openduo/duoduo-manager/releases/download/v1.6.8/DuoduoManager-1.6.8-x86_64-with-nodejs.dmg"
+        sparkle:version="1.6.8"
+        sparkle:shortVersionString="1.6.8"
+        sparkle:edSignature="3H+Lpafn7uRDlSiTnNBo+0gcHSUual/F+m2oOHteafHwACC45hGo3UwSDwrzSU38Ecx6hE096t2dtKaIb3mjBw=="
+        length="98668916"
         type="application/octet-stream"
       />
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
     </item>
     <item>
-      <title>DuoduoManager 1.6.7</title>
-      <pubDate>Mon, 20 Apr 2026 06:21:56 +0000</pubDate>
+      <title>DuoduoManager 1.6.8</title>
+      <pubDate>Mon, 20 Apr 2026 08:29:12 +0000</pubDate>
       <sparkle:channel>universal-lite</sparkle:channel>
       <enclosure
-        url="https://github.com/openduo/duoduo-manager/releases/download/v1.6.7/DuoduoManager-1.6.7-universal-lite.dmg"
-        sparkle:version="1.6.7"
-        sparkle:shortVersionString="1.6.7"
-        sparkle:edSignature="PgjKDwXxopmbJFv5bz1UkQJZ0xJS9ByK13GS8r6t/e2zSG4nH1zM65LknfH245k9FIXjQt67IAVMmiN0t5aHDw=="
-        length="5562729"
+        url="https://github.com/openduo/duoduo-manager/releases/download/v1.6.8/DuoduoManager-1.6.8-universal-lite.dmg"
+        sparkle:version="1.6.8"
+        sparkle:shortVersionString="1.6.8"
+        sparkle:edSignature="degzjz60lPmFSD6IwzS2spvd0MvfKCpgYdf4CJpkSmqQULt4hoz3uXFFlQiMHO74lZRLkqlpCDTPt+TNLMemCw=="
+        length="5560345"
         type="application/octet-stream"
       />
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
