@@ -1,10 +1,6 @@
 import Foundation
 
 extension AppStore {
-    func extraEnv(for channelType: String) -> [String: String] {
-        ChannelRegistry.entry(for: channelType, feishuConfig: runtime.feishuConfig)?.extraEnv() ?? [:]
-    }
-
     func executeCommand(_ operation: @escaping () async throws -> String) {
         guard !command.isLoading else { return }
         command.isLoading = true

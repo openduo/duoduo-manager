@@ -38,10 +38,9 @@ struct UpgradeService: Sendable {
         daemonWasRunning: Bool,
         channels: [ChannelInfo],
         latestVersions: [String: String],
-        extraEnv: (String) -> [String: String],
         stopChannel: (String) async throws -> String,
         syncChannel: (String) async throws -> String,
-        startChannel: (String, [String: String]) async throws -> String,
+        startChannel: (String) async throws -> String,
         restartDaemon: () async throws -> String
     ) async throws -> String {
         var output = ""
@@ -80,7 +79,7 @@ struct UpgradeService: Sendable {
                 ?? "@openduo/channel-\(ch.type)"
             output += try await syncChannel(pkg)
             if ch.isRunning {
-                output += try await startChannel(ch.type, extraEnv(ch.type))
+                output += try await startChannel(ch.type)
             }
         }
 

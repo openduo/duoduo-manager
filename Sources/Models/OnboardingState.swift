@@ -441,7 +441,7 @@ final class OnboardingStore {
             let service = DaemonService(daemonURL: config.daemonURL)
 
             do {
-                _ = try await service.start(extraEnv: config.envVars)
+                _ = try await service.start()
                 let status = try await service.getStatus()
                 if status.isRunning {
                     if let appStore {

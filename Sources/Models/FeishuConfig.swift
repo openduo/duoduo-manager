@@ -1,71 +1,68 @@
 import Foundation
 
-/// Feishu channel configuration, mapped to @openduo/channel-feishu environment variables
-struct FeishuConfig: Codable, Sendable, Equatable {
-
-    // MARK: - Authentication (required)
-
+struct FeishuConfig: Sendable, Equatable {
     var appId: String = ""
     var appSecret: String = ""
-
-    // MARK: - Connection
-    /// feishu · lark · or custom domain URL
     var domain: String = "feishu"
-
-    // MARK: - Access Control
-    /// open | allowlist
     var dmPolicy: String = "open"
-    /// open | allowlist | disabled
-    var groupPolicy: String = "allowlist"
+    var groupPolicy: String = "open"
     var requireMention: Bool = true
-    /// Comma-separated open_id allowlist
     var allowFrom: String = ""
-    /// Comma-separated chat_id allowlist
     var allowGroups: String = ""
 
-    // MARK: - Rendering
-    /// auto | raw | card
-    var renderMode: String = "auto"
-
-    // MARK: - Advanced
-
-    var botOpenId: String = ""
-    /// debug | info | warn | error
-    var logLevel: String = "info"
-
-    // MARK: - Helpers
-
     var isConfigured: Bool {
-        !appId.trimmingCharacters(in: .whitespaces).isEmpty &&
-        !appSecret.trimmingCharacters(in: .whitespaces).isEmpty
+        !appId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !appSecret.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
-
-    /// Environment variables injected into `duoduo channel feishu start`
-    var envVars: [String: String] {
-        var env: [String: String] = [:]
-        env["FEISHU_APP_ID"]          = appId
-        env["FEISHU_APP_SECRET"]      = appSecret
-        if !domain.isEmpty            { env["FEISHU_DOMAIN"] = domain }
-        env["FEISHU_DM_POLICY"]       = dmPolicy
-        env["FEISHU_GROUP_POLICY"]    = groupPolicy
-        env["FEISHU_REQUIRE_MENTION"] = requireMention ? "true" : "false"
-        if !allowFrom.isEmpty         { env["FEISHU_ALLOW_FROM"] = allowFrom }
-        if !allowGroups.isEmpty       { env["FEISHU_ALLOW_GROUPS"] = allowGroups }
-        env["FEISHU_RENDER_MODE"]     = renderMode
-        if !botOpenId.isEmpty         { env["FEISHU_BOT_OPEN_ID"] = botOpenId }
-        env["FEISHU_LOG_LEVEL"]       = logLevel
-        return env
-    }
-
-    // MARK: - Persistence
-
-    private static let udKey = "feishu_channel_config_v1"
 
     static func load() -> FeishuConfig {
-        ConfigStore.load(defaultValue: FeishuConfig(), forKey: udKey)
+        let values = ConfigStore.loadValues()
+        var config = FeishuConfig()
+        config.appId = values["FEISHU_APP_ID"] ?? config.appId
+        config.appSecret = values["FEISHU_APP_SECRET"] ?? config.appSecret
+        config.domain = values["FEISHU_DOMAIN"] ?? config.domain
+        config.dmPolicy = values["FEISHU_DM_POLICY"] ?? config.dmPolicy
+        config.groupPolicy = values["FEISHU_GROUP_POLICY"] ?? config.groupPolicy
+        config.requireMention = boolValue(values["FEISHU_REQUIRE_MENTION"], default: config.requireMention)
+        config.allowFrom = normalizedList(values["FEISHU_ALLOW_FROM"])
+        config.allowGroups = normalizedList(values["FEISHU_ALLOW_GROUPS"])
+        return config
     }
 
     func save() {
-        ConfigStore.save(self, forKey: FeishuConfig.udKey)
+        ConfigStore.save(entries: persistedEntries, managedKeys: Self.managedKeys)
     }
+
+    var persistedEntries: [(key: String, value: String)] {
+        var entries: [(String, String)] = []
+        appendIfNonEmpty(&entries, "FEISHU_APP_ID", appId)
+        appendIfNonEmpty(&entries, "FEISHU_APP_SECRET", appSecret)
+        appendIfDifferent(&entries, "FEISHU_DOMAIN", domain, defaultValue: "feishu")
+        appendIfDifferent(&entries, "FEISHU_DM_POLICY", dmPolicy, defaultValue: "open")
+        appendIfDifferent(&entries, "FEISHU_GROUP_POLICY", groupPolicy, defaultValue: "open")
+        appendIfDifferent(&entries, "FEISHU_REQUIRE_MENTION", requireMention, defaultValue: true)
+        appendIfNonEmpty(&entries, "FEISHU_ALLOW_FROM", normalizedList(allowFrom))
+        appendIfNonEmpty(&entries, "FEISHU_ALLOW_GROUPS", normalizedList(allowGroups))
+        return entries
+    }
+
+    private static let managedKeys: Set<String> = [
+        "FEISHU_APP_ID",
+        "FEISHU_APP_SECRET",
+        "FEISHU_DOMAIN",
+        "FEISHU_DM_POLICY",
+        "FEISHU_GROUP_POLICY",
+        "FEISHU_REQUIRE_MENTION",
+        "FEISHU_ALLOW_FROM",
+        "FEISHU_ALLOW_GROUPS",
+    ]
+}
+
+private func normalizedList(_ rawValue: String?) -> String {
+    guard let rawValue else { return "" }
+    return rawValue
+        .split(separator: ",")
+        .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+        .filter { !$0.isEmpty }
+        .joined(separator: ",")
 }

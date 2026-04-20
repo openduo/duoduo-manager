@@ -115,38 +115,15 @@ extension StatusBarView {
     }
 
     func saveDaemonDraft() {
-        let previous = store.runtime.daemonConfig
         daemonDraft.save()
         store.updateDaemonConfig(daemonDraft)
-
-        let needsRestart = previous != daemonDraft && store.runtime.status.isRunning
-        daemonNotice = InlineConfigNotice(
-            message: needsRestart ? "saved · restart required" : "saved",
-            tint: needsRestart ? ConsolePalette.warning : ConsolePalette.signal,
-            actionTitle: needsRestart ? "restart" : nil,
-            action: needsRestart ? {
-                store.restartDaemon()
-                daemonNotice = nil
-            } : nil
-        )
+        daemonNotice = nil
     }
 
     func saveFeishuDraft() {
-        let previous = store.runtime.feishuConfig
         feishuDraft.save()
         store.updateFeishuConfig(feishuDraft)
-
-        let runningChannel = store.runtime.channels.first(where: { $0.type == "feishu" && $0.isRunning }) != nil
-        let needsRestart = previous != feishuDraft && runningChannel
-        feishuNotice = InlineConfigNotice(
-            message: needsRestart ? "saved · restart required" : "saved",
-            tint: needsRestart ? ConsolePalette.warning : ConsolePalette.signal,
-            actionTitle: needsRestart ? "restart" : nil,
-            action: needsRestart ? {
-                store.restartChannel("feishu")
-                feishuNotice = nil
-            } : nil
-        )
+        feishuNotice = nil
     }
 }
 

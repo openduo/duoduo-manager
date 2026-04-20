@@ -290,42 +290,20 @@ struct StatusBarView: View {
     }
 
     private var daemonInlineConfig: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            DaemonConfigView(
-                config: $daemonDraft,
-                mode: .inline,
-                onSave: saveDaemonDraft,
-                onCancel: { cancelConfig(.daemon) }
-            )
-
-            if let daemonNotice {
-                StatusInlineConfigNotice(
-                    message: daemonNotice.message,
-                    tint: daemonNotice.tint,
-                    actionTitle: daemonNotice.actionTitle,
-                    action: daemonNotice.action
-                )
-            }
-        }
+        DaemonConfigView(
+            config: $daemonDraft,
+            mode: .inline,
+            onSave: saveDaemonDraft,
+            onCancel: { cancelConfig(.daemon) }
+        )
     }
 
     private var feishuInlineConfig: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            FeishuConfigView(
-                config: $feishuDraft,
-                mode: .inline,
-                onSave: saveFeishuDraft,
-                onCancel: { cancelConfig(.feishu) }
-            )
-
-            if let feishuNotice {
-                StatusInlineConfigNotice(
-                    message: feishuNotice.message,
-                    tint: feishuNotice.tint,
-                    actionTitle: feishuNotice.actionTitle,
-                    action: feishuNotice.action
-                )
-            }
-        }
+        FeishuConfigView(
+            config: $feishuDraft,
+            mode: .inline,
+            onSave: saveFeishuDraft,
+            onCancel: { cancelConfig(.feishu) }
+        )
     }
 }

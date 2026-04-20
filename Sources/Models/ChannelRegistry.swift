@@ -5,34 +5,29 @@ struct ChannelEntry: Identifiable, Sendable {
     let displayName: String               // e.g. "Feishu"
     let packageName: String               // e.g. "@openduo/channel-feishu"
     let iconName: String                  // SF Symbol name
-    @usableFromInline
-    let extraEnv: @Sendable () -> [String: String]
 
     init(
         id: String,
         displayName: String,
         packageName: String,
-        iconName: String,
-        extraEnv: @escaping @Sendable () -> [String: String] = { [:] }
+        iconName: String
     ) {
         self.id = id
         self.displayName = displayName
         self.packageName = packageName
         self.iconName = iconName
-        self.extraEnv = extraEnv
     }
 }
 
 enum ChannelRegistry {
-    /// Generate channel list with env closures based on feishuConfig
+    /// Generate channel list based on configured channels
     static func channels(feishuConfig: FeishuConfig) -> [ChannelEntry] {
         [
             ChannelEntry(
                 id: "feishu",
                 displayName: L10n.Channel.feishuDisplayName,
                 packageName: "@openduo/channel-feishu",
-                iconName: "message.badge.waveform.fill",
-                extraEnv: { feishuConfig.envVars }
+                iconName: "message.badge.waveform.fill"
             ),
         ]
     }
