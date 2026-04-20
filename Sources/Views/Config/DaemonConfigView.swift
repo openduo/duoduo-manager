@@ -6,13 +6,14 @@ struct DaemonConfigView: View {
     var onSave: (() -> Void)?
     var onCancel: (() -> Void)?
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     @State private var didSave = false
 
     var body: some View {
         VStack(spacing: 0) {
             if mode == .panel {
                 titleBar
-                Divider()
+                Divider().overlay(ConfigPalette.divider(for: mode))
             }
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
@@ -23,12 +24,13 @@ struct DaemonConfigView: View {
                 .padding(.bottom, 16)
             }
             if mode == .inline {
-                Divider()
+                Divider().overlay(ConfigPalette.divider(for: mode))
                 inlineActions
             }
         }
         .frame(width: mode == .panel ? 420 : nil)
         .fixedSize(horizontal: false, vertical: mode == .panel)
+        .environment(\.colorScheme, mode == .inline ? .dark : colorScheme)
     }
 
     private var titleBar: some View {
@@ -42,6 +44,7 @@ struct DaemonConfigView: View {
 
             Text(L10n.DaemonConfig.title)
                 .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(ConfigPalette.label(for: mode))
 
             Spacer()
 
@@ -54,7 +57,7 @@ struct DaemonConfigView: View {
     }
 
     private var workDirSection: some View {
-        configRow(label: L10n.DaemonConfig.workDir, hint: L10n.DaemonConfig.workDirHint) {
+        configRow(mode: mode, label: L10n.DaemonConfig.workDir, hint: L10n.DaemonConfig.workDirHint) {
             HStack(spacing: 6) {
                 TextField("", text: $config.workDir)
                     .textFieldStyle(.roundedBorder)
@@ -79,14 +82,14 @@ struct DaemonConfigView: View {
 
     private var networkSection: some View {
         Group {
-            configSectionLabel(L10n.DaemonConfig.network)
-            configRow(label: L10n.DaemonConfig.daemonHost, hint: "ALADUO_DAEMON_HOST") {
+            configSectionLabel(L10n.DaemonConfig.network, mode: mode)
+            configRow(mode: mode, label: L10n.DaemonConfig.daemonHost, hint: "ALADUO_DAEMON_HOST") {
                 TextField("127.0.0.1", text: $config.daemonHost)
                     .textFieldStyle(.roundedBorder)
                     .font(.system(size: 12, design: .monospaced))
             }
-            configRowDivider()
-            configRow(label: L10n.DaemonConfig.listenPort, hint: "ALADUO_PORT") {
+            configRowDivider(mode: mode)
+            configRow(mode: mode, label: L10n.DaemonConfig.listenPort, hint: "ALADUO_PORT") {
                 TextField("20233", text: $config.port)
                     .textFieldStyle(.roundedBorder)
                     .font(.system(size: 12, design: .monospaced))
@@ -96,8 +99,8 @@ struct DaemonConfigView: View {
 
     private var runtimeSection: some View {
         Group {
-            configSectionLabel(L10n.DaemonConfig.general)
-            configRow(label: L10n.DaemonConfig.logLevel, hint: "ALADUO_LOG_LEVEL") {
+            configSectionLabel(L10n.DaemonConfig.general, mode: mode)
+            configRow(mode: mode, label: L10n.DaemonConfig.logLevel, hint: "ALADUO_LOG_LEVEL") {
                 Picker("", selection: $config.logLevel) {
                     Text("debug").tag("debug")
                     Text("info").tag("info")
@@ -107,8 +110,8 @@ struct DaemonConfigView: View {
                 .pickerStyle(.segmented)
                 .labelsHidden()
             }
-            configRowDivider()
-            configRow(label: L10n.DaemonConfig.permissionMode, hint: "ALADUO_PERMISSION_MODE") {
+            configRowDivider(mode: mode)
+            configRow(mode: mode, label: L10n.DaemonConfig.permissionMode, hint: "ALADUO_PERMISSION_MODE") {
                 Picker("", selection: $config.permissionMode) {
                     Text("default").tag("default")
                     Text("bypassPermissions").tag("bypassPermissions")

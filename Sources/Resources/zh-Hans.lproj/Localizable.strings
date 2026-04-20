@@ -89,7 +89,7 @@
 "onboard.headerTitle" = "Onboard";
 "onboard.setupComplete" = "SETUP COMPLETE";
 "onboard.enjoy" = "Enjoy.";
-"onboard.readyHint" = "Duoduo 已就绪。你随时都可以回到第三步修改模型配置。";
+"onboard.readyHint" = "";
 "onboard.editConfig" = "修改模型配置";
 "onboard.close" = "关闭";
 "onboard.detecting" = "检测中...";
@@ -143,7 +143,7 @@
 "onboard.error.browserLoginIncomplete" = "浏览器登录未完成，请重试。";
 "onboard.error.daemonNotHealthy" = "daemon 未进入 healthy 状态。";
 "onboard.shellPath.title" = "Agent shell 访问";
-"onboard.shellPath.summary" = "把 ~/.duoduo-manager/bin 加入用户 shell 的 PATH，让 agent 子进程（claude-code 的 bash tool）能找到 `duoduo`。会更新登录 shell 的 profile 文件（例如 ~/.zprofile、~/.bash_profile、~/.bash_login 或 ~/.profile），写入一段带标记、可自动失效的代码。";
+"onboard.shellPath.summary" = "把 ~/.duoduo-manager/bin 加入登录 shell 的 PATH，让 agent 子进程能找到 `duoduo`。会更新你的 shell profile。";
 "onboard.shellPath.stateInstalled" = "已启用";
 "onboard.shellPath.stateNotInstalled" = "未启用";
 "onboard.shellPath.statePartial" = "部分启用";

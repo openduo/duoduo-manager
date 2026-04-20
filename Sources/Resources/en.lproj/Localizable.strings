@@ -89,7 +89,7 @@
 "onboard.headerTitle" = "Onboard";
 "onboard.setupComplete" = "SETUP COMPLETE";
 "onboard.enjoy" = "Enjoy.";
-"onboard.readyHint" = "Duoduo is ready. You can come back here anytime to reconfigure your model.";
+"onboard.readyHint" = "";
 "onboard.editConfig" = "Edit Model Config";
 "onboard.close" = "Close";
 "onboard.detecting" = "Detecting...";
@@ -143,7 +143,7 @@
 "onboard.error.browserLoginIncomplete" = "Browser login not completed. Please try again.";
 "onboard.error.daemonNotHealthy" = "Daemon did not reach healthy state.";
 "onboard.shellPath.title" = "Agent shell access";
-"onboard.shellPath.summary" = "Add ~/.duoduo-manager/bin to your shell PATH so agent subprocesses (claude-code's bash tool) can resolve `duoduo`. Updates your login-shell profile file (for example ~/.zprofile, ~/.bash_profile, ~/.bash_login, or ~/.profile) with a marked, self-disabling block.";
+"onboard.shellPath.summary" = "Add ~/.duoduo-manager/bin to your login-shell PATH so agent subprocesses can resolve `duoduo`. This updates your shell profile.";
 "onboard.shellPath.stateInstalled" = "Enabled";
 "onboard.shellPath.stateNotInstalled" = "Not enabled";
 "onboard.shellPath.statePartial" = "Partially installed";

@@ -5,6 +5,9 @@ import SwiftUI
 final class OnboardingWindowController: NSObject, NSWindowDelegate {
     private var window: NSWindow?
     private let store: OnboardingStore
+    private let preferredWidth: CGFloat = 620
+    private let minHeight: CGFloat = 440
+    private let maxHeight: CGFloat = 760
 
     var onClose: (() -> Void)?
 
@@ -19,10 +22,13 @@ final class OnboardingWindowController: NSObject, NSWindowDelegate {
                 onClose: { [weak self] in
                     self?.window?.close()
                     self?.onClose?()
+                },
+                onPreferredHeightChange: { [weak self] height in
+                    self?.updateWindowHeight(height)
                 }
             )
             let w = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 520, height: 440),
+                contentRect: NSRect(x: 0, y: 0, width: preferredWidth, height: minHeight),
                 styleMask: [.titled, .closable, .fullSizeContentView],
                 backing: .buffered,
                 defer: false
@@ -31,7 +37,8 @@ final class OnboardingWindowController: NSObject, NSWindowDelegate {
             w.titlebarAppearsTransparent = true
             w.titleVisibility = .hidden
             w.contentViewController = NSHostingController(rootView: view)
-            w.setContentSize(NSSize(width: 520, height: 440))
+            w.setContentSize(NSSize(width: preferredWidth, height: minHeight))
+            w.minSize = NSSize(width: preferredWidth, height: minHeight)
             w.delegate = self
             w.isReleasedWhenClosed = false
             w.isMovableByWindowBackground = true
@@ -43,6 +50,14 @@ final class OnboardingWindowController: NSObject, NSWindowDelegate {
         NSApp.setActivationPolicy(.regular)
         window?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+    }
+
+    private func updateWindowHeight(_ height: CGFloat) {
+        guard let window else { return }
+        let targetHeight = max(minHeight, min(maxHeight, ceil(height)))
+        let current = window.contentLayoutRect.size
+        guard abs(current.height - targetHeight) > 1 || abs(current.width - preferredWidth) > 1 else { return }
+        window.setContentSize(NSSize(width: preferredWidth, height: targetHeight))
     }
 
     nonisolated func windowShouldClose(_ sender: NSWindow) -> Bool {

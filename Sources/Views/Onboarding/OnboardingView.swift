@@ -1,8 +1,17 @@
 import SwiftUI
 
+private struct OnboardingContentHeightKey: PreferenceKey {
+    static var defaultValue: CGFloat = 440
+
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+
 struct OnboardingView: View {
     @Bindable var store: OnboardingStore
     let onClose: () -> Void
+    var onPreferredHeightChange: (CGFloat) -> Void = { _ in }
     @State private var completionReveal = false
     @State private var completionAxisShift = false
 
@@ -10,15 +19,26 @@ struct OnboardingView: View {
         VStack(spacing: 0) {
             header
             Divider().overlay(ConsolePalette.divider)
-            if store.state.step == .complete {
-                completionView
-                    .transition(.opacity.combined(with: .scale(scale: 0.98)))
-            } else {
-                taskList
-                    .transition(.opacity)
+            Group {
+                if store.state.step == .complete {
+                    completionView
+                        .transition(.opacity.combined(with: .scale(scale: 0.98)))
+                } else {
+                    taskList
+                        .transition(.opacity)
+                }
             }
         }
         .background(ConsolePalette.background)
+        .frame(width: 620)
+        .background(
+            GeometryReader { proxy in
+                Color.clear.preference(key: OnboardingContentHeightKey.self, value: proxy.size.height)
+            }
+        )
+        .onPreferenceChange(OnboardingContentHeightKey.self) { height in
+            onPreferredHeightChange(height)
+        }
         .animation(.easeOut(duration: 0.22), value: store.state.step)
         .animation(.easeOut(duration: 0.22), value: store.state.currentRequirement)
         .task {
@@ -91,29 +111,26 @@ struct OnboardingView: View {
     }
 
     private var completionView: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Spacer(minLength: 0)
-
-            HStack(alignment: .top, spacing: 34) {
-                completionHeroColumn
-                    .offset(y: completionReveal ? 0 : 10)
-                    .opacity(completionReveal ? 1 : 0)
-
-                completionAxis
-                    .offset(y: completionReveal ? 0 : 18)
-                    .opacity(completionReveal ? 1 : 0)
-
-                completionInfoColumn
-                    .offset(y: completionReveal ? 0 : 14)
-                    .opacity(completionReveal ? 1 : 0)
-            }
+        completionWideLayout
             .frame(maxWidth: .infinity, alignment: .leading)
-
-            Spacer(minLength: 0)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .padding(.horizontal, 34)
-        .padding(.vertical, 34)
+        .padding(.vertical, 28)
+    }
+
+    private var completionWideLayout: some View {
+        HStack(alignment: .top, spacing: 34) {
+            completionHeroColumn
+                .offset(y: completionReveal ? 0 : 10)
+                .opacity(completionReveal ? 1 : 0)
+
+            completionAxis
+                .offset(y: completionReveal ? 0 : 18)
+                .opacity(completionReveal ? 1 : 0)
+
+            completionInfoColumn
+                .offset(y: completionReveal ? 0 : 14)
+                .opacity(completionReveal ? 1 : 0)
+        }
     }
 
     private var expandedRequirement: OnboardingRequirement? {
@@ -198,7 +215,7 @@ struct OnboardingView: View {
     }
 
     private var completionHeroColumn: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 16) {
             Text(L10n.Onboard.setupComplete)
                 .font(.system(size: 11, weight: .semibold, design: .monospaced))
                 .tracking(1.2)
@@ -219,12 +236,10 @@ struct OnboardingView: View {
                 .frame(width: 108, height: 3)
                 .clipShape(Capsule())
 
-            Text(L10n.Onboard.readyHint)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(ConsolePalette.secondaryText)
-                .fixedSize(horizontal: false, vertical: true)
+            AgentShellPathPanel(duoduoVersion: store.state.snapshot.duoduoVersion)
+                .padding(.top, 2)
         }
-        .frame(width: 214, alignment: .leading)
+        .frame(width: 236, alignment: .leading)
     }
 
     private var completionAxis: some View {
@@ -248,15 +263,13 @@ struct OnboardingView: View {
     }
 
     private var completionInfoColumn: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 12) {
             VStack(spacing: 0) {
                 completionMetricRow("Duoduo", installedLabel(store.state.snapshot.duoduoVersion))
                 completionMetricRow("Claude SDK", installedLabel(store.state.snapshot.claudeVersion))
                 completionMetricRow(L10n.Onboard.metricModel, L10n.Onboard.connected)
                 completionMetricRow("Daemon", daemonCompletionLabel, showsDivider: false)
             }
-
-            AgentShellPathPanel(duoduoVersion: store.state.snapshot.duoduoVersion)
 
             HStack(spacing: 12) {
                 primaryButton(title: L10n.Onboard.editConfig, tint: ConsolePalette.accent, disabled: false) {
@@ -272,7 +285,7 @@ struct OnboardingView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.top, 16)
+        .padding(.top, 6)
     }
 
     private func completionMetricRow(_ title: String, _ value: String, showsDivider: Bool = true) -> some View {
@@ -286,7 +299,7 @@ struct OnboardingView: View {
                     .font(.system(size: 13, weight: .semibold, design: .monospaced))
                     .foregroundStyle(ConsolePalette.primaryText)
             }
-            .padding(.vertical, 12)
+            .padding(.vertical, 10)
             .frame(maxWidth: .infinity, alignment: .leading)
 
             if showsDivider {
@@ -688,7 +701,7 @@ private struct AgentShellPathPanel: View {
     @State private var isBusy = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .firstTextBaseline) {
                 Text(L10n.Onboard.ShellPath.title)
                     .font(.system(size: 13, weight: .semibold))
@@ -700,13 +713,13 @@ private struct AgentShellPathPanel: View {
             }
 
             Text(L10n.Onboard.ShellPath.summary)
-                .font(.system(size: 11, weight: .medium))
+                .font(.system(size: 10, weight: .medium))
                 .foregroundStyle(ConsolePalette.secondaryText)
                 .fixedSize(horizontal: false, vertical: true)
 
             if let gateMessage {
                 Text(gateMessage)
-                    .font(.system(size: 11, weight: .medium))
+                    .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(ConsolePalette.warning)
             } else {
                 actionRow
@@ -714,11 +727,11 @@ private struct AgentShellPathPanel: View {
 
             if let errorMessage {
                 Text(errorMessage)
-                    .font(.system(size: 11, weight: .medium))
+                    .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(ConsolePalette.critical)
             }
         }
-        .padding(14)
+        .padding(12)
         .background(ConsolePalette.panelRaised)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(
@@ -766,7 +779,7 @@ private struct AgentShellPathPanel: View {
 
     @ViewBuilder
     private var actionRow: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 8) {
             switch status {
             case .installed:
                 secondaryButton(title: L10n.Onboard.ShellPath.actionRefresh, action: refresh)

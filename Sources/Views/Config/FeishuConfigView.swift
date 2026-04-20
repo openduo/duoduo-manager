@@ -6,6 +6,7 @@ struct FeishuConfigView: View {
     var onSave: (() -> Void)?
     var onCancel: (() -> Void)?
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
 
     @State private var revealSecret = false
     @State private var didSave = false
@@ -19,7 +20,7 @@ struct FeishuConfigView: View {
         VStack(spacing: 0) {
             if mode == .panel {
                 titleBar
-                Divider()
+                Divider().overlay(ConfigPalette.divider(for: mode))
             }
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
@@ -30,12 +31,13 @@ struct FeishuConfigView: View {
                 .padding(.bottom, 16)
             }
             if mode == .inline {
-                Divider()
+                Divider().overlay(ConfigPalette.divider(for: mode))
                 inlineActions
             }
         }
         .frame(width: mode == .panel ? 420 : nil)
         .fixedSize(horizontal: false, vertical: mode == .panel)
+        .environment(\.colorScheme, mode == .inline ? .dark : colorScheme)
     }
 
     private var titleBar: some View {
@@ -49,6 +51,7 @@ struct FeishuConfigView: View {
 
             Text(L10n.FeishuConfig.title)
                 .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(ConfigPalette.label(for: mode))
 
             Spacer()
 
@@ -64,7 +67,7 @@ struct FeishuConfigView: View {
     private var authSection: some View {
         Group {
             HStack {
-                configSectionLabel(L10n.FeishuConfig.auth)
+                configSectionLabel(L10n.FeishuConfig.auth, mode: mode)
                 Spacer()
                 Button {
                     if let url = URL(string: "https://open.feishu.cn/page/openclaw?form=multiAgent") {
@@ -77,19 +80,19 @@ struct FeishuConfigView: View {
                         Text(L10n.Onboard.createBot)
                             .font(.system(size: 10, weight: .medium))
                     }
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(ConfigPalette.secondary(for: mode))
                 }
                 .buttonStyle(.plain)
                 .padding(.horizontal, 14)
                 .padding(.top, 14)
             }
-            configRow(label: L10n.FeishuConfig.appID, required: true, hint: "FEISHU_APP_ID") {
+            configRow(mode: mode, label: L10n.FeishuConfig.appID, required: true, hint: "FEISHU_APP_ID") {
                 TextField("cli_xxxxxxxxxx", text: $config.appId)
                     .textFieldStyle(.roundedBorder)
                     .font(.system(size: 12, design: .monospaced))
             }
-            configRowDivider()
-            configRow(label: L10n.FeishuConfig.appSecret, required: true, hint: "FEISHU_APP_SECRET") {
+            configRowDivider(mode: mode)
+            configRow(mode: mode, label: L10n.FeishuConfig.appSecret, required: true, hint: "FEISHU_APP_SECRET") {
                 HStack(spacing: 6) {
                     Group {
                         if revealSecret {
@@ -104,7 +107,7 @@ struct FeishuConfigView: View {
                     Button { revealSecret.toggle() } label: {
                         Image(systemName: revealSecret ? "eye.slash" : "eye")
                             .font(.system(size: 11))
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(ConfigPalette.secondary(for: mode))
                     }
                     .buttonStyle(.plain)
                 }
@@ -114,8 +117,8 @@ struct FeishuConfigView: View {
 
     private var connectionSection: some View {
         Group {
-            configSectionLabel(L10n.FeishuConfig.connection)
-            configRow(label: L10n.FeishuConfig.feishuDomain, hint: "FEISHU_DOMAIN") {
+            configSectionLabel(L10n.FeishuConfig.connection, mode: mode)
+            configRow(mode: mode, label: L10n.FeishuConfig.feishuDomain, hint: "FEISHU_DOMAIN") {
                 Picker("", selection: $config.domain) {
                     Text("feishu").tag("feishu")
                     Text("lark").tag("lark")
@@ -129,8 +132,8 @@ struct FeishuConfigView: View {
 
     private var accessSection: some View {
         Group {
-            configSectionLabel(L10n.FeishuConfig.accessControl)
-            configRow(label: L10n.FeishuConfig.dmPolicy, hint: "FEISHU_DM_POLICY") {
+            configSectionLabel(L10n.FeishuConfig.accessControl, mode: mode)
+            configRow(mode: mode, label: L10n.FeishuConfig.dmPolicy, hint: "FEISHU_DM_POLICY") {
                 Picker("", selection: $config.dmPolicy) {
                     Text("open").tag("open")
                     Text("allowlist").tag("allowlist")
@@ -139,8 +142,8 @@ struct FeishuConfigView: View {
                 .pickerStyle(.segmented)
                 .labelsHidden()
             }
-            configRowDivider()
-            configRow(label: L10n.FeishuConfig.groupPolicy, hint: "FEISHU_GROUP_POLICY") {
+            configRowDivider(mode: mode)
+            configRow(mode: mode, label: L10n.FeishuConfig.groupPolicy, hint: "FEISHU_GROUP_POLICY") {
                 Picker("", selection: $config.groupPolicy) {
                     Text("open").tag("open")
                     Text("allowlist").tag("allowlist")
@@ -149,16 +152,16 @@ struct FeishuConfigView: View {
                 .pickerStyle(.segmented)
                 .labelsHidden()
             }
-            configRowDivider()
+            configRowDivider(mode: mode)
             boolRow(label: L10n.FeishuConfig.requireMention, hint: "FEISHU_REQUIRE_MENTION", value: $config.requireMention)
-            configRowDivider()
-            configRow(label: L10n.FeishuConfig.allowedUsers, hint: "FEISHU_ALLOW_FROM") {
+            configRowDivider(mode: mode)
+            configRow(mode: mode, label: L10n.FeishuConfig.allowedUsers, hint: "FEISHU_ALLOW_FROM") {
                 TextField("ou_abc,ou_def", text: $config.allowFrom)
                     .textFieldStyle(.roundedBorder)
                     .font(.system(size: 12, design: .monospaced))
             }
-            configRowDivider()
-            configRow(label: L10n.FeishuConfig.allowedGroups, hint: "FEISHU_ALLOW_GROUPS") {
+            configRowDivider(mode: mode)
+            configRow(mode: mode, label: L10n.FeishuConfig.allowedGroups, hint: "FEISHU_ALLOW_GROUPS") {
                 TextField("oc_abc,oc_def", text: $config.allowGroups)
                     .textFieldStyle(.roundedBorder)
                     .font(.system(size: 12, design: .monospaced))
@@ -167,12 +170,12 @@ struct FeishuConfigView: View {
     }
 
     private func boolRow(label: String, hint: String, value: Binding<Bool>) -> some View {
-        configRow(label: label, hint: hint) {
+        configRow(mode: mode, label: label, hint: hint) {
             HStack {
                 Toggle("", isOn: value).labelsHidden()
                 Text(value.wrappedValue ? L10n.Config.enabled : L10n.Config.disabled)
                     .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(ConfigPalette.secondary(for: mode))
                 Spacer()
             }
         }
