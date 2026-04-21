@@ -3,6 +3,104 @@ import XCTest
 
 @MainActor
 final class AppStoreTests: XCTestCase {
+    func testFetchDashboardStatusPopulatesUsageJobsAndHealth() async {
+        let jobs = JobListResponse(jobs: [
+            JobInfo(
+                id: "job-1",
+                frontmatter: JobFrontmatter(cron: "*/5 * * * *", cwd_rel: "ops", runtime: "shell"),
+                state: JobState(last_result: "ok", run_count: 3, last_run_at: "2026-04-21T00:00:00Z")
+            )
+        ])
+        let usage = UsageTotalsResponse(
+            totals: UsageTotals(
+                total_cost_usd: 4.25,
+                total_input_tokens: 100,
+                total_output_tokens: 40,
+                total_cache_read_tokens: 60,
+                total_tool_calls: 7
+            )
+        )
+        let systemStatus = SystemStatus(
+            sessions: [
+                SessionInfo(
+                    session_key: "session:1",
+                    status: "active",
+                    health: "ok",
+                    last_event_at: nil,
+                    created_at: nil,
+                    last_error: nil,
+                    cwd: "/tmp",
+                    display_name: "Alpha"
+                )
+            ],
+            health: HealthInfo(gateway: "ok", meta_session: "ok"),
+            subconscious: SubconsciousInfo(partitions: [SubconsciousPartition(name: "primary", done: false)]),
+            cadence: CadenceInfo(last_tick: "2026-04-21T00:00:00Z", interval_ms: 5000)
+        )
+        let store = AppStore(
+            runtime: RuntimeStore(daemonConfig: DaemonConfig(), feishuConfig: FeishuConfig()),
+            dashboard: DashboardStore(),
+            updates: UpdateStore(),
+            command: CommandStore(),
+            dependencies: TestFactory.dependencies(systemStatus: systemStatus, usageTotals: usage, jobs: jobs)
+        )
+
+        await store.fetchDashboardStatus()
+
+        XCTAssertEqual(store.dashboard.sessions.map(\.session_key), ["session:1"])
+        XCTAssertEqual(store.dashboard.health?.gateway, "ok")
+        XCTAssertEqual(store.dashboard.totalCost, 4.25)
+        XCTAssertEqual(store.dashboard.totalTokens, 200)
+        XCTAssertEqual(store.dashboard.totalTools, 7)
+        XCTAssertEqual(store.dashboard.cacheHitRate, 38)
+        XCTAssertEqual(store.dashboard.jobs.map(\.id), ["job-1"])
+    }
+
+    func testFetchDashboardEventsAppendsEventsAndTracksSessionTimestamps() async {
+        let events = SpineTailResponse(events: [
+            SpineEvent(id: "evt-1", type: "agent.tool_use", session_key: "session:1", ts: "2026-04-21T00:00:01Z", payload: nil),
+            SpineEvent(id: "evt-2", type: "job.started", session_key: "job:sync", ts: "2026-04-21T00:00:02.123Z", payload: nil)
+        ])
+        let store = AppStore(
+            runtime: RuntimeStore(daemonConfig: DaemonConfig(), feishuConfig: FeishuConfig()),
+            dashboard: DashboardStore(),
+            updates: UpdateStore(),
+            command: CommandStore(),
+            dependencies: TestFactory.dependencies(events: events)
+        )
+
+        await store.fetchDashboardEvents()
+
+        XCTAssertEqual(store.dashboard.events.map(\.id), ["evt-1", "evt-2"])
+        XCTAssertEqual(store.lastEventId, "evt-2")
+        XCTAssertNotNil(store.lastSeenBySession["session:1"])
+        XCTAssertNotNil(store.lastSeenBySession["job:sync"])
+    }
+
+    func testFetchConfigStoresSystemConfigResponse() async {
+        let config = SystemConfig(
+            network: ["port": makeConfigEntry(value: "20233", source: "env")],
+            sessions: nil,
+            cadence: nil,
+            transfer: nil,
+            logging: nil,
+            sdk: nil,
+            paths: nil,
+            subconscious: nil
+        )
+        let store = AppStore(
+            runtime: RuntimeStore(daemonConfig: DaemonConfig(), feishuConfig: FeishuConfig()),
+            dashboard: DashboardStore(),
+            updates: UpdateStore(),
+            command: CommandStore(),
+            dependencies: TestFactory.dependencies(config: config)
+        )
+
+        await store.fetchConfig()
+
+        XCTAssertEqual(store.dashboard.config?.network?["port"]?.value, "20233")
+    }
+
     func testExecuteCommandSuccessRefreshesRuntimeAndDashboard() async {
         let runtime = RuntimeStore(
             daemonConfig: DaemonConfig(workDir: "", daemonHost: "127.0.0.1", port: "20233", logLevel: "info", permissionMode: "default"),
@@ -152,6 +250,13 @@ final class AppStoreTests: XCTestCase {
             expectation.fulfill()
         }
         return expectation
+    }
+
+    private func makeConfigEntry(value: String, source: String) -> ConfigEntry {
+        let data = """
+        {"value":"\(value)","source":"\(source)"}
+        """.data(using: .utf8)!
+        return try! JSONDecoder().decode(ConfigEntry.self, from: data)
     }
 }
 
