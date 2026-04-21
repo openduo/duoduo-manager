@@ -19,6 +19,7 @@
 		215B500F921DEA3BD18BF344 /* StatusBarPresentationMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB10AA52A36C2C0DDB3E082D /* StatusBarPresentationMapper.swift */; };
 		2224CCBCC47C74BB0F7C1CED /* ConfigContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A614BA165C938FF6F95D053D /* ConfigContentView.swift */; };
 		223709C12B9D941FF19956CF /* L10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9222F0BCE466A5D13746D15B /* L10n.swift */; };
+		24A56450A55E7D5764F74855 /* DashboardModelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BEF6EA57DA0120926D8BA4A /* DashboardModelsTests.swift */; };
 		2A105D6814C9BBD254976959 /* AppStoreFakes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3C5A2EA16A5659EC25A4A8F /* AppStoreFakes.swift */; };
 		2F895A0585E7DA19070AC821 /* DuoduoCompatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8064F089733E58BAC77B5177 /* DuoduoCompatTests.swift */; };
 		315443C46D9471FF21A17448 /* AppStore+Fetch.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0734A84D6BD5B7B46F95A44 /* AppStore+Fetch.swift */; };
@@ -112,6 +113,7 @@
 		33AEA42E718AE2B948BAB6FB /* StatusBarTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarTheme.swift; sourceTree = "<group>"; };
 		383647EF2C49D5F7595B6F3E /* SessionsContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionsContentView.swift; sourceTree = "<group>"; };
 		3BEA40D33E29FED5A01BEB28 /* EventStreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventStreamView.swift; sourceTree = "<group>"; };
+		3BEF6EA57DA0120926D8BA4A /* DashboardModelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardModelsTests.swift; sourceTree = "<group>"; };
 		4038281C88477EE5D39B06F4 /* ServiceProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceProtocols.swift; sourceTree = "<group>"; };
 		4342751622BFA0637BB62E76 /* CommandStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandStore.swift; sourceTree = "<group>"; };
 		434F837F54C3ACF3FE2C30AA /* OnboardingWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingWindow.swift; sourceTree = "<group>"; };
@@ -430,6 +432,7 @@
 			isa = PBXGroup;
 			children = (
 				7DCB7518B9AB30913638E9F7 /* ConfigStoreTests.swift */,
+				3BEF6EA57DA0120926D8BA4A /* DashboardModelsTests.swift */,
 				A88DC70212764AEEF0CFF431 /* OnboardingReducerTests.swift */,
 				F3220EB9A822D51F1DEDA8C5 /* OnboardingStoreTests.swift */,
 			);
@@ -627,6 +630,7 @@
 				C5C9A12A9740F3DFB6753330 /* AppStoreTests.swift in Sources */,
 				ACCD474DEE8340DC403DE614 /* AppStoreVisibilityTests.swift in Sources */,
 				F6DCEA3DDBDCCB645A131B97 /* ConfigStoreTests.swift in Sources */,
+				24A56450A55E7D5764F74855 /* DashboardModelsTests.swift in Sources */,
 				AD05E125ED2B830AEE70A269 /* DashboardPresentationMapperTests.swift in Sources */,
 				2F895A0585E7DA19070AC821 /* DuoduoCompatTests.swift in Sources */,
 				08B19C66F8B4067F10052A15 /* OnboardingReducerTests.swift in Sources */,
