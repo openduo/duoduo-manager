@@ -2,34 +2,23 @@ import Foundation
 
 struct UpgradeService: Sendable {
     private let versionService = VersionService()
-    let npmPackages = ["@openduo/duoduo"]
 
     func checkVersions() async throws -> [PackageVersion] {
-        var versions: [PackageVersion] = []
-        for pkg in npmPackages {
-            let installed = try await versionService.getInstalledVersion(pkg)
-            let latest = try await versionService.getNpmLatestVersion(pkg)
-            versions.append(PackageVersion(
-                name: pkg,
-                installedVersion: installed,
-                latestVersion: latest,
-                needsUpdate: installed != latest && installed != nil
-            ))
-        }
-        return versions
+        let installed = try await versionService.getInstalledVersion("@openduo/duoduo")
+        let latest = try await versionService.getNpmLatestVersion("@openduo/duoduo")
+        return [PackageVersion(
+            name: "@openduo/duoduo",
+            installedVersion: installed,
+            latestVersion: latest,
+            needsUpdate: installed != latest && installed != nil
+        )]
     }
 
-    private func upgrade(packages: [String]) async throws -> String {
-        var output = ""
-        for pkg in packages {
-            let result = try await ShellService.run(
-                "npm",
-                arguments: ["install", "-g", "\(pkg)@latest"],
-                environment: NodeRuntime.environment
-            )
-            output += result
-        }
-        return output
+    private func upgradeDaemon() async throws -> String {
+        try await ShellService.run(
+            "duoduo", arguments: ["upgrade"],
+            environment: NodeRuntime.environment
+        )
     }
 
     /// Update only components that have newer versions available.
@@ -67,7 +56,7 @@ struct UpgradeService: Sendable {
 
         // 3. Update + restart daemon if needed
         if daemonNeedsUpdate {
-            output += try await upgrade(packages: npmPackages)
+            output += try await upgradeDaemon()
             if daemonWasRunning {
                 output += try await restartDaemon()
             }
