@@ -13,6 +13,7 @@
 		08B19C66F8B4067F10052A15 /* OnboardingReducerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88DC70212764AEEF0CFF431 /* OnboardingReducerTests.swift */; };
 		13D3A0E3DFD59142E77996D3 /* OnboardingState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89411076C4002FBEAE791367 /* OnboardingState.swift */; };
 		14354D2B7A708F52C3FDB43B /* OnboardingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C747F9FD7584F55E6DB0CF /* OnboardingService.swift */; };
+		A0B1C2D3E4F5061728394052 /* OnboardingCompletionMarker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B1C2D3E4F5061728394051 /* OnboardingCompletionMarker.swift */; };
 		18F89BEAF2BBD471D20C580E /* VersionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B18C58A264D7928F215FD2C1 /* VersionService.swift */; };
 		1AE91AE673A239BECE21292F /* StatusBarExecutionSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBA3BA1559ACB5B8DEC5DC72 /* StatusBarExecutionSection.swift */; };
 		1C109FCAF4464502FCB1D76B /* AppStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B63D809AA1DFB4E9079738E0 /* AppStore.swift */; };
@@ -135,6 +136,7 @@
 		8064F089733E58BAC77B5177 /* DuoduoCompatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuoduoCompatTests.swift; sourceTree = "<group>"; };
 		8355C197B1A02286E7764494 /* DaemonService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonService.swift; sourceTree = "<group>"; };
 		83C747F9FD7584F55E6DB0CF /* OnboardingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingService.swift; sourceTree = "<group>"; };
+		A0B1C2D3E4F5061728394051 /* OnboardingCompletionMarker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCompletionMarker.swift; sourceTree = "<group>"; };
 		8664C1B1683BC5A5B7BB44E8 /* AppStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStoreTests.swift; sourceTree = "<group>"; };
 		89411076C4002FBEAE791367 /* OnboardingState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingState.swift; sourceTree = "<group>"; };
 		89EFE42BC8CDEF5987274498 /* StatusBarPresentationMapperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarPresentationMapperTests.swift; sourceTree = "<group>"; };
@@ -293,6 +295,7 @@
 				210C266E6749AEA8B72E0E08 /* DashboardRPCService.swift */,
 				AA3A7532E537E99FEEAFBCBE /* DuoduoCompat.swift */,
 				6E9E00A5B0A8B3275C899A48 /* NodeRuntime.swift */,
+				A0B1C2D3E4F5061728394051 /* OnboardingCompletionMarker.swift */,
 				83C747F9FD7584F55E6DB0CF /* OnboardingService.swift */,
 				4038281C88477EE5D39B06F4 /* ServiceProtocols.swift */,
 				677F998568B75268A4907439 /* ShellPathInstaller.swift */,
@@ -594,6 +597,7 @@
 				77B740AE23180F0A8A274FA2 /* JobsContentView.swift in Sources */,
 				223709C12B9D941FF19956CF /* L10n.swift in Sources */,
 				017084BD3C6DE881D64F1663 /* NodeRuntime.swift in Sources */,
+				A0B1C2D3E4F5061728394052 /* OnboardingCompletionMarker.swift in Sources */,
 				14354D2B7A708F52C3FDB43B /* OnboardingService.swift in Sources */,
 				13D3A0E3DFD59142E77996D3 /* OnboardingState.swift in Sources */,
 				60696BA7EA83A62188AAAA3A /* OnboardingStoreDependencies.swift in Sources */,

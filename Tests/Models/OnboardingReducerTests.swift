@@ -43,10 +43,51 @@ final class OnboardingReducerTests: XCTestCase {
 
         let command = OnboardingReducer.reduce(state: &state, event: .detectionFinished(snapshot, status: nil))
 
-        XCTAssertNil(command)
+        XCTAssertEqual(command, .markCompletion)
         XCTAssertEqual(state.step, .complete)
         XCTAssertEqual(state.statusMessage, L10n.Onboard.statusSystemReady)
         XCTAssertFalse(state.isBusy)
+    }
+
+    func testDetectionFinishedMarksCompletionWhenCoreOnboardingIsReadyWithoutDaemon() {
+        var state = OnboardingState()
+        let snapshot = OnboardingSnapshot(
+            duoduoInstalled: true,
+            duoduoVersion: "0.5.0",
+            claudeInstalled: true,
+            claudeVersion: "1.0.0",
+            claudeAuthenticated: true,
+            claudeAuthMethod: nil,
+            claudeAPIProvider: nil,
+            daemonHealthy: false,
+            daemonPID: nil
+        )
+
+        let command = OnboardingReducer.reduce(state: &state, event: .detectionFinished(snapshot, status: nil))
+
+        XCTAssertEqual(command, .markCompletion)
+        XCTAssertEqual(state.step, .ready)
+        XCTAssertEqual(state.currentRequirement, .daemon)
+    }
+
+    func testDetectionFinishedDoesNotMarkCompletionBeforeLLMIsConfigured() {
+        var state = OnboardingState()
+        let snapshot = OnboardingSnapshot(
+            duoduoInstalled: true,
+            duoduoVersion: "0.5.0",
+            claudeInstalled: true,
+            claudeVersion: "1.0.0",
+            claudeAuthenticated: false,
+            claudeAuthMethod: nil,
+            claudeAPIProvider: nil,
+            daemonHealthy: false,
+            daemonPID: nil
+        )
+
+        let command = OnboardingReducer.reduce(state: &state, event: .detectionFinished(snapshot, status: nil))
+
+        XCTAssertNil(command)
+        XCTAssertEqual(state.currentRequirement, .claudeAccess)
     }
 
     func testSaveProviderRequestedReturnsCommandWhenStateCanSave() {

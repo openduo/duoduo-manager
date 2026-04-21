@@ -87,6 +87,10 @@ struct OnboardingSnapshot {
         }
         return requirements
     }
+
+    var hasCompletedCoreOnboarding: Bool {
+        duoduoInstalled && claudeInstalled && claudeAuthenticated
+    }
 }
 
 struct OnboardingState {
@@ -160,6 +164,7 @@ enum OnboardingCommand: Equatable {
     case saveProviderConfig(envVars: [String: String], successStatus: String)
     case performOAuthLogin
     case startDaemon
+    case markCompletion
 }
 
 enum OnboardingReducer {
@@ -253,6 +258,7 @@ enum OnboardingReducer {
             return .startDaemon
 
         case .detectionFinished(let snapshot, let status):
+            let shouldMarkCompletion = snapshot.hasCompletedCoreOnboarding
             state.snapshot = snapshot
             if snapshot.unmetRequirements.isEmpty {
                 state.currentRequirement = state.preferredRequirement
@@ -270,7 +276,7 @@ enum OnboardingReducer {
             } else if let requirement = state.currentRequirement {
                 state.statusMessage = L10n.Onboard.statusNext(requirement.title)
             }
-            return nil
+            return shouldMarkCompletion ? .markCompletion : nil
 
         case .operationFailed(let message):
             state.isBusy = false
@@ -440,6 +446,11 @@ final class OnboardingStore {
             } catch {
                 send(.operationFailed(error.localizedDescription))
             }
+
+        case .markCompletion:
+            try? await Task.detached(priority: .utility) {
+                try OnboardingCompletionMarker.markCompletedIfNeeded()
+            }.value
         }
     }
 }
