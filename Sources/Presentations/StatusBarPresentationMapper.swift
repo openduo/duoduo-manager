@@ -32,7 +32,7 @@ struct StatusBarPresentationMapper {
             ),
             daemonCard: StatusServiceCardPresentation(
                 icon: "server.rack",
-                name: "daemon",
+                name: "Daemon",
                 version: store.runtime.status.version,
                 hasUpdate: store.hasUpdate(type: "daemon", installedVersion: store.runtime.status.version),
                 latestVersion: store.updates.latestVersions["daemon"] ?? "0.4.7",
