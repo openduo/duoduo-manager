@@ -1,12 +1,17 @@
 import Foundation
 
 enum ConfigStore {
-    private static let envURL: URL = {
-        URL(fileURLWithPath: NSHomeDirectory())
+    static var envURLOverride: URL?
+
+    private static var envURL: URL {
+        if let envURLOverride {
+            return envURLOverride
+        }
+        return URL(fileURLWithPath: NSHomeDirectory())
             .appendingPathComponent(".config", isDirectory: true)
             .appendingPathComponent("duoduo", isDirectory: true)
             .appendingPathComponent(".env", isDirectory: false)
-    }()
+    }
 
     private enum Line {
         case blank(String)

@@ -59,6 +59,8 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: ai.openduo.manager.tests
         PRODUCT_MODULE_NAME: DuoduoManagerTests
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_FILE: ""
 
 schemes:
   DuoduoManager:

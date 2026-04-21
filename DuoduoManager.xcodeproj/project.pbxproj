@@ -56,6 +56,8 @@
 		8C76D7C9F2A6E4BAA14B967A /* RuntimeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC9C2D3B574FE326D021356D /* RuntimeStore.swift */; };
 		91FA18C55A51123CDDF890C6 /* CommandStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4342751622BFA0637BB62E76 /* CommandStore.swift */; };
 		A03503D709DAAF9C4AA91B36 /* StatusBarTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AEA42E718AE2B948BAB6FB /* StatusBarTheme.swift */; };
+		ACCD474DEE8340DC403DE614 /* AppStoreVisibilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 041E74EBC327977A9E15D883 /* AppStoreVisibilityTests.swift */; };
+		AD05E125ED2B830AEE70A269 /* DashboardPresentationMapperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68F530764FBEB00DC791A7DE /* DashboardPresentationMapperTests.swift */; };
 		BA58BFF1B0477069153EA297 /* DuoduoCompat.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3A7532E537E99FEEAFBCBE /* DuoduoCompat.swift */; };
 		C4056C27635EC363B56C3248 /* FeishuConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 657074B7EFCDAC93A1F55DD8 /* FeishuConfigView.swift */; };
 		C5C9A12A9740F3DFB6753330 /* AppStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8664C1B1683BC5A5B7BB44E8 /* AppStoreTests.swift */; };
@@ -76,6 +78,7 @@
 		E7CEAFC11D802BE358E07367 /* ShellPathInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 677F998568B75268A4907439 /* ShellPathInstaller.swift */; };
 		E87ABFF41041D675B97464B0 /* ShellPathInstallerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7B76EA8B4B8C9BDDFEA34FB /* ShellPathInstallerTests.swift */; };
 		EE570707F73271A03DFA2C64 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC685DCE1F6A1F29867B8AF /* OnboardingView.swift */; };
+		F6DCEA3DDBDCCB645A131B97 /* ConfigStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DCB7518B9AB30913638E9F7 /* ConfigStoreTests.swift */; };
 		F7A144EB6254AE07E38EBB12 /* DaemonConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F208FDB32EE95280C59DE480 /* DaemonConfig.swift */; };
 		F97089A9A67B81FF81F9BB4C /* DashboardPresentationMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D50E480BA7922E6B4768AAD /* DashboardPresentationMapper.swift */; };
 		FA953AF57994D9DB7B81424A /* StatusBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 905C0CACFCF03BAA771CC96E /* StatusBarView.swift */; };
@@ -93,6 +96,7 @@
 
 /* Begin PBXFileReference section */
 		03599F7BD1273B95205930E6 /* StatusBarPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarPresentation.swift; sourceTree = "<group>"; };
+		041E74EBC327977A9E15D883 /* AppStoreVisibilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStoreVisibilityTests.swift; sourceTree = "<group>"; };
 		08AF8879FC0820B8606A783C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		0E0046CA8AE532D210FB92F7 /* SharedPresentationFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedPresentationFormatting.swift; sourceTree = "<group>"; };
 		18799A79169815D636D94496 /* DaemonConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonConfigView.swift; sourceTree = "<group>"; };
@@ -118,9 +122,11 @@
 		652BAAFCF820EB15493EC29E /* AppStoreDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStoreDependencies.swift; sourceTree = "<group>"; };
 		657074B7EFCDAC93A1F55DD8 /* FeishuConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeishuConfigView.swift; sourceTree = "<group>"; };
 		677F998568B75268A4907439 /* ShellPathInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellPathInstaller.swift; sourceTree = "<group>"; };
+		68F530764FBEB00DC791A7DE /* DashboardPresentationMapperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardPresentationMapperTests.swift; sourceTree = "<group>"; };
 		6C4EACF47B7EFB6FD7EE9677 /* AppUpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdateService.swift; sourceTree = "<group>"; };
 		6E9E00A5B0A8B3275C899A48 /* NodeRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeRuntime.swift; sourceTree = "<group>"; };
 		6FD413F335364A6203A47A3D /* AppStatusController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStatusController.swift; sourceTree = "<group>"; };
+		7DCB7518B9AB30913638E9F7 /* ConfigStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigStoreTests.swift; sourceTree = "<group>"; };
 		8064F089733E58BAC77B5177 /* DuoduoCompatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuoduoCompatTests.swift; sourceTree = "<group>"; };
 		8355C197B1A02286E7764494 /* DaemonService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonService.swift; sourceTree = "<group>"; };
 		83C747F9FD7584F55E6DB0CF /* OnboardingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingService.swift; sourceTree = "<group>"; };
@@ -244,6 +250,7 @@
 		50F7C468DDEC2D22D247A15A /* Presentations */ = {
 			isa = PBXGroup;
 			children = (
+				68F530764FBEB00DC791A7DE /* DashboardPresentationMapperTests.swift */,
 				89EFE42BC8CDEF5987274498 /* StatusBarPresentationMapperTests.swift */,
 			);
 			path = Presentations;
@@ -323,6 +330,7 @@
 			isa = PBXGroup;
 			children = (
 				8664C1B1683BC5A5B7BB44E8 /* AppStoreTests.swift */,
+				041E74EBC327977A9E15D883 /* AppStoreVisibilityTests.swift */,
 			);
 			path = Stores;
 			sourceTree = "<group>";
@@ -416,6 +424,7 @@
 		DD9B1508809A9905E3738126 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				7DCB7518B9AB30913638E9F7 /* ConfigStoreTests.swift */,
 				A88DC70212764AEEF0CFF431 /* OnboardingReducerTests.swift */,
 			);
 			path = Models;
@@ -609,6 +618,9 @@
 			files = (
 				2A105D6814C9BBD254976959 /* AppStoreFakes.swift in Sources */,
 				C5C9A12A9740F3DFB6753330 /* AppStoreTests.swift in Sources */,
+				ACCD474DEE8340DC403DE614 /* AppStoreVisibilityTests.swift in Sources */,
+				F6DCEA3DDBDCCB645A131B97 /* ConfigStoreTests.swift in Sources */,
+				AD05E125ED2B830AEE70A269 /* DashboardPresentationMapperTests.swift in Sources */,
 				2F895A0585E7DA19070AC821 /* DuoduoCompatTests.swift in Sources */,
 				08B19C66F8B4067F10052A15 /* OnboardingReducerTests.swift in Sources */,
 				E87ABFF41041D675B97464B0 /* ShellPathInstallerTests.swift in Sources */,
@@ -722,6 +734,8 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -756,6 +770,8 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
