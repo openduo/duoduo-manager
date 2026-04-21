@@ -14,7 +14,7 @@ A macOS menu bar application for managing the [duoduo](https://github.com/opendu
 - **Smart upgrades** — Version-aware: only updates and restarts components with newer versions
 - **Sparkle auto-update** — In-app update checks with channel-based rollouts per build variant
 - **ATC Dashboard** — Real-time event stream, session monitoring, and job management in a native panel (Catppuccin Mocha theme)
-- **CC Reader** — Embedded [cc-reader](https://github.com/kuaner/cc-reader) for browsing Claude Code session history, with timeline rendering, syntax highlighting, and multi-pane layout
+- **CC Reader** — Embedded [cc-reader](https://github.com/kuaner/cc-reader) for browsing Claude Code and Codex session history, with timeline rendering, syntax highlighting, and multi-pane layout
 - **Shared app state** — Status popover and ATC Dashboard read from the same root store, so runtime state, dashboard data, and update signals stay in sync
 
 ## Screenshots
@@ -33,7 +33,7 @@ Real-time event stream, active sessions, and job queue. Built with a Catppuccin 
 
 ### CC Reader
 
-Browse and search Claude Code conversation history with markdown rendering, syntax highlighting, and session management. Toolbar items (working directory, resume, refresh) are integrated into the title bar.
+Browse and search Claude Code and Codex conversation history with markdown rendering, syntax highlighting, and session management. Toolbar items (working directory, resume, refresh) are integrated into the title bar.
 
 ![CC Reader](assets/reader.avif)
 

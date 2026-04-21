@@ -6,7 +6,7 @@ DuoduoManager is a macOS menu bar app (SwiftUI + AppKit) for controlling duoduo 
 
 - **Status popover** for daemon/channel operations and upgrades
 - **ATC Dashboard panel** for real-time session/job/event monitoring
-- **CC Reader window** for browsing Claude Code histories via `CCReaderKit`
+- **CC Reader window** for browsing Claude Code and Codex session histories via `CCReaderKit`
 
 The app now follows a layered root-store architecture:
 
