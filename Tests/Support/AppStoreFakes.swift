@@ -107,7 +107,7 @@ enum TestFactory {
         jobs: JobListResponse = JobListResponse(jobs: []),
         events: SpineTailResponse = SpineTailResponse(events: []),
         config: SystemConfig = SystemConfig(network: nil, sessions: nil, cadence: nil, transfer: nil, logging: nil, sdk: nil, paths: nil, subconscious: nil),
-        runtimeEnvironment: FakeRuntimeEnvironment = FakeRuntimeEnvironment()
+        runtimeEnvironment: any RuntimeEnvironmentProviding = FakeRuntimeEnvironment()
     ) -> AppStoreDependencies {
         AppStoreDependencies(
             versionService: FakeVersionService(latestVersions: latestVersions),

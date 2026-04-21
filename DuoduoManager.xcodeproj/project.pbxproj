@@ -37,6 +37,7 @@
 		5626E057C5F55FFA555E32E4 /* SharedPresentationFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E0046CA8AE532D210FB92F7 /* SharedPresentationFormatting.swift */; };
 		5C201FFD868C1924954A8C52 /* DashboardTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2929BD4A52F7AEC4F969FB9B /* DashboardTheme.swift */; };
 		5DF5E97F1DD4F835663B8976 /* DashboardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D007A22CF7A3EFDA50D85248 /* DashboardStore.swift */; };
+		60696BA7EA83A62188AAAA3A /* OnboardingStoreDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03425568CBEA034CCB4597B3 /* OnboardingStoreDependencies.swift */; };
 		6726E4463756AFF1906335BB /* AppStatusController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FD413F335364A6203A47A3D /* AppStatusController.swift */; };
 		6753CC35BF8CACE4298B7501 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD1B503E8E96E73118E67D93 /* DashboardView.swift */; };
 		67919609723E49BE8D1FC602 /* ConfigLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E4A80BA81B497FFF0F2F949 /* ConfigLayout.swift */; };
@@ -46,6 +47,7 @@
 		7183D24C0D4821A2D4E7ADCB /* AppStoreDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 652BAAFCF820EB15493EC29E /* AppStoreDependencies.swift */; };
 		77B740AE23180F0A8A274FA2 /* JobsContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B128C5ABF94ABDF761C5B57C /* JobsContentView.swift */; };
 		788D30A4900C9B63050009AC /* CCReaderKit in Frameworks */ = {isa = PBXBuildFile; productRef = CC64276C4E99EC947B05A95B /* CCReaderKit */; };
+		7B2597BA2867240B91D7E20D /* OnboardingStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3220EB9A822D51F1DEDA8C5 /* OnboardingStoreTests.swift */; };
 		7F4CFB13A97E23FC5F3D6D95 /* AppStore+Actions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54840B6846285AED341E1271 /* AppStore+Actions.swift */; };
 		7FF1731F71DAE350C34EA241 /* OnboardingWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434F837F54C3ACF3FE2C30AA /* OnboardingWindow.swift */; };
 		8411541E31AA0B794EA8AFE4 /* DaemonService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8355C197B1A02286E7764494 /* DaemonService.swift */; };
@@ -95,6 +97,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		03425568CBEA034CCB4597B3 /* OnboardingStoreDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStoreDependencies.swift; sourceTree = "<group>"; };
 		03599F7BD1273B95205930E6 /* StatusBarPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarPresentation.swift; sourceTree = "<group>"; };
 		041E74EBC327977A9E15D883 /* AppStoreVisibilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStoreVisibilityTests.swift; sourceTree = "<group>"; };
 		08AF8879FC0820B8606A783C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -170,6 +173,7 @@
 		EC458B24E507BA2488503CD4 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		EC9C2D3B574FE326D021356D /* RuntimeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeStore.swift; sourceTree = "<group>"; };
 		F208FDB32EE95280C59DE480 /* DaemonConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonConfig.swift; sourceTree = "<group>"; };
+		F3220EB9A822D51F1DEDA8C5 /* OnboardingStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStoreTests.swift; sourceTree = "<group>"; };
 		F54D68D0A4635B98DE788042 /* ShellService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellService.swift; sourceTree = "<group>"; };
 		FCAE8BA826F3F2FC84989E8E /* AppWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppWindowController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -216,6 +220,7 @@
 				BBAA39C3D4832508EC728871 /* DashboardModels.swift */,
 				E29BB270BCC709AA4E4A82B6 /* FeishuConfig.swift */,
 				89411076C4002FBEAE791367 /* OnboardingState.swift */,
+				03425568CBEA034CCB4597B3 /* OnboardingStoreDependencies.swift */,
 				CD3062CC1C88B89EE363866C /* PackageVersion.swift */,
 			);
 			path = Models;
@@ -426,6 +431,7 @@
 			children = (
 				7DCB7518B9AB30913638E9F7 /* ConfigStoreTests.swift */,
 				A88DC70212764AEEF0CFF431 /* OnboardingReducerTests.swift */,
+				F3220EB9A822D51F1DEDA8C5 /* OnboardingStoreTests.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -587,6 +593,7 @@
 				017084BD3C6DE881D64F1663 /* NodeRuntime.swift in Sources */,
 				14354D2B7A708F52C3FDB43B /* OnboardingService.swift in Sources */,
 				13D3A0E3DFD59142E77996D3 /* OnboardingState.swift in Sources */,
+				60696BA7EA83A62188AAAA3A /* OnboardingStoreDependencies.swift in Sources */,
 				EE570707F73271A03DFA2C64 /* OnboardingView.swift in Sources */,
 				7FF1731F71DAE350C34EA241 /* OnboardingWindow.swift in Sources */,
 				35F3E9C29A2F992A3B84784C /* PackageVersion.swift in Sources */,
@@ -623,6 +630,7 @@
 				AD05E125ED2B830AEE70A269 /* DashboardPresentationMapperTests.swift in Sources */,
 				2F895A0585E7DA19070AC821 /* DuoduoCompatTests.swift in Sources */,
 				08B19C66F8B4067F10052A15 /* OnboardingReducerTests.swift in Sources */,
+				7B2597BA2867240B91D7E20D /* OnboardingStoreTests.swift in Sources */,
 				E87ABFF41041D675B97464B0 /* ShellPathInstallerTests.swift in Sources */,
 				4ACF648B9B30BAF598EF35C2 /* StatusBarPresentationMapperTests.swift in Sources */,
 			);
