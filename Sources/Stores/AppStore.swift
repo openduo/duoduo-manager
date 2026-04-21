@@ -13,14 +13,16 @@ final class AppStore {
     let updates: UpdateStore
     let command: CommandStore
 
-    let versionService = VersionService()
-    let upgradeService = UpgradeService()
-    let appUpdateService = AppUpdateService()
+    let dependencies: AppStoreDependencies
+    let versionService: any VersionServicing
+    let upgradeService: any UpgradeServicing
+    let appUpdateService: any AppUpdateServicing
+    let runtimeEnvironment: any RuntimeEnvironmentProviding
     var checkForSparkleUpdate: (() -> Void)?
 
-    var daemonService: DaemonService
-    var channelService: ChannelService
-    var rpc: DashboardRPCService
+    var daemonService: any DaemonServicing
+    var channelService: any ChannelServicing
+    var rpc: any DashboardRPCServicing
 
     var runtimeRefreshTask: Task<Void, Never>?
     var dashboardEventsTask: Task<Void, Never>?
@@ -40,30 +42,40 @@ final class AppStore {
 
     var updateStatusBarIcon: (() -> Void)?
 
-    init() {
-        let config = DaemonConfig.load()
-        let feishu = FeishuConfig.load()
-        runtime = RuntimeStore(
+    init(
+        runtime: RuntimeStore? = nil,
+        dashboard: DashboardStore? = nil,
+        updates: UpdateStore? = nil,
+        command: CommandStore? = nil,
+        dependencies: AppStoreDependencies = .live
+    ) {
+        let runtimeStore = runtime ?? RuntimeStore(
             status: DaemonStatus.empty,
             channels: [],
-            daemonConfig: config,
-            feishuConfig: feishu,
+            daemonConfig: DaemonConfig.load(),
+            feishuConfig: FeishuConfig.load(),
             isSettingUp: false
         )
-        dashboard = DashboardStore()
-        updates = UpdateStore()
-        command = CommandStore()
-        daemonService = DaemonService(daemonURL: config.daemonURL)
-        channelService = ChannelService(daemonURL: config.daemonURL)
-        rpc = DashboardRPCService(daemonURL: config.daemonURL)
+        self.runtime = runtimeStore
+        self.dashboard = dashboard ?? DashboardStore()
+        self.updates = updates ?? UpdateStore()
+        self.command = command ?? CommandStore()
+        self.dependencies = dependencies
+        versionService = dependencies.versionService
+        upgradeService = dependencies.upgradeService
+        appUpdateService = dependencies.appUpdateService
+        runtimeEnvironment = dependencies.runtimeEnvironment
+        daemonService = dependencies.makeDaemonService(runtimeStore.daemonConfig.daemonURL)
+        channelService = dependencies.makeChannelService(runtimeStore.daemonConfig.daemonURL)
+        rpc = dependencies.makeDashboardRPCService(runtimeStore.daemonConfig.daemonURL)
     }
 
     func reconfigureConnectionsIfNeeded() {
         let daemonURL = runtime.daemonConfig.daemonURL
         if daemonService.daemonURL != daemonURL {
-            daemonService = DaemonService(daemonURL: daemonURL)
-            channelService = ChannelService(daemonURL: daemonURL)
-            rpc = DashboardRPCService(daemonURL: daemonURL)
+            daemonService = dependencies.makeDaemonService(daemonURL)
+            channelService = dependencies.makeChannelService(daemonURL)
+            rpc = dependencies.makeDashboardRPCService(daemonURL)
             lastEventId = nil
             lastSeenBySession.removeAll()
             dashboard.events.removeAll()

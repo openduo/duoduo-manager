@@ -151,7 +151,7 @@ enum OnboardingEvent {
     case operationFailed(String)
 }
 
-enum OnboardingCommand {
+enum OnboardingCommand: Equatable {
     case hydrateSettings
     case detect(status: String)
     case installDuoduo(useMirror: Bool)
@@ -330,10 +330,16 @@ enum OnboardingReducer {
 @Observable
 final class OnboardingStore {
     private let appStore: AppStore?
+    private let dependencies: OnboardingStoreDependencies
     var state = OnboardingState()
 
-    init(appStore: AppStore? = nil, preferredRequirement: OnboardingRequirement? = nil) {
+    init(
+        appStore: AppStore? = nil,
+        preferredRequirement: OnboardingRequirement? = nil,
+        dependencies: OnboardingStoreDependencies = .live
+    ) {
         self.appStore = appStore
+        self.dependencies = dependencies
         state.preferredRequirement = preferredRequirement
     }
 
@@ -342,11 +348,11 @@ final class OnboardingStore {
         Task { await run(command) }
     }
 
-    private func run(_ command: OnboardingCommand) async {
+    func run(_ command: OnboardingCommand) async {
         switch command {
         case .hydrateSettings:
             do {
-                let env = try ClaudeSettingsStore().currentEnv()
+                let env = try dependencies.currentEnv()
                 send(.settingsHydrated(env))
             } catch {
                 send(.hydrateSettingsFailed(error.localizedDescription))
@@ -356,20 +362,12 @@ final class OnboardingStore {
             if let appStore {
                 await appStore.refreshRuntime()
             }
-            let snapshot = await OnboardingService.detect(appStore: appStore)
+            let snapshot = await dependencies.detect(appStore, nil, nil, nil)
             send(.detectionFinished(snapshot, status: status))
 
         case .installDuoduo(let useMirror):
-            let previousRegistry = NodeRuntime.npmRegistryOverride
-            if useMirror {
-                NodeRuntime.npmRegistryOverride = "https://registry.npmmirror.com"
-            }
-            defer {
-                NodeRuntime.npmRegistryOverride = previousRegistry
-            }
-
             do {
-                _ = try await NodeRuntime.installDuoduo()
+                _ = try await dependencies.installDuoduo(useMirror)
                 send(.refreshRequested)
             } catch {
                 send(.operationFailed(error.localizedDescription))
@@ -377,7 +375,7 @@ final class OnboardingStore {
 
         case .installClaude(let useMirror):
             do {
-                try await ClaudeCLIService.install(useMirror: useMirror)
+                try await dependencies.installClaude(useMirror)
                 send(.refreshRequested)
             } catch {
                 send(.operationFailed(error.localizedDescription))
@@ -385,13 +383,9 @@ final class OnboardingStore {
 
         case .verifyClaudeStatus:
             do {
-                let status = try await ClaudeCLIService.authStatus()
+                let status = try await dependencies.authStatus()
                 if status.loggedIn {
-                    let snapshot = await OnboardingService.detect(
-                        appStore: appStore,
-                        knownClaudeInstalled: true,
-                        knownClaudeAuthStatus: status
-                    )
+                    let snapshot = await dependencies.detect(appStore, true, nil, status)
                     send(.detectionFinished(snapshot, status: L10n.Onboard.statusLlmVerified))
                 } else {
                     send(.operationFailed(L10n.Onboard.errAuthNotVerified))
@@ -402,14 +396,10 @@ final class OnboardingStore {
 
         case .saveProviderConfig(let envVars, let successStatus):
             do {
-                try ClaudeSettingsStore().mergeEnv(envVars)
-                let status = try await ClaudeCLIService.authStatus()
+                try dependencies.mergeProviderEnv(envVars)
+                let status = try await dependencies.authStatus()
                 if status.loggedIn {
-                    let snapshot = await OnboardingService.detect(
-                        appStore: appStore,
-                        knownClaudeInstalled: true,
-                        knownClaudeAuthStatus: status
-                    )
+                    let snapshot = await dependencies.detect(appStore, true, nil, status)
                     send(.detectionFinished(snapshot, status: successStatus))
                 } else {
                     send(.operationFailed(L10n.Onboard.errConfigSavedButAuthFailed))
@@ -420,14 +410,10 @@ final class OnboardingStore {
 
         case .performOAuthLogin:
             do {
-                try await ClaudeCLIService.login()
-                let authStatus = try await ClaudeCLIService.authStatus()
+                try await dependencies.login()
+                let authStatus = try await dependencies.authStatus()
                 if authStatus.loggedIn {
-                    let snapshot = await OnboardingService.detect(
-                        appStore: appStore,
-                        knownClaudeInstalled: true,
-                        knownClaudeAuthStatus: authStatus
-                    )
+                    let snapshot = await dependencies.detect(appStore, true, nil, authStatus)
                     send(.detectionFinished(snapshot, status: L10n.Onboard.statusLoginSuccess))
                 } else {
                     send(.operationFailed(L10n.Onboard.errBrowserLoginIncomplete))
@@ -439,11 +425,11 @@ final class OnboardingStore {
         case .startDaemon:
             do {
                 if let appStore {
-                    _ = try await appStore.daemonService.start()
+                    _ = try await appStore.daemonService.start(extraEnv: [:])
                     await appStore.refreshRuntime()
 
                     if appStore.runtime.status.isRunning {
-                        let snapshot = await OnboardingService.detect(appStore: appStore)
+                        let snapshot = await dependencies.detect(appStore, nil, nil, nil)
                         send(.detectionFinished(snapshot, status: L10n.Onboard.statusDaemonStarted))
                     } else {
                         send(.operationFailed(L10n.Onboard.errDaemonNotHealthy))

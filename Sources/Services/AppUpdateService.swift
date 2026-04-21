@@ -19,7 +19,7 @@ struct AppUpdateService: Sendable {
     }
 
     /// Returns both the version and the release page URL for the latest release.
-    func fetchLatestRelease() async -> (version: String, url: URL)? {
+    func fetchLatestRelease() async -> AppReleaseInfo? {
         let url = URL(string: "https://api.github.com/repos/\(Self.owner)/\(Self.repo)/releases/latest")!
         var request = URLRequest(url: url, timeoutInterval: 15)
         request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
@@ -36,7 +36,10 @@ struct AppUpdateService: Sendable {
             // Strip leading "v" if present
             let version = tagName.hasPrefix("v") ? String(tagName.dropFirst()) : tagName
             let htmlURL = URL(string: "https://github.com/\(Self.owner)/\(Self.repo)/releases/tag/\(tagName)")
-            return (version: version, url: htmlURL ?? URL(string: "https://github.com/\(Self.owner)/\(Self.repo)/releases")!)
+            return AppReleaseInfo(
+                version: version,
+                url: htmlURL ?? URL(string: "https://github.com/\(Self.owner)/\(Self.repo)/releases")!
+            )
         } catch {
             return nil
         }
