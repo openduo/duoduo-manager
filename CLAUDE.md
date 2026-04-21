@@ -117,7 +117,7 @@ English (`en`) and Simplified Chinese (`zh-Hans`) under `Sources/Resources/{en,z
 ## Conventions worth knowing
 
 - `entitlements.mac.plist` controls codesign entitlements; `Config/Info.plist` is the canonical Info.plist (referenced from `project.yml`, not generated).
-- `cc-reader` is consumed as a SwiftPM package (`CCReaderKit`) declared in `project.yml`; the CC Reader window is a SwiftUI scene defined in `DuoduoManagerApp.swift`.
+- `cc-reader` is consumed as a SwiftPM package (`CCReaderKit`) declared in `project.yml`; the CC Reader window is a SwiftUI scene defined in `DuoduoManagerApp.swift`. CC Reader supports both Claude Code and Codex session history.
 - Sparkle is integrated via `SPUStandardUpdaterController` in `AppDelegate`; the per-variant channel filtering in `allowedChannels` is what keeps an arm64 build from offering an x86_64 update.
 - Do not commit `.secret.env`, `*.p12`, `*.cer`, or `dist/` artifacts.
 
