@@ -162,6 +162,8 @@ enum L10n {
         static let browserLogin = String(localized: "onboard.browserLogin", bundle: bundle)
         static let waitingLogin = String(localized: "onboard.waitingLogin", bundle: bundle)
         static let officialHint = String(localized: "onboard.officialHint", bundle: bundle)
+        static let workDirPrompt = String(localized: "onboard.workDirPrompt", bundle: bundle)
+        static let startDaemon = String(localized: "onboard.startDaemon", bundle: bundle)
         static let customProvider = String(localized: "onboard.customProvider", bundle: bundle)
         static let createBot = String(localized: "onboard.createBot", bundle: bundle)
         static func update(_ version: String) -> String {

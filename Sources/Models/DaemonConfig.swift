@@ -7,6 +7,13 @@ struct DaemonConfig: Sendable, Equatable {
     var logLevel: String = "info"
     var permissionMode: String = "default"
 
+    static var defaultWorkDir: String {
+        URL(fileURLWithPath: NSHomeDirectory())
+            .appendingPathComponent("Documents", isDirectory: true)
+            .appendingPathComponent("duoduo", isDirectory: true)
+            .path
+    }
+
     var daemonURL: String {
         "http://\(daemonHost):\(port)"
     }
@@ -31,6 +38,15 @@ struct DaemonConfig: Sendable, Equatable {
         ConfigStore.save(entries: persistedEntries, managedKeys: Self.managedKeys)
     }
 
+    var onboardingConfigDocument: OnboardingConfigDocument {
+        OnboardingConfigDocument(
+            mode: "local",
+            daemonUrl: daemonURL,
+            workDir: workDir.trimmingCharacters(in: .whitespacesAndNewlines),
+            authSource: "claude_code_local"
+        )
+    }
+
     var persistedEntries: [(key: String, value: String)] {
         var entries: [(String, String)] = []
         appendIfNonEmpty(&entries, "ALADUO_WORK_DIR", workDir)
@@ -49,6 +65,13 @@ struct DaemonConfig: Sendable, Equatable {
         "ALADUO_LOG_LEVEL",
         "ALADUO_PERMISSION_MODE",
     ]
+}
+
+struct OnboardingConfigDocument: Codable, Equatable {
+    var mode: String
+    var daemonUrl: String
+    var workDir: String
+    var authSource: String
 }
 
 func boolValue(_ rawValue: String?, default defaultValue: Bool) -> Bool {

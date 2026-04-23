@@ -33,6 +33,10 @@ enum ConfigStore {
         parseDocument().values
     }
 
+    static var envFileExists: Bool {
+        FileManager.default.fileExists(atPath: envURL.path)
+    }
+
     static func save(entries: [(key: String, value: String)], managedKeys: Set<String>) {
         do {
             try ensureEnvFile()

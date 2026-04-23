@@ -122,8 +122,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
             await store?.refreshRuntime()
             let snapshot = await OnboardingService.detect(appStore: store)
             let critical = snapshot.unmetRequirements.filter { $0 != .daemon }
-            if !critical.isEmpty {
-                await MainActor.run { showOnboarding() }
+            let daemonConfig = store?.runtime.daemonConfig ?? .load()
+            let hasRequiredConfiguration = OnboardingCompletionMarker.hasRequiredConfiguration(daemonConfig: daemonConfig)
+
+            if critical.isEmpty, hasRequiredConfiguration {
+                try? OnboardingCompletionMarker.repairDerivedFilesIfNeeded(daemonConfig: daemonConfig)
+                return
+            }
+
+            if !critical.isEmpty || !hasRequiredConfiguration {
+                let preferredRequirement: OnboardingRequirement? = critical.isEmpty ? .daemon : nil
+                await MainActor.run { showOnboarding(at: preferredRequirement) }
             }
         }
     }

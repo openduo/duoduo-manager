@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 private struct OnboardingContentHeightKey: PreferenceKey {
@@ -388,8 +389,6 @@ struct OnboardingView: View {
             store.send(.installDuoduoRequested)
         case .claudeCLI:
             store.send(.installClaudeRequested)
-        case .daemon:
-            store.send(.startDaemonRequested)
         default:
             break
         }
@@ -496,6 +495,8 @@ private struct TaskRow: View {
             switch requirement {
             case .claudeAccess:
                 tokenSetup
+            case .daemon:
+                daemonSetup
             default:
                 ProgressView(value: 0.66)
                     .tint(highlightTint)
@@ -561,6 +562,72 @@ private struct TaskRow: View {
         .padding(.top, 10)
         .frame(maxWidth: 320, alignment: .leading)
         .transition(.opacity.combined(with: .move(edge: .top)))
+    }
+
+    private var daemonSetup: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(L10n.Onboard.workDirPrompt)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(ConsolePalette.secondaryText)
+
+            HStack(spacing: 8) {
+                simpleField(
+                    placeholder: DaemonConfig.defaultWorkDir,
+                    text: Binding(
+                        get: { store.state.daemonWorkDir },
+                        set: { store.send(.daemonWorkDirChanged($0)) }
+                    )
+                )
+
+                Button {
+                    selectWorkDir()
+                } label: {
+                    Image(systemName: "folder")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(ConsolePalette.secondaryText)
+                        .frame(width: 36, height: 36)
+                        .background(ConsolePalette.panelRaised)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(ConsolePalette.divider, lineWidth: 1)
+                        )
+                }
+                .buttonStyle(.plain)
+                .disabled(store.state.isBusy)
+            }
+
+            primaryButton(
+                title: store.state.isBusy ? L10n.Onboard.starting : L10n.Onboard.startDaemon,
+                tint: ConsolePalette.accent,
+                disabled: store.state.isBusy
+            ) {
+                store.send(.startDaemonRequested)
+            }
+
+            if let message = store.state.errorMessage ?? store.state.statusMessage {
+                Text(message)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(store.state.errorMessage == nil ? ConsolePalette.secondaryText : ConsolePalette.critical)
+                    .padding(.top, 2)
+            }
+        }
+        .padding(.top, 10)
+        .frame(maxWidth: 360, alignment: .leading)
+        .transition(.opacity.combined(with: .move(edge: .top)))
+    }
+
+    private func selectWorkDir() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.canCreateDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.message = L10n.DaemonConfig.workDirPanelMessage
+        panel.directoryURL = URL(fileURLWithPath: store.state.daemonWorkDir, isDirectory: true)
+        if panel.runModal() == .OK, let url = panel.url {
+            store.send(.daemonWorkDirChanged(url.path))
+        }
     }
 
     private var providerMenu: some View {
@@ -712,12 +779,14 @@ private struct TaskRow: View {
     }
 
     private var highlightTint: Color {
-        requirement == .claudeAccess ? ConsolePalette.accent : ConsolePalette.warning
+        (requirement == .claudeAccess || requirement == .daemon) ? ConsolePalette.accent : ConsolePalette.warning
     }
 
     private var connectorHeight: CGFloat {
         if isExpanded {
-            return requirement == .claudeAccess ? 148 : 72
+            if requirement == .claudeAccess { return 148 }
+            if requirement == .daemon { return 142 }
+            return 72
         }
         return 52
     }

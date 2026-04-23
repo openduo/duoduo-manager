@@ -43,13 +43,16 @@ final class OnboardingReducerTests: XCTestCase {
 
         let command = OnboardingReducer.reduce(state: &state, event: .detectionFinished(snapshot, status: nil))
 
-        XCTAssertEqual(command, .markCompletion)
+        guard case .markCompletion(let config) = command else {
+            return XCTFail("expected markCompletion")
+        }
+        XCTAssertEqual(config.workDir, DaemonConfig.defaultWorkDir)
         XCTAssertEqual(state.step, .complete)
         XCTAssertEqual(state.statusMessage, L10n.Onboard.statusSystemReady)
         XCTAssertFalse(state.isBusy)
     }
 
-    func testDetectionFinishedMarksCompletionWhenCoreOnboardingIsReadyWithoutDaemon() {
+    func testDetectionFinishedDoesNotBlockWhenDaemonStoppedButConfigured() {
         var state = OnboardingState()
         let snapshot = OnboardingSnapshot(
             duoduoInstalled: true,
@@ -65,7 +68,32 @@ final class OnboardingReducerTests: XCTestCase {
 
         let command = OnboardingReducer.reduce(state: &state, event: .detectionFinished(snapshot, status: nil))
 
-        XCTAssertEqual(command, .markCompletion)
+        guard case .markCompletion(let config) = command else {
+            return XCTFail("expected markCompletion")
+        }
+        XCTAssertEqual(config.workDir, DaemonConfig.defaultWorkDir)
+        XCTAssertEqual(state.step, .complete)
+        XCTAssertNil(state.currentRequirement)
+    }
+
+    func testDetectionFinishedRequiresDaemonConfigurationWhenMissing() {
+        var state = OnboardingState()
+        let snapshot = OnboardingSnapshot(
+            duoduoInstalled: true,
+            duoduoVersion: "0.5.0",
+            claudeInstalled: true,
+            claudeVersion: "1.0.0",
+            claudeAuthenticated: true,
+            claudeAuthMethod: nil,
+            claudeAPIProvider: nil,
+            daemonHealthy: true,
+            daemonPID: "123",
+            daemonConfigured: false
+        )
+
+        let command = OnboardingReducer.reduce(state: &state, event: .detectionFinished(snapshot, status: nil))
+
+        XCTAssertNil(command)
         XCTAssertEqual(state.step, .ready)
         XCTAssertEqual(state.currentRequirement, .daemon)
     }
@@ -106,5 +134,16 @@ final class OnboardingReducerTests: XCTestCase {
         XCTAssertEqual(envVars["ANTHROPIC_BASE_URL"], "https://example.com/anthropic")
         XCTAssertEqual(envVars["ANTHROPIC_MODEL"], "model-x")
         XCTAssertTrue(state.isBusy)
+    }
+
+    func testStartDaemonUsesSelectedWorkDir() {
+        var state = OnboardingState()
+        state.daemonWorkDir = " /tmp/duoduo-work "
+
+        let command = OnboardingReducer.reduce(state: &state, event: .startDaemonRequested)
+
+        XCTAssertEqual(command, .startDaemon(workDir: "/tmp/duoduo-work"))
+        XCTAssertTrue(state.isBusy)
+        XCTAssertEqual(state.statusMessage, L10n.Onboard.statusStartingDaemon)
     }
 }

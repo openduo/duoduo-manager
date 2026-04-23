@@ -3,29 +3,93 @@ import Foundation
 struct OnboardingCompletionMarker {
     enum Failure: LocalizedError {
         case createFailed(path: String)
+        case writeConfigFailed(path: String)
 
         var errorDescription: String? {
             switch self {
             case .createFailed(let path):
                 return "Could not create \(path)"
+            case .writeConfigFailed(let path):
+                return "Could not write \(path)"
             }
         }
     }
 
     static let markerPath = "~/.config/duoduo/.onboarded"
+    static let configPath = "~/.config/duoduo/config.json"
     static var homeDirectoryOverride: String?
 
-    static func markCompletedIfNeeded() throws {
-        let url = URL(fileURLWithPath: resolve(markerPath))
-        guard !FileManager.default.fileExists(atPath: url.path) else { return }
+    static func writeConfig(daemonConfig: DaemonConfig) throws {
+        try writeConfig(daemonConfig.onboardingConfigDocument)
+    }
 
+    static func hasRequiredConfiguration(daemonConfig: DaemonConfig = .load()) -> Bool {
+        ConfigStore.envFileExists
+            && !daemonConfig.workDir.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    static func hasCompletedConfiguration(daemonConfig: DaemonConfig = .load()) -> Bool {
+        isMarkedCompleted
+            && hasRequiredConfiguration(daemonConfig: daemonConfig)
+            && hasConfigJSONAligned(daemonConfig: daemonConfig)
+    }
+
+    static func repairDerivedFilesIfNeeded(daemonConfig: DaemonConfig) throws {
+        if !hasConfigJSONAligned(daemonConfig: daemonConfig) {
+            try writeConfig(daemonConfig: daemonConfig)
+        }
+        try markCompletedIfNeeded(daemonConfig: daemonConfig)
+    }
+
+    static func markCompletedIfNeeded(daemonConfig: DaemonConfig) throws {
+        let url = URL(fileURLWithPath: resolve(markerPath))
         let directory = url.deletingLastPathComponent()
         let fileManager = FileManager.default
 
         try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
+        try writeConfig(daemonConfig: daemonConfig)
+
+        guard !fileManager.fileExists(atPath: url.path) else { return }
 
         if !fileManager.createFile(atPath: url.path, contents: Data()) {
             throw Failure.createFailed(path: url.path)
+        }
+    }
+
+    private static var isMarkedCompleted: Bool {
+        FileManager.default.fileExists(atPath: resolve(markerPath))
+    }
+
+    private static func hasConfigJSONAligned(daemonConfig: DaemonConfig) -> Bool {
+        let url = URL(fileURLWithPath: resolve(configPath))
+        guard
+            let data = try? Data(contentsOf: url),
+            let document = try? JSONDecoder().decode(OnboardingConfigDocument.self, from: data)
+        else {
+            return false
+        }
+
+        let configWorkDir = daemonConfig.workDir.trimmingCharacters(in: .whitespacesAndNewlines)
+        return !document.mode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !document.authSource.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !document.workDir.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && document.workDir == configWorkDir
+            && document.daemonUrl == daemonConfig.daemonURL
+    }
+
+    private static func writeConfig(_ document: OnboardingConfigDocument) throws {
+        let url = URL(fileURLWithPath: resolve(configPath))
+        try FileManager.default.createDirectory(
+            at: url.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
+        let data = try encoder.encode(document)
+        do {
+            try data.write(to: url, options: .atomic)
+        } catch {
+            throw Failure.writeConfigFailed(path: url.path)
         }
     }
 

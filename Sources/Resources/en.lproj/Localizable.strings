@@ -107,6 +107,8 @@
 "onboard.browserLogin" = "Browser Login";
 "onboard.waitingLogin" = "Waiting for login...";
 "onboard.officialHint" = "Sign in with your Anthropic account via browser.";
+"onboard.workDirPrompt" = "Choose the working directory used by the daemon.";
+"onboard.startDaemon" = "Start Daemon";
 "onboard.customProvider" = "Custom";
 "onboard.createBot" = "Create Bot";
 "onboard.update %@" = "Update %@";

@@ -217,6 +217,19 @@ final class OnboardingStoreTests: XCTestCase {
     }
 
     func testStartDaemonRefreshesRuntimeAndCompletesWhenHealthy() async {
+        let tempRoot = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let envURL = tempRoot
+            .appendingPathComponent("config", isDirectory: true)
+            .appendingPathComponent("duoduo", isDirectory: true)
+            .appendingPathComponent(".env", isDirectory: false)
+        let workDir = tempRoot.appendingPathComponent("work", isDirectory: true).path
+        ConfigStore.envURLOverride = envURL
+        OnboardingCompletionMarker.homeDirectoryOverride = tempRoot.path
+        defer {
+            ConfigStore.envURLOverride = nil
+            OnboardingCompletionMarker.homeDirectoryOverride = nil
+            try? FileManager.default.removeItem(at: tempRoot)
+        }
         let runtime = RuntimeStore(
             status: .empty,
             daemonConfig: DaemonConfig(workDir: "", daemonHost: "127.0.0.1", port: "20233", logLevel: "info", permissionMode: "default"),
@@ -256,10 +269,22 @@ final class OnboardingStoreTests: XCTestCase {
         )
         let store = OnboardingStore(appStore: appStore, dependencies: dependencies)
 
-        await store.run(.startDaemon)
+        await store.run(.startDaemon(workDir: workDir))
 
         XCTAssertTrue(appStore.runtime.status.isRunning)
         XCTAssertEqual(appStore.runtime.status.pid, "2468")
+        XCTAssertEqual(appStore.runtime.daemonConfig.workDir, workDir)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: workDir))
+        let configURL = tempRoot
+            .appendingPathComponent(".config", isDirectory: true)
+            .appendingPathComponent("duoduo", isDirectory: true)
+            .appendingPathComponent("config.json", isDirectory: false)
+        let configData = try? Data(contentsOf: configURL)
+        XCTAssertNotNil(configData)
+        let configDocument = configData.flatMap {
+            try? JSONDecoder().decode(OnboardingConfigDocument.self, from: $0)
+        }
+        XCTAssertEqual(configDocument?.workDir, workDir)
         XCTAssertEqual(store.state.step, .complete)
         XCTAssertEqual(store.state.statusMessage, L10n.Onboard.statusDaemonStarted)
     }

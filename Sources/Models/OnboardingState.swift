@@ -58,6 +58,7 @@ struct OnboardingSnapshot {
     var claudeAPIProvider: String?
     var daemonHealthy: Bool
     var daemonPID: String?
+    var daemonConfigured: Bool = true
 
     static let empty = OnboardingSnapshot(
         duoduoInstalled: false,
@@ -68,7 +69,8 @@ struct OnboardingSnapshot {
         claudeAuthMethod: nil,
         claudeAPIProvider: nil,
         daemonHealthy: false,
-        daemonPID: nil
+        daemonPID: nil,
+        daemonConfigured: false
     )
 
     var unmetRequirements: [OnboardingRequirement] {
@@ -82,7 +84,7 @@ struct OnboardingSnapshot {
         if claudeInstalled && !claudeAuthenticated {
             requirements.append(.claudeAccess)
         }
-        if !daemonHealthy {
+        if !daemonConfigured {
             requirements.append(.daemon)
         }
         return requirements
@@ -114,6 +116,7 @@ struct OnboardingState {
     var showSecret = false
     var hydratedSettings = false
     var preferredRequirement: OnboardingRequirement?
+    var daemonWorkDir = DaemonConfig.defaultWorkDir
 
     var visibleRequirements: [OnboardingRequirement] {
         let requirements = snapshot.unmetRequirements
@@ -144,6 +147,7 @@ enum OnboardingEvent {
     case authTokenChanged(String)
     case customBaseURLChanged(String)
     case customModelChanged(String)
+    case daemonWorkDirChanged(String)
     case showSecretToggled
     case installDuoduoRequested
     case installClaudeRequested
@@ -163,8 +167,8 @@ enum OnboardingCommand: Equatable {
     case verifyClaudeStatus
     case saveProviderConfig(envVars: [String: String], successStatus: String)
     case performOAuthLogin
-    case startDaemon
-    case markCompletion
+    case startDaemon(workDir: String)
+    case markCompletion(daemonConfig: DaemonConfig)
 }
 
 enum OnboardingReducer {
@@ -220,6 +224,10 @@ enum OnboardingReducer {
             state.customModel = value
             return nil
 
+        case .daemonWorkDirChanged(let value):
+            state.daemonWorkDir = value
+            return nil
+
         case .showSecretToggled:
             state.showSecret.toggle()
             return nil
@@ -255,10 +263,9 @@ enum OnboardingReducer {
         case .startDaemonRequested:
             guard !state.isBusy else { return nil }
             beginBusy(state: &state, message: L10n.Onboard.statusStartingDaemon)
-            return .startDaemon
+            return .startDaemon(workDir: normalizedWorkDir(state.daemonWorkDir))
 
         case .detectionFinished(let snapshot, let status):
-            let shouldMarkCompletion = snapshot.hasCompletedCoreOnboarding
             state.snapshot = snapshot
             if snapshot.unmetRequirements.isEmpty {
                 state.currentRequirement = state.preferredRequirement
@@ -276,7 +283,7 @@ enum OnboardingReducer {
             } else if let requirement = state.currentRequirement {
                 state.statusMessage = L10n.Onboard.statusNext(requirement.title)
             }
-            return shouldMarkCompletion ? .markCompletion : nil
+            return snapshot.unmetRequirements.isEmpty ? .markCompletion(daemonConfig: daemonConfig(from: state)) : nil
 
         case .operationFailed(let message):
             state.isBusy = false
@@ -289,6 +296,7 @@ enum OnboardingReducer {
         state.authToken = env["ANTHROPIC_AUTH_TOKEN"] ?? env["ANTHROPIC_API_KEY"] ?? ""
         state.customBaseURL = env["ANTHROPIC_BASE_URL"] ?? ""
         state.customModel = env["ANTHROPIC_MODEL"] ?? ""
+        state.daemonWorkDir = normalizedWorkDir(env["ALADUO_WORK_DIR"] ?? state.daemonWorkDir)
 
         if let matchedPreset = LLMProviderPreset.allPresets().first(where: {
             $0 != .custom && $0.envVars["ANTHROPIC_BASE_URL"] == state.customBaseURL
@@ -310,6 +318,17 @@ enum OnboardingReducer {
         }
         envVars["ANTHROPIC_AUTH_TOKEN"] = state.authToken.trimmingCharacters(in: .whitespacesAndNewlines)
         return envVars
+    }
+
+    private static func daemonConfig(from state: OnboardingState) -> DaemonConfig {
+        var config = DaemonConfig.load()
+        config.workDir = normalizedWorkDir(state.daemonWorkDir)
+        return config
+    }
+
+    private static func normalizedWorkDir(_ value: String) -> String {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? DaemonConfig.defaultWorkDir : trimmed
     }
 
     private static func startDetection(state: inout OnboardingState, status: String) -> OnboardingCommand {
@@ -428,10 +447,20 @@ final class OnboardingStore {
                 send(.operationFailed(error.localizedDescription))
             }
 
-        case .startDaemon:
+        case .startDaemon(let workDir):
             do {
                 if let appStore {
-                    _ = try await appStore.daemonService.start(extraEnv: [:])
+                    var config = appStore.runtime.daemonConfig
+                    config.workDir = workDir
+                    try FileManager.default.createDirectory(
+                        at: URL(fileURLWithPath: workDir, isDirectory: true),
+                        withIntermediateDirectories: true
+                    )
+                    config.save()
+                    try OnboardingCompletionMarker.writeConfig(daemonConfig: config)
+                    appStore.updateDaemonConfig(config)
+
+                    _ = try await appStore.daemonService.start(extraEnv: ["ALADUO_WORK_DIR": workDir])
                     await appStore.refreshRuntime()
 
                     if appStore.runtime.status.isRunning {
@@ -447,9 +476,9 @@ final class OnboardingStore {
                 send(.operationFailed(error.localizedDescription))
             }
 
-        case .markCompletion:
+        case .markCompletion(let daemonConfig):
             try? await Task.detached(priority: .utility) {
-                try OnboardingCompletionMarker.markCompletedIfNeeded()
+                try OnboardingCompletionMarker.markCompletedIfNeeded(daemonConfig: daemonConfig)
             }.value
         }
     }

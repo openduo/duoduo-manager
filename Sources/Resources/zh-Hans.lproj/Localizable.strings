@@ -107,6 +107,8 @@
 "onboard.browserLogin" = "浏览器登录";
 "onboard.waitingLogin" = "等待登录...";
 "onboard.officialHint" = "将通过浏览器登录 Anthropic 官方账号。";
+"onboard.workDirPrompt" = "选择 daemon 使用的工作目录。";
+"onboard.startDaemon" = "启动 Daemon";
 "onboard.customProvider" = "自定义";
 "onboard.createBot" = "创建机器人";
 "onboard.update %@" = "更新 %@";

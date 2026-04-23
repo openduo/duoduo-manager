@@ -13,11 +13,11 @@
 		08B19C66F8B4067F10052A15 /* OnboardingReducerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88DC70212764AEEF0CFF431 /* OnboardingReducerTests.swift */; };
 		13D3A0E3DFD59142E77996D3 /* OnboardingState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89411076C4002FBEAE791367 /* OnboardingState.swift */; };
 		14354D2B7A708F52C3FDB43B /* OnboardingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C747F9FD7584F55E6DB0CF /* OnboardingService.swift */; };
-		A0B1C2D3E4F5061728394052 /* OnboardingCompletionMarker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B1C2D3E4F5061728394051 /* OnboardingCompletionMarker.swift */; };
 		18F89BEAF2BBD471D20C580E /* VersionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B18C58A264D7928F215FD2C1 /* VersionService.swift */; };
 		1AE91AE673A239BECE21292F /* StatusBarExecutionSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBA3BA1559ACB5B8DEC5DC72 /* StatusBarExecutionSection.swift */; };
 		1C109FCAF4464502FCB1D76B /* AppStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B63D809AA1DFB4E9079738E0 /* AppStore.swift */; };
 		215B500F921DEA3BD18BF344 /* StatusBarPresentationMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB10AA52A36C2C0DDB3E082D /* StatusBarPresentationMapper.swift */; };
+		2172AE735243688E1696CCD2 /* OnboardingCompletionMarker.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC4320C20C5F061D4095C15E /* OnboardingCompletionMarker.swift */; };
 		2224CCBCC47C74BB0F7C1CED /* ConfigContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A614BA165C938FF6F95D053D /* ConfigContentView.swift */; };
 		223709C12B9D941FF19956CF /* L10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9222F0BCE466A5D13746D15B /* L10n.swift */; };
 		24A56450A55E7D5764F74855 /* DashboardModelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BEF6EA57DA0120926D8BA4A /* DashboardModelsTests.swift */; };
@@ -82,6 +82,7 @@
 		E7CEAFC11D802BE358E07367 /* ShellPathInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 677F998568B75268A4907439 /* ShellPathInstaller.swift */; };
 		E87ABFF41041D675B97464B0 /* ShellPathInstallerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7B76EA8B4B8C9BDDFEA34FB /* ShellPathInstallerTests.swift */; };
 		EE570707F73271A03DFA2C64 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC685DCE1F6A1F29867B8AF /* OnboardingView.swift */; };
+		F649C5C985E54CCB40D61CB9 /* OnboardingCompletionMarkerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57487CEBE75A5F2A3A38E3B6 /* OnboardingCompletionMarkerTests.swift */; };
 		F6DCEA3DDBDCCB645A131B97 /* ConfigStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DCB7518B9AB30913638E9F7 /* ConfigStoreTests.swift */; };
 		F7A144EB6254AE07E38EBB12 /* DaemonConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F208FDB32EE95280C59DE480 /* DaemonConfig.swift */; };
 		F97089A9A67B81FF81F9BB4C /* DashboardPresentationMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D50E480BA7922E6B4768AAD /* DashboardPresentationMapper.swift */; };
@@ -123,6 +124,7 @@
 		51F90A264797A448DDFA20BF /* ChannelRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelRegistry.swift; sourceTree = "<group>"; };
 		52ABF56B3A67B044533AB057 /* DashboardPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardPresentation.swift; sourceTree = "<group>"; };
 		54840B6846285AED341E1271 /* AppStore+Actions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppStore+Actions.swift"; sourceTree = "<group>"; };
+		57487CEBE75A5F2A3A38E3B6 /* OnboardingCompletionMarkerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCompletionMarkerTests.swift; sourceTree = "<group>"; };
 		5AC685DCE1F6A1F29867B8AF /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		63FD10798EC2CABC731AE9AB /* DaemonStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonStatus.swift; sourceTree = "<group>"; };
 		652BAAFCF820EB15493EC29E /* AppStoreDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStoreDependencies.swift; sourceTree = "<group>"; };
@@ -136,7 +138,6 @@
 		8064F089733E58BAC77B5177 /* DuoduoCompatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuoduoCompatTests.swift; sourceTree = "<group>"; };
 		8355C197B1A02286E7764494 /* DaemonService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonService.swift; sourceTree = "<group>"; };
 		83C747F9FD7584F55E6DB0CF /* OnboardingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingService.swift; sourceTree = "<group>"; };
-		A0B1C2D3E4F5061728394051 /* OnboardingCompletionMarker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCompletionMarker.swift; sourceTree = "<group>"; };
 		8664C1B1683BC5A5B7BB44E8 /* AppStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStoreTests.swift; sourceTree = "<group>"; };
 		89411076C4002FBEAE791367 /* OnboardingState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingState.swift; sourceTree = "<group>"; };
 		89EFE42BC8CDEF5987274498 /* StatusBarPresentationMapperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarPresentationMapperTests.swift; sourceTree = "<group>"; };
@@ -163,6 +164,7 @@
 		BD1B503E8E96E73118E67D93 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		C306376319589909FF3AF1D1 /* StatusBarSharedViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarSharedViews.swift; sourceTree = "<group>"; };
 		CA8811AA530243F3BB28FF5B /* StatusBarRuntimeStreamSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarRuntimeStreamSection.swift; sourceTree = "<group>"; };
+		CC4320C20C5F061D4095C15E /* OnboardingCompletionMarker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCompletionMarker.swift; sourceTree = "<group>"; };
 		CD3062CC1C88B89EE363866C /* PackageVersion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackageVersion.swift; sourceTree = "<group>"; };
 		CEC650582C38EC2C96D4C1D5 /* StatusBarView+Support.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StatusBarView+Support.swift"; sourceTree = "<group>"; };
 		D007A22CF7A3EFDA50D85248 /* DashboardStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardStore.swift; sourceTree = "<group>"; };
@@ -295,7 +297,7 @@
 				210C266E6749AEA8B72E0E08 /* DashboardRPCService.swift */,
 				AA3A7532E537E99FEEAFBCBE /* DuoduoCompat.swift */,
 				6E9E00A5B0A8B3275C899A48 /* NodeRuntime.swift */,
-				A0B1C2D3E4F5061728394051 /* OnboardingCompletionMarker.swift */,
+				CC4320C20C5F061D4095C15E /* OnboardingCompletionMarker.swift */,
 				83C747F9FD7584F55E6DB0CF /* OnboardingService.swift */,
 				4038281C88477EE5D39B06F4 /* ServiceProtocols.swift */,
 				677F998568B75268A4907439 /* ShellPathInstaller.swift */,
@@ -396,6 +398,7 @@
 			isa = PBXGroup;
 			children = (
 				8064F089733E58BAC77B5177 /* DuoduoCompatTests.swift */,
+				57487CEBE75A5F2A3A38E3B6 /* OnboardingCompletionMarkerTests.swift */,
 				A7B76EA8B4B8C9BDDFEA34FB /* ShellPathInstallerTests.swift */,
 			);
 			path = Services;
@@ -597,7 +600,7 @@
 				77B740AE23180F0A8A274FA2 /* JobsContentView.swift in Sources */,
 				223709C12B9D941FF19956CF /* L10n.swift in Sources */,
 				017084BD3C6DE881D64F1663 /* NodeRuntime.swift in Sources */,
-				A0B1C2D3E4F5061728394052 /* OnboardingCompletionMarker.swift in Sources */,
+				2172AE735243688E1696CCD2 /* OnboardingCompletionMarker.swift in Sources */,
 				14354D2B7A708F52C3FDB43B /* OnboardingService.swift in Sources */,
 				13D3A0E3DFD59142E77996D3 /* OnboardingState.swift in Sources */,
 				60696BA7EA83A62188AAAA3A /* OnboardingStoreDependencies.swift in Sources */,
@@ -637,6 +640,7 @@
 				24A56450A55E7D5764F74855 /* DashboardModelsTests.swift in Sources */,
 				AD05E125ED2B830AEE70A269 /* DashboardPresentationMapperTests.swift in Sources */,
 				2F895A0585E7DA19070AC821 /* DuoduoCompatTests.swift in Sources */,
+				F649C5C985E54CCB40D61CB9 /* OnboardingCompletionMarkerTests.swift in Sources */,
 				08B19C66F8B4067F10052A15 /* OnboardingReducerTests.swift in Sources */,
 				7B2597BA2867240B91D7E20D /* OnboardingStoreTests.swift in Sources */,
 				E87ABFF41041D675B97464B0 /* ShellPathInstallerTests.swift in Sources */,

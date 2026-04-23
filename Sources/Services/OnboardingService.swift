@@ -18,6 +18,8 @@ final class OnboardingService {
         var claudeAPIProvider = knownClaudeAuthStatus?.apiProvider
         var daemonHealthy = false
         var daemonPID = runtimeStatus?.pid.nilIfEmpty
+        let daemonConfig = appStore?.runtime.daemonConfig ?? .load()
+        let daemonConfigured = OnboardingCompletionMarker.hasRequiredConfiguration(daemonConfig: daemonConfig)
 
         if knownClaudeInstalled == nil || knownClaudeVersion == nil || knownClaudeAuthStatus == nil {
             do {
@@ -68,7 +70,8 @@ final class OnboardingService {
             claudeAuthMethod: claudeAuthMethod,
             claudeAPIProvider: claudeAPIProvider,
             daemonHealthy: daemonHealthy,
-            daemonPID: daemonPID
+            daemonPID: daemonPID,
+            daemonConfigured: daemonConfigured
         )
     }
 }
