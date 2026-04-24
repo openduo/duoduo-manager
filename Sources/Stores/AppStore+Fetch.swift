@@ -1,6 +1,13 @@
 import Foundation
 
 extension AppStore {
+    private func resolvedDaemonVersion(statusVersion: String) async -> String {
+        if !statusVersion.isEmpty {
+            return statusVersion
+        }
+        return (try? await versionService.getInstalledVersion("@openduo/duoduo")) ?? ""
+    }
+
     func executeCommand(_ operation: @escaping () async throws -> String) {
         guard !command.isLoading else { return }
         command.isLoading = true
@@ -31,7 +38,7 @@ extension AppStore {
         do {
             let newStatus = try await daemonService.getStatus()
             var updated = newStatus
-            updated.version = try await daemonService.getVersion()
+            updated.version = await resolvedDaemonVersion(statusVersion: (try? await daemonService.getVersion()) ?? "")
             if runtime.status != updated { runtime.status = updated }
         } catch {
             runtime.status = DaemonStatus.empty

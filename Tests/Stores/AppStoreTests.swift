@@ -185,6 +185,48 @@ final class AppStoreTests: XCTestCase {
         XCTAssertEqual(store.dashboard.health?.gateway, "ok")
     }
 
+    func testRefreshRuntimeFallsBackToInstalledDaemonVersionWhenStatusVersionMissing() async {
+        let dependencies = AppStoreDependencies(
+            versionService: FakeVersionService(installedVersions: ["@openduo/duoduo": "0.4.7"]),
+            upgradeService: FakeUpgradeService(),
+            appUpdateService: FakeAppUpdateService(),
+            runtimeEnvironment: FakeRuntimeEnvironment(),
+            makeDaemonService: { url in
+                FakeDaemonService(
+                    daemonURL: url,
+                    status: DaemonStatus(isRunning: true, version: "", pid: "11", output: "healthy: yes", lastUpdated: .now),
+                    version: ""
+                )
+            },
+            makeChannelService: { url in
+                FakeChannelService(daemonURL: url)
+            },
+            makeDashboardRPCService: { url in
+                FakeDashboardRPCService(
+                    baseURL: url,
+                    systemStatusResponse: SystemStatus(sessions: [], health: HealthInfo(gateway: "ok", meta_session: "ok"), subconscious: nil, cadence: nil),
+                    usageTotalsResponse: UsageTotalsResponse(totals: UsageTotals(total_cost_usd: 0, total_input_tokens: 0, total_output_tokens: 0, total_cache_read_tokens: 0, total_tool_calls: 0)),
+                    jobListResponse: JobListResponse(jobs: []),
+                    spineTailResponse: SpineTailResponse(events: []),
+                    systemConfigResponse: SystemConfig(network: nil, sessions: nil, cadence: nil, transfer: nil, logging: nil, sdk: nil, paths: nil, subconscious: nil)
+                )
+            }
+        )
+        let store = AppStore(
+            runtime: RuntimeStore(daemonConfig: DaemonConfig(), feishuConfig: FeishuConfig()),
+            dashboard: DashboardStore(),
+            updates: UpdateStore(),
+            command: CommandStore(),
+            dependencies: dependencies
+        )
+
+        await store.refreshRuntime()
+
+        XCTAssertEqual(store.runtime.status.version, "0.4.7")
+        XCTAssertEqual(store.runtime.status.pid, "11")
+        XCTAssertTrue(store.runtime.status.isRunning)
+    }
+
     func testEnsureDuoduoInstalledIfNeededReportsMissingNode() async {
         let dependencies = TestFactory.dependencies(
             runtimeEnvironment: MutableRuntimeEnvironment(
