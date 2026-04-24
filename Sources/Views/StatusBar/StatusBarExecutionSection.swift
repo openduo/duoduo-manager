@@ -9,7 +9,7 @@ struct StatusExecutionPanel: View {
 
     var body: some View {
         StatusPanelSection(icon: "square.stack.3d.up", title: "Execution Board", hint: hint) {
-            HStack(alignment: .top, spacing: 12) {
+            HStack(alignment: .top, spacing: 10) {
                 summarySection(
                     title: "sessions",
                     caption: sessionCaption,
@@ -28,7 +28,7 @@ struct StatusExecutionPanel: View {
     }
 
     private func summarySection(title: String, caption: String, rows: [SummaryRowData], emptyText: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 7) {
             HStack(alignment: .firstTextBaseline, spacing: 6) {
                 Image(systemName: title == "sessions" ? "person.2.fill" : "shippingbox.fill")
                     .font(.system(size: 8, weight: .semibold))
@@ -46,9 +46,9 @@ struct StatusExecutionPanel: View {
                 Text(emptyText)
                     .font(.system(size: 10, design: .monospaced))
                     .foregroundStyle(ConsolePalette.mutedText)
-                    .padding(.vertical, 4)
+                    .padding(.vertical, 2)
             } else {
-                ForEach(rows, id: \.title) { row in
+                ForEach(Array(rows.prefix(3)), id: \.title) { row in
                     HStack(spacing: 8) {
                         Circle()
                             .fill(row.tint)
@@ -74,21 +74,17 @@ struct StatusExecutionPanel: View {
                 }
             }
         }
-        .padding(10)
+        .padding(9)
         .background(ConsolePalette.panelRaised)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: 10)
                 .stroke(ConsolePalette.divider, lineWidth: 1)
         )
     }
 }
 
 struct StatusFooterBar: View {
-    let costValue: String
-    let tokenValue: String
-    let cacheValue: String
-    let toolsValue: String
     let statusMessage: String?
     let statusIsError: Bool
     let onDashboard: () -> Void
@@ -98,63 +94,23 @@ struct StatusFooterBar: View {
     let onQuit: () -> Void
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 0) {
-                footerMetric(title: "COST", value: costValue, icon: "dollarsign.circle")
-                footerDivider
-                footerMetric(title: "TOK", value: tokenValue, icon: "circle.hexagongrid")
-                footerDivider
-                footerMetric(title: "CACHE", value: cacheValue, icon: "externaldrive")
-                footerDivider
-                footerMetric(title: "TOOLS", value: toolsValue, icon: "wrench.and.screwdriver")
+        HStack(spacing: 8) {
+            footerButton(title: "ATC", systemImage: "square.grid.2x2", action: onDashboard)
+            footerButton(title: "Reader", systemImage: "book.closed", action: onReader)
+            footerButton(title: "Onboard", systemImage: "checklist", action: onOnboard)
+            footerButton(title: "Terminal", systemImage: "terminal", action: onTerminal)
+
+            Spacer(minLength: 8)
+
+            if let statusMessage, !statusMessage.isEmpty {
+                footerStatusMessage(statusMessage)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
 
-            Divider().overlay(ConsolePalette.divider)
-
-            HStack(spacing: 8) {
-                footerButton(title: "ATC", systemImage: "square.grid.2x2", action: onDashboard)
-                footerButton(title: "Onboard", systemImage: "checklist", action: onOnboard)
-                footerButton(title: "Reader", systemImage: "book.closed", action: onReader)
-                footerButton(title: "Terminal", systemImage: "terminal", action: onTerminal)
-
-                Spacer()
-
-                if let statusMessage, !statusMessage.isEmpty {
-                    footerStatusMessage(statusMessage)
-                }
-
-                footerButton(title: L10n.Status.quit, systemImage: "power", action: onQuit)
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            footerButton(title: L10n.Status.quit, systemImage: "power", action: onQuit)
         }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 9)
         .background(ConsolePalette.panel)
-    }
-
-    private var footerDivider: some View {
-        Rectangle()
-            .fill(ConsolePalette.divider)
-            .frame(width: 1, height: 26)
-            .padding(.horizontal, 12)
-    }
-
-    private func footerMetric(title: String, value: String, icon: String) -> some View {
-        HStack(spacing: 5) {
-            Image(systemName: icon)
-                .font(.system(size: 8, weight: .semibold))
-                .foregroundStyle(ConsolePalette.mutedText)
-            Text(title)
-                .font(.system(size: 9, design: .monospaced))
-                .foregroundStyle(ConsolePalette.secondaryText)
-            Spacer()
-            Text(value)
-                .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                .foregroundStyle(ConsolePalette.primaryText)
-                .lineLimit(1)
-        }
-        .frame(maxWidth: .infinity)
     }
 
     private func footerButton(title: String, systemImage: String, action: @escaping () -> Void) -> some View {
@@ -167,9 +123,9 @@ struct StatusFooterBar: View {
             }
             .foregroundStyle(ConsolePalette.primaryText)
             .padding(.horizontal, 10)
-            .padding(.vertical, 7)
+            .padding(.vertical, 6)
             .background(ConsolePalette.panelRaised)
-            .clipShape(RoundedRectangle(cornerRadius: 9))
+            .clipShape(RoundedRectangle(cornerRadius: 8))
         }
         .buttonStyle(.plain)
     }
@@ -184,7 +140,7 @@ struct StatusFooterBar: View {
         }
         .font(.system(size: 10, design: .monospaced))
         .foregroundStyle(statusIsError ? ConsolePalette.critical : ConsolePalette.secondaryText)
-        .frame(maxWidth: .infinity, alignment: .trailing)
+        .frame(maxWidth: 128, alignment: .trailing)
         .help(message)
     }
 }

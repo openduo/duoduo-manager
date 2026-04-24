@@ -10,13 +10,15 @@ struct StatusRuntimeStreamPanel: View {
         StatusPanelSection(icon: "waveform.path.ecg", title: "Runtime Stream", hint: hint) {
             if recentEvents.isEmpty {
                 Text("runtime idle, waiting for new activity")
-                    .font(.system(size: 12, design: .monospaced))
+                    .font(.system(size: 11, design: .monospaced))
                     .foregroundStyle(ConsolePalette.secondaryText)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, 20)
+                    .padding(.vertical, 8)
             } else {
                 streamHero
-                streamTimeline
+                if recentEvents.count > 1 {
+                    streamTimeline
+                }
             }
         }
     }
@@ -24,18 +26,18 @@ struct StatusRuntimeStreamPanel: View {
     @ViewBuilder
     private var streamHero: some View {
         if let event = recentEvents.first {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(alignment: .top, spacing: 10) {
+            VStack(alignment: .leading, spacing: 7) {
+                HStack(alignment: .center, spacing: 9) {
                     RoundedRectangle(cornerRadius: 10)
                         .fill(eventColor(for: event).opacity(0.16))
-                        .frame(width: 42, height: 42)
+                        .frame(width: 32, height: 32)
                         .overlay(
                             Image(systemName: heroSymbol(for: event))
-                                .font(.system(size: 16, weight: .semibold))
+                                .font(.system(size: 13, weight: .semibold))
                                 .foregroundStyle(eventColor(for: event))
                         )
 
-                    VStack(alignment: .leading, spacing: 6) {
+                    VStack(alignment: .leading, spacing: 4) {
                         HStack(alignment: .firstTextBaseline, spacing: 8) {
                             Text(heroEyebrow(for: event))
                                 .font(.system(size: 10, weight: .semibold, design: .monospaced))
@@ -55,36 +57,23 @@ struct StatusRuntimeStreamPanel: View {
                     Text(detail)
                         .font(.system(size: 11, design: .monospaced))
                         .foregroundStyle(ConsolePalette.secondaryText)
-                        .lineLimit(3)
-                }
-
-                HStack(spacing: 8) {
-                    StatusHeroMetaBadge(title: event.type.uppercased(), tint: eventColor(for: event))
-                    if let key = event.session_key, !key.isEmpty {
-                        StatusHeroMetaBadge(title: shortKey(key), tint: ConsolePalette.secondaryText)
-                    }
+                        .lineLimit(1)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(14)
-            .background(
-                LinearGradient(
-                    colors: [eventColor(for: event).opacity(0.16), ConsolePalette.panelRaised],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .padding(10)
+            .background(ConsolePalette.panelRaised)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(eventColor(for: event).opacity(0.45), lineWidth: 1)
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(eventColor(for: event).opacity(0.35), lineWidth: 1)
             )
         }
     }
 
     private var streamTimeline: some View {
         VStack(spacing: 0) {
-            ForEach(Array(recentEvents.dropFirst())) { event in
+            ForEach(Array(recentEvents.dropFirst().prefix(3))) { event in
                 EventRowView(
                     event: event,
                     isExpanded: expandedEventIDs.contains(event.id),
@@ -92,9 +81,9 @@ struct StatusRuntimeStreamPanel: View {
                 )
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: 10)
                 .stroke(ConsolePalette.divider, lineWidth: 1)
         )
     }
@@ -161,6 +150,7 @@ struct StatusRuntimeStreamPanel: View {
         }
         .font(.system(size: 15, weight: .semibold, design: .monospaced))
         .foregroundStyle(ConsolePalette.primaryText)
+        .lineLimit(1)
     }
 
     private func latestEventDetail(for event: SpineEvent) -> String? {

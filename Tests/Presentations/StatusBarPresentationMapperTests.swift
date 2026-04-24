@@ -16,7 +16,8 @@ final class StatusBarPresentationMapperTests: XCTestCase {
             jobs: [JobInfo(id: "job-1", frontmatter: nil, state: JobState(last_result: "success", run_count: 1, last_run_at: "2026-01-01T00:00:00Z"))],
             events: [SpineEvent(id: "evt-1", type: "agent.result", session_key: "s1", ts: "2026-01-01T00:00:00Z", payload: nil)]
         )
-        let updates = UpdateStore(latestVersions: ["daemon": "0.4.7", "feishu": "0.2.0"], appLatestVersion: "1.6.9")
+        let appLatestVersion = "9.9.9"
+        let updates = UpdateStore(latestVersions: ["daemon": "0.4.7", "feishu": "0.2.0"], appLatestVersion: appLatestVersion)
         let command = CommandStore(isLoading: false, lastOutput: "done", errorMessage: "boom")
         let store = AppStore(runtime: runtime, dashboard: dashboard, updates: updates, command: command, dependencies: .live)
         store.lastSeenBySession["job:job-1"] = Date()
@@ -25,7 +26,7 @@ final class StatusBarPresentationMapperTests: XCTestCase {
 
         XCTAssertTrue(presentation.header.showAppUpdate)
         XCTAssertTrue(presentation.header.showRuntimeUpdate)
-        XCTAssertEqual(presentation.header.appVersion, "1.6.9")
+        XCTAssertEqual(presentation.header.appVersion, appLatestVersion)
         XCTAssertEqual(presentation.daemonCard.latestVersion, "0.4.7")
         XCTAssertEqual(presentation.execution.sessionCaption, "1 active")
         XCTAssertEqual(presentation.execution.jobCaption, "1 running")

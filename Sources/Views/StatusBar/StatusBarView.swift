@@ -14,10 +14,10 @@ struct StatusBarView: View {
     @State var daemonNotice: InlineConfigNotice?
     @State var feishuNotice: InlineConfigNotice?
     let panelWidth: CGFloat = 568
-    let panelHeight: CGFloat = 734
-    let panelInset: CGFloat = 14
-    let overviewSpacing: CGFloat = 14
-    let panelContentInset: CGFloat = 12
+    let panelHeight: CGFloat = 628
+    let panelInset: CGFloat = 12
+    let overviewSpacing: CGFloat = 12
+    let panelContentInset: CGFloat = 10
     let overviewDividerWidth: CGFloat = 1
 
     init(store: AppStore, openDashboard: (() -> Void)? = nil, openReader: (() -> Void)? = nil, openOnboard: (() -> Void)? = nil) {
@@ -37,18 +37,20 @@ struct StatusBarView: View {
                 eventCount: statusBarPresentation.header.eventCount,
                 showAppUpdate: statusBarPresentation.header.showAppUpdate,
                 appVersion: statusBarPresentation.header.appVersion,
-                showRuntimeUpdate: statusBarPresentation.header.showRuntimeUpdate,
                 isLoading: statusBarPresentation.header.isLoading,
                 currentVersion: statusBarPresentation.header.currentVersion,
+                costValue: statusBarPresentation.footer.costValue,
+                tokenValue: statusBarPresentation.footer.tokenValue,
+                cacheValue: statusBarPresentation.footer.cacheValue,
+                toolsValue: statusBarPresentation.footer.toolsValue,
                 onAppUpdate: { store.openReleasesPage() },
-                onRefresh: { store.refreshVisibleContentWithFeedback() },
-                onUpgrade: { store.upgradeAll() }
+                onRefresh: { store.refreshVisibleContentWithFeedback() }
             )
 
             Divider().overlay(ConsolePalette.divider)
 
             ScrollView {
-                VStack(spacing: 14) {
+                VStack(spacing: 12) {
                     overviewRow
                     subconsciousPanel
                     streamPanel
@@ -61,10 +63,6 @@ struct StatusBarView: View {
             Divider().overlay(ConsolePalette.divider)
 
             StatusFooterBar(
-                costValue: statusBarPresentation.footer.costValue,
-                tokenValue: statusBarPresentation.footer.tokenValue,
-                cacheValue: statusBarPresentation.footer.cacheValue,
-                toolsValue: statusBarPresentation.footer.toolsValue,
                 statusMessage: statusBarPresentation.footer.statusMessage,
                 statusIsError: statusBarPresentation.footer.statusIsError,
                 onDashboard: { openDashboard?() },
@@ -83,7 +81,10 @@ struct StatusBarView: View {
             overviewColumn(
                 icon: "slider.horizontal.3",
                 title: "Control Plane",
-                hint: statusBarPresentation.controlHint
+                hint: statusBarPresentation.header.showRuntimeUpdate ? nil : statusBarPresentation.controlHint,
+                trailing: statusBarPresentation.header.showRuntimeUpdate
+                    ? AnyView(controlPlaneUpdateButton)
+                    : nil
             ) {
                 controlPanelContent
             }
@@ -110,6 +111,7 @@ struct StatusBarView: View {
         icon: String,
         title: String,
         hint: String? = nil,
+        trailing: AnyView? = nil,
         @ViewBuilder content: () -> Content
     ) -> some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -125,7 +127,9 @@ struct StatusBarView: View {
 
                 Spacer()
 
-                if let hint, !hint.isEmpty {
+                if let trailing {
+                    trailing
+                } else if let hint, !hint.isEmpty {
                     Text(hint)
                         .font(.system(size: 10, design: .monospaced))
                         .foregroundStyle(ConsolePalette.secondaryText)
@@ -136,8 +140,18 @@ struct StatusBarView: View {
         }
     }
 
+    private var controlPlaneUpdateButton: some View {
+        StatusSmallActionButton(
+            title: "update",
+            systemImage: "arrow.up.circle.fill",
+            tint: ConsolePalette.warning,
+            isDisabled: store.command.isLoading,
+            action: { store.upgradeAll() }
+        )
+    }
+
     private var topologySummaryContent: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 10) {
             StatusTopologyMetric(icon: "dot.radiowaves.left.and.right", title: "daemon endpoint", value: statusBarPresentation.topology.endpoint)
             StatusTopologyMetric(icon: "network", title: "runtime host", value: statusBarPresentation.topology.runtimeHost)
             StatusTopologyMetric(icon: "cross.case", title: "system", value: statusBarPresentation.topology.system, tint: statusBarPresentation.topology.systemTint)

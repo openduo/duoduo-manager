@@ -6,32 +6,42 @@ struct StatusHeaderBar: View {
     let eventCount: Int
     let showAppUpdate: Bool
     let appVersion: String
-    let showRuntimeUpdate: Bool
     let isLoading: Bool
     let currentVersion: String
+    let costValue: String
+    let tokenValue: String
+    let cacheValue: String
+    let toolsValue: String
     let onAppUpdate: () -> Void
     let onRefresh: () -> Void
-    let onUpgrade: () -> Void
 
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
             appGlyph
 
-            VStack(alignment: .leading, spacing: 7) {
-                Text("duoduo manager")
-                    .font(.system(size: 18, weight: .semibold, design: .monospaced))
-                    .foregroundStyle(ConsolePalette.primaryText)
-
+            VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 8) {
+                    Text("duoduo manager")
+                        .font(.system(size: 16, weight: .semibold, design: .monospaced))
+                        .foregroundStyle(ConsolePalette.primaryText)
+                        .lineLimit(1)
+
                     if showAppUpdate {
                         Button(action: onAppUpdate) {
                             StatusBadge(title: L10n.Status.appUpdate(appVersion), tint: ConsolePalette.warning)
                         }
                         .buttonStyle(.plain)
                     } else {
-                        StatusBadge(title: "v\(currentVersion)", tint: ConsolePalette.accent)
+                        StatusBadge(title: "v\(currentVersion)", tint: ConsolePalette.secondaryText)
                     }
-                    StatusBadge(title: "events \(eventCount)", tint: ConsolePalette.accent)
+
+                }
+
+                HStack(spacing: 10) {
+                    headerMetric("cost", costValue)
+                    headerMetric("tok", tokenValue)
+                    headerMetric("cache", cacheValue)
+                    headerMetric("tools", toolsValue)
                 }
             }
 
@@ -47,22 +57,9 @@ struct StatusHeaderBar: View {
             }
             .buttonStyle(.plain)
             .disabled(isLoading)
-
-            if showRuntimeUpdate {
-                Button(action: onUpgrade) {
-                    Image(systemName: "arrow.up.circle.fill")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(ConsolePalette.warning)
-                        .frame(width: 30, height: 30)
-                        .background(ConsolePalette.panelRaised)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                }
-                .buttonStyle(.plain)
-                .disabled(isLoading)
-            }
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 14)
+        .padding(.vertical, 10)
         .background(ConsolePalette.panel)
     }
 
@@ -74,13 +71,25 @@ struct StatusHeaderBar: View {
                     .resizable()
                     .interpolation(.high)
                     .scaledToFit()
-                    .frame(width: 44, height: 44)
-                    .clipShape(RoundedRectangle(cornerRadius: 11))
+                    .frame(width: 38, height: 38)
+                    .clipShape(RoundedRectangle(cornerRadius: 9))
             }
         }
         .overlay(
-            RoundedRectangle(cornerRadius: 11)
+            RoundedRectangle(cornerRadius: 9)
                 .stroke(ConsolePalette.divider, lineWidth: 1)
         )
+    }
+
+    private func headerMetric(_ title: String, _ value: String) -> some View {
+        HStack(spacing: 4) {
+            Text(title)
+                .foregroundStyle(ConsolePalette.mutedText)
+            Text(value)
+                .foregroundStyle(ConsolePalette.primaryText)
+                .fontWeight(.semibold)
+                .lineLimit(1)
+        }
+        .font(.system(size: 10, design: .monospaced))
     }
 }
