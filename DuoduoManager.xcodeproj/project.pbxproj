@@ -76,7 +76,6 @@
 		D2BE4E4DF0173E7FC1821406 /* DaemonStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63FD10798EC2CABC731AE9AB /* DaemonStatus.swift */; };
 		DCD14982263FD265DD213F3D /* AppWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCAE8BA826F3F2FC84989E8E /* AppWindowController.swift */; };
 		E08920046FF8BCA7E8693D74 /* DuoduoManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5175981D0FA6FAD90921DCE /* DuoduoManagerApp.swift */; };
-		E0C6E810FA94AE64B35500DF /* AppUpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C4EACF47B7EFB6FD7EE9677 /* AppUpdateService.swift */; };
 		E29D739D6216455B4D6F60CA /* UpdateStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77280A851FF3D40035BCF49 /* UpdateStore.swift */; };
 		E4ABAFFE00ECC2A03DED886F /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = EDBE1098D012D8D7423DE84F /* Localizable.strings */; };
 		E7CEAFC11D802BE358E07367 /* ShellPathInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 677F998568B75268A4907439 /* ShellPathInstaller.swift */; };
@@ -131,7 +130,6 @@
 		657074B7EFCDAC93A1F55DD8 /* FeishuConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeishuConfigView.swift; sourceTree = "<group>"; };
 		677F998568B75268A4907439 /* ShellPathInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellPathInstaller.swift; sourceTree = "<group>"; };
 		68F530764FBEB00DC791A7DE /* DashboardPresentationMapperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardPresentationMapperTests.swift; sourceTree = "<group>"; };
-		6C4EACF47B7EFB6FD7EE9677 /* AppUpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdateService.swift; sourceTree = "<group>"; };
 		6E9E00A5B0A8B3275C899A48 /* NodeRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeRuntime.swift; sourceTree = "<group>"; };
 		6FD413F335364A6203A47A3D /* AppStatusController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStatusController.swift; sourceTree = "<group>"; };
 		7DCB7518B9AB30913638E9F7 /* ConfigStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigStoreTests.swift; sourceTree = "<group>"; };
@@ -290,7 +288,6 @@
 		699317DC08453475F652AB21 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				6C4EACF47B7EFB6FD7EE9677 /* AppUpdateService.swift */,
 				926633CA04F758F9BC2A5064 /* ChannelService.swift */,
 				DBDDA8B25C6AAF6D04A90EAD /* ClaudeAuthService.swift */,
 				8355C197B1A02286E7764494 /* DaemonService.swift */,
@@ -569,7 +566,6 @@
 				533284317A1C3453B6C2FF30 /* AppStore+Visibility.swift in Sources */,
 				1C109FCAF4464502FCB1D76B /* AppStore.swift in Sources */,
 				7183D24C0D4821A2D4E7ADCB /* AppStoreDependencies.swift in Sources */,
-				E0C6E810FA94AE64B35500DF /* AppUpdateService.swift in Sources */,
 				DCD14982263FD265DD213F3D /* AppWindowController.swift in Sources */,
 				D015D59BC93A38CCEB6C4480 /* BrandIconView.swift in Sources */,
 				6DB4DAD1E2EE5E6470EA02E8 /* ChannelInfo.swift in Sources */,

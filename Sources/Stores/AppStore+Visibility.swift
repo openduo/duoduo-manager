@@ -22,7 +22,7 @@ extension AppStore {
             visibleSurfaces.insert(surface)
             if surface == .popover {
                 Task { [weak self] in
-                    await self?.checkForUpdates(force: true)
+                    await self?.checkForUpdates()
                     self?.updateStatusBarIcon?()
                 }
             }

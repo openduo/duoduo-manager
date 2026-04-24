@@ -128,10 +128,6 @@ extension AppStore {
         command.errorMessage = nil
     }
 
-    func openReleasesPage() {
-        checkForSparkleUpdate?()
-    }
-
     func fetchConfig() async {
         dashboard.config = try? await rpc.systemConfig()
     }
