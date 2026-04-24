@@ -120,12 +120,21 @@ struct StatusSubconsciousList: View {
 struct StatusBadge: View {
     let title: String
     let tint: Color
+    let showsIndicator: Bool
+
+    init(title: String, tint: Color, showsIndicator: Bool = true) {
+        self.title = title
+        self.tint = tint
+        self.showsIndicator = showsIndicator
+    }
 
     var body: some View {
         HStack(spacing: 5) {
-            Circle()
-                .fill(tint)
-                .frame(width: 6, height: 6)
+            if showsIndicator {
+                Circle()
+                    .fill(tint)
+                    .frame(width: 6, height: 6)
+            }
             Text(title)
         }
         .font(.system(size: 10, weight: .medium, design: .monospaced))

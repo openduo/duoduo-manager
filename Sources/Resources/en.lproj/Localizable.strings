@@ -4,6 +4,7 @@
 "status.hasUpdate" = "Update";
 "status.appUpdate %@" = "Update to %@";
 "status.configure" = "Configure";
+"status.updateAll" = "Update all";
 "status.install" = "Install";
 "status.clear" = "Clear";
 "status.quit" = "Quit";

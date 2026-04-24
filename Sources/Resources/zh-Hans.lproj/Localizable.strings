@@ -4,6 +4,7 @@
 "status.hasUpdate" = "有更新";
 "status.appUpdate %@" = "更新到 %@";
 "status.configure" = "配置";
+"status.updateAll" = "全部更新";
 "status.install" = "安装";
 "status.clear" = "清除";
 "status.quit" = "退出";

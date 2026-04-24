@@ -20,7 +20,7 @@ struct StatusHeaderBar: View {
             appGlyph
 
             VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 8) {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
                     Text("duoduo manager")
                         .font(.system(size: 16, weight: .semibold, design: .monospaced))
                         .foregroundStyle(ConsolePalette.primaryText)
@@ -28,20 +28,22 @@ struct StatusHeaderBar: View {
 
                     if showAppUpdate {
                         Button(action: onAppUpdate) {
-                            StatusBadge(title: L10n.Status.appUpdate(appVersion), tint: ConsolePalette.warning)
+                            StatusBadge(title: L10n.Status.appUpdate(appVersion), tint: ConsolePalette.warning, showsIndicator: false)
                         }
                         .buttonStyle(.plain)
                     } else {
-                        StatusBadge(title: "v\(currentVersion)", tint: ConsolePalette.secondaryText)
+                        Text("v\(currentVersion)")
+                            .font(.system(size: 10, design: .monospaced))
+                            .foregroundStyle(ConsolePalette.secondaryText)
                     }
 
                 }
 
                 HStack(spacing: 10) {
-                    headerMetric("cost", costValue)
-                    headerMetric("tok", tokenValue)
-                    headerMetric("cache", cacheValue)
-                    headerMetric("tools", toolsValue)
+                    headerMetric("cost", costValue, valueTint: Color(red: 0.82, green: 0.74, blue: 0.58))
+                    headerMetric("tok", tokenValue, valueTint: Color(red: 0.61, green: 0.77, blue: 0.90))
+                    headerMetric("cache", cacheValue, valueTint: Color(red: 0.59, green: 0.80, blue: 0.71))
+                    headerMetric("tools", toolsValue, valueTint: Color(red: 0.73, green: 0.67, blue: 0.88))
                 }
             }
 
@@ -81,12 +83,12 @@ struct StatusHeaderBar: View {
         )
     }
 
-    private func headerMetric(_ title: String, _ value: String) -> some View {
+    private func headerMetric(_ title: String, _ value: String, valueTint: Color) -> some View {
         HStack(spacing: 4) {
             Text(title)
                 .foregroundStyle(ConsolePalette.mutedText)
             Text(value)
-                .foregroundStyle(ConsolePalette.primaryText)
+                .foregroundStyle(valueTint)
                 .fontWeight(.semibold)
                 .lineLimit(1)
         }

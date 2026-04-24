@@ -13,12 +13,10 @@ struct StatusRuntimeStreamPanel: View {
                     .font(.system(size: 11, design: .monospaced))
                     .foregroundStyle(ConsolePalette.secondaryText)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, 10)
             } else {
                 streamHero
-                if recentEvents.count > 1 {
-                    streamTimeline
-                }
+                streamTimeline
             }
         }
     }
@@ -26,14 +24,14 @@ struct StatusRuntimeStreamPanel: View {
     @ViewBuilder
     private var streamHero: some View {
         if let event = recentEvents.first {
-            VStack(alignment: .leading, spacing: 7) {
-                HStack(alignment: .center, spacing: 9) {
+            VStack(alignment: .leading, spacing: 9) {
+                HStack(alignment: .top, spacing: 9) {
                     RoundedRectangle(cornerRadius: 10)
                         .fill(eventColor(for: event).opacity(0.16))
-                        .frame(width: 32, height: 32)
+                        .frame(width: 36, height: 36)
                         .overlay(
                             Image(systemName: heroSymbol(for: event))
-                                .font(.system(size: 13, weight: .semibold))
+                                .font(.system(size: 14, weight: .semibold))
                                 .foregroundStyle(eventColor(for: event))
                         )
 
@@ -57,23 +55,36 @@ struct StatusRuntimeStreamPanel: View {
                     Text(detail)
                         .font(.system(size: 11, design: .monospaced))
                         .foregroundStyle(ConsolePalette.secondaryText)
-                        .lineLimit(1)
+                        .lineLimit(2)
+                }
+
+                HStack(spacing: 8) {
+                    StatusHeroMetaBadge(title: event.type.uppercased(), tint: eventColor(for: event))
+                    if let key = event.session_key, !key.isEmpty {
+                        StatusHeroMetaBadge(title: shortKey(key), tint: ConsolePalette.secondaryText)
+                    }
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(10)
-            .background(ConsolePalette.panelRaised)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .padding(12)
+            .background(
+                LinearGradient(
+                    colors: [eventColor(for: event).opacity(0.16), ConsolePalette.panelRaised],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(eventColor(for: event).opacity(0.35), lineWidth: 1)
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(eventColor(for: event).opacity(0.45), lineWidth: 1)
             )
         }
     }
 
     private var streamTimeline: some View {
         VStack(spacing: 0) {
-            ForEach(Array(recentEvents.dropFirst().prefix(3))) { event in
+            ForEach(Array(recentEvents.dropFirst().prefix(2))) { event in
                 EventRowView(
                     event: event,
                     isExpanded: expandedEventIDs.contains(event.id),
@@ -81,9 +92,9 @@ struct StatusRuntimeStreamPanel: View {
                 )
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(
-            RoundedRectangle(cornerRadius: 10)
+            RoundedRectangle(cornerRadius: 12)
                 .stroke(ConsolePalette.divider, lineWidth: 1)
         )
     }
@@ -150,7 +161,6 @@ struct StatusRuntimeStreamPanel: View {
         }
         .font(.system(size: 15, weight: .semibold, design: .monospaced))
         .foregroundStyle(ConsolePalette.primaryText)
-        .lineLimit(1)
     }
 
     private func latestEventDetail(for event: SpineEvent) -> String? {

@@ -142,7 +142,7 @@ struct StatusBarView: View {
 
     private var controlPlaneUpdateButton: some View {
         StatusSmallActionButton(
-            title: "update",
+            title: L10n.Status.updateAll,
             systemImage: "arrow.up.circle.fill",
             tint: ConsolePalette.warning,
             isDisabled: store.command.isLoading,
