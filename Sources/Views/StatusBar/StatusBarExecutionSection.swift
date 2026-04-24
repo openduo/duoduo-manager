@@ -87,18 +87,28 @@ struct StatusExecutionPanel: View {
 struct StatusFooterBar: View {
     let statusMessage: String?
     let statusIsError: Bool
+    let preferredTerminalApp: PreferredTerminalApp
     let onDashboard: () -> Void
     let onOnboard: () -> Void
     let onReader: () -> Void
     let onTerminal: () -> Void
+    let onSelectTerminalApp: (PreferredTerminalApp) -> Void
     let onQuit: () -> Void
+
+    @State private var showTerminalPicker = false
+    @State private var installedTerminalApps: [PreferredTerminalApp] = []
+
+    private func refreshInstalledTerminalApps() {
+        installedTerminalApps = PreferredTerminalApp.allCases.filter { $0.isInstalled }
+    }
 
     var body: some View {
         HStack(spacing: 8) {
             footerButton(title: "ATC", systemImage: "square.grid.2x2", action: onDashboard)
             footerButton(title: "Reader", systemImage: "book.closed", action: onReader)
             footerButton(title: "Onboard", systemImage: "checklist", action: onOnboard)
-            footerButton(title: "Terminal", systemImage: "terminal", action: onTerminal)
+            terminalControl
+                .onAppear { refreshInstalledTerminalApps() }
 
             Spacer(minLength: 8)
 
@@ -113,19 +123,97 @@ struct StatusFooterBar: View {
         .background(ConsolePalette.panel)
     }
 
-    private func footerButton(title: String, systemImage: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 6) {
-                Image(systemName: systemImage)
-                    .font(.system(size: 11, weight: .semibold))
-                Text(title)
-                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+    @ViewBuilder
+    private var terminalControl: some View {
+        if installedTerminalApps.count <= 1 {
+            footerButton(title: preferredTerminalApp.title, systemImage: "terminal", action: onTerminal)
+        } else {
+            HStack(spacing: 0) {
+                Button(action: onTerminal) {
+                    footerButtonLabel(title: preferredTerminalApp.title, systemImage: "terminal")
+                        .padding(.leading, 10)
+                        .padding(.trailing, 6)
+                        .padding(.vertical, 6)
+                }
+                .buttonStyle(.plain)
+
+                Rectangle()
+                    .fill(ConsolePalette.divider)
+                    .frame(width: 1, height: 18)
+
+                Button {
+                    showTerminalPicker.toggle()
+                } label: {
+                    Text("▾")
+                        .font(.system(size: 12, weight: .heavy))
+                        .foregroundColor(ConsolePalette.signal)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 6)
+                }
+                .buttonStyle(.plain)
+                .popover(isPresented: $showTerminalPicker, arrowEdge: .bottom) {
+                    VStack(alignment: .leading, spacing: 0) {
+                        ForEach(installedTerminalApps, id: \.rawValue) { app in
+                            Button {
+                                onSelectTerminalApp(app)
+                                showTerminalPicker = false
+                            } label: {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "terminal")
+                                        .font(.system(size: 11))
+                                        .foregroundStyle(ConsolePalette.secondaryText)
+                                        .frame(width: 16)
+                                    Text(app.title)
+                                        .font(.system(size: 12, design: .monospaced))
+                                        .foregroundStyle(ConsolePalette.primaryText)
+                                    Spacer()
+                                    if preferredTerminalApp == app {
+                                        Image(systemName: "checkmark")
+                                            .font(.system(size: 10, weight: .bold))
+                                            .foregroundColor(ConsolePalette.signal)
+                                    }
+                                }
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+
+                            if app != installedTerminalApps.last {
+                                Divider()
+                                    .overlay(ConsolePalette.divider)
+                                    .padding(.leading, 36)
+                            }
+                        }
+                    }
+                    .padding(.vertical, 4)
+                    .frame(width: 180)
+                    .background(ConsolePalette.panel)
+                }
             }
-            .foregroundStyle(ConsolePalette.primaryText)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
             .background(ConsolePalette.panelRaised)
             .clipShape(RoundedRectangle(cornerRadius: 8))
+            .help("Open in \(preferredTerminalApp.title)")
+        }
+    }
+
+    private func footerButtonLabel(title: String, systemImage: String) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: systemImage)
+                .font(.system(size: 11, weight: .semibold))
+            Text(title)
+                .font(.system(size: 11, weight: .medium, design: .monospaced))
+        }
+        .foregroundStyle(ConsolePalette.primaryText)
+    }
+
+    private func footerButton(title: String, systemImage: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            footerButtonLabel(title: title, systemImage: systemImage)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(ConsolePalette.panelRaised)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
         }
         .buttonStyle(.plain)
     }

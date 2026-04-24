@@ -6,6 +6,7 @@ struct StatusBarView: View {
     var openDashboard: (() -> Void)?
     var openReader: (() -> Void)?
     var openOnboard: (() -> Void)?
+    @AppStorage("statusBar.preferredTerminalApp") var preferredTerminalAppRaw: String = PreferredTerminalApp.appleTerminal.rawValue
 
     @State var expandedEventIDs: Set<String> = []
     @State var expandedConfigTarget: InlineConfigTarget?
@@ -65,10 +66,12 @@ struct StatusBarView: View {
             StatusFooterBar(
                 statusMessage: statusBarPresentation.footer.statusMessage,
                 statusIsError: statusBarPresentation.footer.statusIsError,
+                preferredTerminalApp: PreferredTerminalApp(rawValue: preferredTerminalAppRaw) ?? .appleTerminal,
                 onDashboard: { openDashboard?() },
                 onOnboard: { openOnboard?() },
                 onReader: { openCCReader() },
                 onTerminal: { openTerminal() },
+                onSelectTerminalApp: { preferredTerminalAppRaw = $0.rawValue },
                 onQuit: { NSApplication.shared.terminate(nil) }
             )
         }
