@@ -1,10 +1,5 @@
 import Foundation
 
-struct AppReleaseInfo: Sendable, Equatable {
-    let version: String
-    let url: URL
-}
-
 protocol DaemonServicing: Sendable {
     var daemonURL: String { get }
     func getStatus() async throws -> DaemonStatus
@@ -51,11 +46,6 @@ protocol UpgradeServicing: Sendable {
     ) async throws -> String
 }
 
-protocol AppUpdateServicing: Sendable {
-    func fetchLatestReleaseVersion() async -> String?
-    func fetchLatestRelease() async -> AppReleaseInfo?
-}
-
 protocol RuntimeEnvironmentProviding: Sendable {
     var isDuoduoInstalled: Bool { get }
     var hasBundledNode: Bool { get }
@@ -78,4 +68,3 @@ extension ChannelService: ChannelServicing {}
 extension DashboardRPCService: DashboardRPCServicing {}
 extension VersionService: VersionServicing {}
 extension UpgradeService: UpgradeServicing {}
-extension AppUpdateService: AppUpdateServicing {}

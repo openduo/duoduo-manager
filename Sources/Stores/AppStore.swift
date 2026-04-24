@@ -16,9 +16,9 @@ final class AppStore {
     let dependencies: AppStoreDependencies
     let versionService: any VersionServicing
     let upgradeService: any UpgradeServicing
-    let appUpdateService: any AppUpdateServicing
     let runtimeEnvironment: any RuntimeEnvironmentProviding
     var checkForSparkleUpdate: (() -> Void)?
+    var checkForSparkleUpdateSilently: (() -> Void)?
 
     var daemonService: any DaemonServicing
     var channelService: any ChannelServicing
@@ -63,7 +63,6 @@ final class AppStore {
         self.dependencies = dependencies
         versionService = dependencies.versionService
         upgradeService = dependencies.upgradeService
-        appUpdateService = dependencies.appUpdateService
         runtimeEnvironment = dependencies.runtimeEnvironment
         daemonService = dependencies.makeDaemonService(runtimeStore.daemonConfig.daemonURL)
         channelService = dependencies.makeChannelService(runtimeStore.daemonConfig.daemonURL)
@@ -94,9 +93,13 @@ final class AppStore {
             || runtime.channels.contains { hasUpdate(type: $0.type, installedVersion: $0.version) }
     }
 
+    static let currentVersion: String = {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.0.0"
+    }()
+
     var hasAppUpdate: Bool {
         guard let latest = updates.appLatestVersion else { return false }
-        return AppUpdateService.currentVersion.compare(latest, options: .numeric) == .orderedAscending
+        return Self.currentVersion.compare(latest, options: .numeric) == .orderedAscending
     }
 
     func isJobRunning(_ jobId: String) -> Bool {

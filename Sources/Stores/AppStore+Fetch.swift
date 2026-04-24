@@ -55,12 +55,8 @@ extension AppStore {
         updateStatusBarIcon?()
     }
 
-    func checkForUpdates(force: Bool) async {
-        // Check GitHub for latest release version (for update badge visibility)
-        if let result = await appUpdateService.fetchLatestRelease() {
-            updates.appLatestVersion = result.version
-            updates.appLatestReleaseURL = result.url
-        }
+    func checkForUpdates() async {
+        checkForSparkleUpdateSilently?()
 
         if let latest = try? await versionService.getNpmLatestVersion("@openduo/duoduo") {
             updates.latestVersions["daemon"] = latest

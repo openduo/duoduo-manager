@@ -44,7 +44,7 @@ struct StatusBarView: View {
                 tokenValue: statusBarPresentation.footer.tokenValue,
                 cacheValue: statusBarPresentation.footer.cacheValue,
                 toolsValue: statusBarPresentation.footer.toolsValue,
-                onAppUpdate: { store.openReleasesPage() },
+                onAppUpdate: { store.checkForSparkleUpdate?() },
                 onRefresh: { store.refreshVisibleContentWithFeedback() }
             )
 

@@ -103,6 +103,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         store?.checkForSparkleUpdate = { [weak self] in
             self?.updaterController.checkForUpdates(nil)
         }
+        store?.checkForSparkleUpdateSilently = { [weak self] in
+            self?.updaterController.updater.checkForUpdateInformation()
+        }
         store?.updateStatusBarIcon = { [weak self] in
             self?.updateStatusBarIcon()
         }
@@ -210,5 +213,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
             return [channel]
         }
         return []
+    }
+
+    nonisolated func updater(_ updater: SPUUpdater, didFindValidUpdate item: SUAppcastItem) {
+        Task { @MainActor in
+            guard store?.updates.appLatestVersion != item.displayVersionString else { return }
+            store?.updates.appLatestVersion = item.displayVersionString
+        }
+    }
+
+    nonisolated func updaterDidNotFindUpdate(_ updater: SPUUpdater, error: any Error) {
+        Task { @MainActor in
+            guard store?.updates.appLatestVersion != nil else { return }
+            store?.updates.appLatestVersion = nil
+        }
     }
 }
