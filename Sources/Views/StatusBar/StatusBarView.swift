@@ -14,8 +14,8 @@ struct StatusBarView: View {
     @State var feishuDraft: FeishuConfig
     @State var daemonNotice: InlineConfigNotice?
     @State var feishuNotice: InlineConfigNotice?
-    let panelWidth: CGFloat = 568
-    let panelHeight: CGFloat = 628
+    let panelWidth: CGFloat = 520
+    let panelHeight: CGFloat = 680
     let panelInset: CGFloat = 12
     let overviewSpacing: CGFloat = 12
     let panelContentInset: CGFloat = 10
