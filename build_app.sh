@@ -282,10 +282,11 @@ create_dmg_variant() {
             --window-pos 200 120 \
             --window-size 600 400 \
             --icon-size 100 \
-            --icon "${APP_BUNDLE}" 150 190 \
-            --app-drop-link 450 190 \
+            --icon "${APP_BUNDLE}" 150 150 \
+            --app-drop-link 450 150 \
+            --hide-extension "${APP_BUNDLE}" \
             --no-internet-enable \
-            --format UDZO \
+            --format ULFO \
             "$dmg_path" \
             "$temp_dir" || {
             echo -e "${YELLOW}create-dmg failed, falling back to simple mode${NC}"
