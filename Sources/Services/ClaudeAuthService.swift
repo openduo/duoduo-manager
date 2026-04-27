@@ -139,10 +139,10 @@ struct LLMProviderPreset: Identifiable, Hashable {
         envVars: [
             "ANTHROPIC_BASE_URL": "https://api.z.ai/api/anthropic",
             "ANTHROPIC_AUTH_TOKEN": "",
-            "ANTHROPIC_MODEL": "glm-5",
-            "ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-5",
-            "ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-5",
-            "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-5"
+            "ANTHROPIC_MODEL": "glm-5.1",
+            "ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-5.1",
+            "ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-5.1",
+            "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-5.1"
         ]
     )
 
@@ -153,10 +153,10 @@ struct LLMProviderPreset: Identifiable, Hashable {
         envVars: [
             "ANTHROPIC_BASE_URL": "https://api.moonshot.cn/anthropic",
             "ANTHROPIC_AUTH_TOKEN": "",
-            "ANTHROPIC_MODEL": "kimi-k2.5",
-            "ANTHROPIC_DEFAULT_HAIKU_MODEL": "kimi-k2.5",
-            "ANTHROPIC_DEFAULT_SONNET_MODEL": "kimi-k2.5",
-            "ANTHROPIC_DEFAULT_OPUS_MODEL": "kimi-k2.5"
+            "ANTHROPIC_MODEL": "kimi-k2.6",
+            "ANTHROPIC_DEFAULT_HAIKU_MODEL": "kimi-k2.6",
+            "ANTHROPIC_DEFAULT_SONNET_MODEL": "kimi-k2.6",
+            "ANTHROPIC_DEFAULT_OPUS_MODEL": "kimi-k2.6"
         ]
     )
 
@@ -191,10 +191,10 @@ struct LLMProviderPreset: Identifiable, Hashable {
         envVars: [
             "ANTHROPIC_BASE_URL": "https://api.deepseek.com/anthropic",
             "ANTHROPIC_AUTH_TOKEN": "",
-            "ANTHROPIC_MODEL": "DeepSeek-V3.2",
-            "ANTHROPIC_DEFAULT_HAIKU_MODEL": "DeepSeek-V3.2",
-            "ANTHROPIC_DEFAULT_SONNET_MODEL": "DeepSeek-V3.2",
-            "ANTHROPIC_DEFAULT_OPUS_MODEL": "DeepSeek-V3.2"
+            "ANTHROPIC_MODEL": "deepseek-v4-pro",
+            "ANTHROPIC_DEFAULT_HAIKU_MODEL": "deepseek-v4-pro",
+            "ANTHROPIC_DEFAULT_SONNET_MODEL": "deepseek-v4-pro",
+            "ANTHROPIC_DEFAULT_OPUS_MODEL": "deepseek-v4-pro"
         ]
     )
 
