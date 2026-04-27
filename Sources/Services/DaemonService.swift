@@ -102,7 +102,26 @@ final class DaemonService: Sendable {
             let pidString = String(output[pidRange])
             status.pid = pidString.replacingOccurrences(of: "pid: ", with: "")
         }
+        status.daemonConfigValues = parseConfigValues(output)
 
         return status
+    }
+
+    private func parseConfigValues(_ output: String) -> [String: String] {
+        var values: [String: String] = [:]
+        for rawLine in output.split(separator: "\n", omittingEmptySubsequences: false).map(String.init) {
+            let parts = rawLine.split(separator: ":", maxSplits: 1, omittingEmptySubsequences: false)
+            guard parts.count == 2 else { continue }
+
+            let key = String(parts[0])
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .lowercased()
+            let value = String(parts[1])
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            guard key == "work_dir", !value.isEmpty else { continue }
+            values["ALADUO_WORK_DIR"] = value
+        }
+
+        return values
     }
 }

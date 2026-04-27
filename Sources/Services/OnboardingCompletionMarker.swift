@@ -16,7 +16,6 @@ struct OnboardingCompletionMarker {
     }
 
     static let markerPath = "~/.config/duoduo/.onboarded"
-    static let configPath = "~/.config/duoduo/config.json"
     static var homeDirectoryOverride: String?
 
     static func writeConfig(daemonConfig: DaemonConfig) throws {
@@ -24,8 +23,7 @@ struct OnboardingCompletionMarker {
     }
 
     static func hasRequiredConfiguration(daemonConfig: DaemonConfig = .load()) -> Bool {
-        ConfigStore.envFileExists
-            && !daemonConfig.workDir.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        !daemonConfig.workDir.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     static func hasCompletedConfiguration(daemonConfig: DaemonConfig = .load()) -> Bool {
@@ -35,6 +33,7 @@ struct OnboardingCompletionMarker {
     }
 
     static func repairDerivedFilesIfNeeded(daemonConfig: DaemonConfig) throws {
+        daemonConfig.save()
         if !hasConfigJSONAligned(daemonConfig: daemonConfig) {
             try writeConfig(daemonConfig: daemonConfig)
         }
@@ -47,6 +46,7 @@ struct OnboardingCompletionMarker {
         let fileManager = FileManager.default
 
         try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
+        daemonConfig.save()
         try writeConfig(daemonConfig: daemonConfig)
 
         guard !fileManager.fileExists(atPath: url.path) else { return }
@@ -61,11 +61,7 @@ struct OnboardingCompletionMarker {
     }
 
     private static func hasConfigJSONAligned(daemonConfig: DaemonConfig) -> Bool {
-        let url = URL(fileURLWithPath: resolve(configPath))
-        guard
-            let data = try? Data(contentsOf: url),
-            let document = try? JSONDecoder().decode(OnboardingConfigDocument.self, from: data)
-        else {
+        guard let document = ConfigStore.loadOnboardingConfigDocument() else {
             return false
         }
 
@@ -78,18 +74,10 @@ struct OnboardingCompletionMarker {
     }
 
     private static func writeConfig(_ document: OnboardingConfigDocument) throws {
-        let url = URL(fileURLWithPath: resolve(configPath))
-        try FileManager.default.createDirectory(
-            at: url.deletingLastPathComponent(),
-            withIntermediateDirectories: true
-        )
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
-        let data = try encoder.encode(document)
         do {
-            try data.write(to: url, options: .atomic)
+            try ConfigStore.writeOnboardingConfigDocument(document)
         } catch {
-            throw Failure.writeConfigFailed(path: url.path)
+            throw Failure.writeConfigFailed(path: "~/.config/duoduo/config.json")
         }
     }
 

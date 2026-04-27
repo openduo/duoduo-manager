@@ -23,8 +23,12 @@ struct DaemonConfig: Sendable, Equatable {
         set { daemonHost = newValue }
     }
 
-    static func load() -> DaemonConfig {
-        let values = ConfigStore.loadValues()
+    static func load(status: DaemonStatus? = nil) -> DaemonConfig {
+        var values = mergeFallbackValues(ConfigStore.loadValues(), into: [:])
+        values = mergeFallbackValues(ConfigStore.loadConfigJSONValues(), into: values)
+        if let status {
+            values = mergeFallbackValues(status.daemonConfigValues, into: values)
+        }
         var config = DaemonConfig()
         config.workDir = values["ALADUO_WORK_DIR"] ?? config.workDir
         config.daemonHost = values["ALADUO_DAEMON_HOST"] ?? values["ALADUO_HOST"] ?? config.daemonHost
@@ -65,6 +69,34 @@ struct DaemonConfig: Sendable, Equatable {
         "ALADUO_LOG_LEVEL",
         "ALADUO_PERMISSION_MODE",
     ]
+
+    private static func mergeFallbackValues(_ source: [String: String], into base: [String: String]) -> [String: String] {
+        var normalized = source
+        if let daemonURL = source["ALADUO_DAEMON_URL"] {
+            let parsed = parseDaemonURL(daemonURL)
+            if normalized["ALADUO_DAEMON_HOST"] == nil, let host = parsed.host {
+                normalized["ALADUO_DAEMON_HOST"] = host
+            }
+            if normalized["ALADUO_PORT"] == nil, let port = parsed.port {
+                normalized["ALADUO_PORT"] = port
+            }
+        }
+
+        var merged = base
+        for (key, value) in normalized {
+            guard !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { continue }
+            if merged[key] == nil {
+                merged[key] = value
+            }
+        }
+        return merged
+    }
+
+    private static func parseDaemonURL(_ rawValue: String) -> (host: String?, port: String?) {
+        let trimmed = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let components = URLComponents(string: trimmed) else { return (nil, nil) }
+        return (components.host, components.port.map(String.init))
+    }
 }
 
 struct OnboardingConfigDocument: Codable, Equatable {

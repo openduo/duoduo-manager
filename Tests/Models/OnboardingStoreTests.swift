@@ -224,9 +224,14 @@ final class OnboardingStoreTests: XCTestCase {
             .appendingPathComponent(".env", isDirectory: false)
         let workDir = tempRoot.appendingPathComponent("work", isDirectory: true).path
         ConfigStore.envURLOverride = envURL
+        ConfigStore.configJSONURLOverride = tempRoot
+            .appendingPathComponent(".config", isDirectory: true)
+            .appendingPathComponent("duoduo", isDirectory: true)
+            .appendingPathComponent("config.json", isDirectory: false)
         OnboardingCompletionMarker.homeDirectoryOverride = tempRoot.path
         defer {
             ConfigStore.envURLOverride = nil
+            ConfigStore.configJSONURLOverride = nil
             OnboardingCompletionMarker.homeDirectoryOverride = nil
             try? FileManager.default.removeItem(at: tempRoot)
         }

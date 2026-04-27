@@ -2,6 +2,29 @@ import XCTest
 @testable import DuoduoManager
 
 final class OnboardingReducerTests: XCTestCase {
+    private var tempDirectory: URL!
+
+    override func setUpWithError() throws {
+        tempDirectory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: tempDirectory, withIntermediateDirectories: true)
+        ConfigStore.envURLOverride = tempDirectory
+            .appendingPathComponent(".config", isDirectory: true)
+            .appendingPathComponent("duoduo", isDirectory: true)
+            .appendingPathComponent(".env", isDirectory: false)
+        ConfigStore.configJSONURLOverride = tempDirectory
+            .appendingPathComponent(".config", isDirectory: true)
+            .appendingPathComponent("duoduo", isDirectory: true)
+            .appendingPathComponent("config.json", isDirectory: false)
+    }
+
+    override func tearDownWithError() throws {
+        ConfigStore.envURLOverride = nil
+        ConfigStore.configJSONURLOverride = nil
+        if let tempDirectory {
+            try? FileManager.default.removeItem(at: tempDirectory)
+        }
+    }
+
     func testBootstrapStartsHydrationBeforeDetection() {
         var state = OnboardingState()
 

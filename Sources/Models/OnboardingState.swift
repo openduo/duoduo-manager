@@ -322,7 +322,11 @@ enum OnboardingReducer {
 
     private static func daemonConfig(from state: OnboardingState) -> DaemonConfig {
         var config = DaemonConfig.load()
-        config.workDir = normalizedWorkDir(state.daemonWorkDir)
+        let selectedWorkDir = normalizedWorkDir(state.daemonWorkDir)
+        if config.workDir.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            || selectedWorkDir != DaemonConfig.defaultWorkDir {
+            config.workDir = selectedWorkDir
+        }
         return config
     }
 

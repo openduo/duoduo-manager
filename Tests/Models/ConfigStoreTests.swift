@@ -14,6 +14,7 @@ final class ConfigStoreTests: XCTestCase {
 
     override func tearDownWithError() throws {
         ConfigStore.envURLOverride = nil
+        ConfigStore.configJSONURLOverride = nil
         if let tempDirectory {
             try? FileManager.default.removeItem(at: tempDirectory)
         }
@@ -61,6 +62,53 @@ final class ConfigStoreTests: XCTestCase {
 
         let contents = try String(contentsOf: envURL, encoding: .utf8)
         XCTAssertTrue(contents.contains("ALADUO_PORT=20233"))
+    }
+
+    func testLoadConfigJSONValuesReadsLegacyDaemonDocument() throws {
+        let configURL = tempDirectory.appendingPathComponent(".config/duoduo/config.json")
+        try FileManager.default.createDirectory(at: configURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try """
+        {
+          "mode": "local",
+          "daemonUrl": "http://127.0.0.1:20233",
+          "authSource": "claude_code_local",
+          "workDir": "/tmp/duoduo-work"
+        }
+        """.write(to: configURL, atomically: true, encoding: .utf8)
+
+        let values = ConfigStore.loadConfigJSONValues()
+
+        XCTAssertEqual(values["ALADUO_WORK_DIR"], "/tmp/duoduo-work")
+        XCTAssertEqual(values["ALADUO_DAEMON_URL"], "http://127.0.0.1:20233")
+    }
+
+    func testDaemonConfigFallsBackAcrossEnvConfigJSONAndStatus() throws {
+        let configURL = tempDirectory.appendingPathComponent(".config/duoduo/config.json")
+        try FileManager.default.createDirectory(at: configURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try """
+        {
+          "mode": "local",
+          "daemonUrl": "http://127.0.0.1:20444",
+          "authSource": "claude_code_local",
+          "workDir": "/tmp/config-work"
+        }
+        """.write(to: configURL, atomically: true, encoding: .utf8)
+        var status = DaemonStatus()
+        status.daemonConfigValues = ["ALADUO_WORK_DIR": "/tmp/status-work"]
+
+        var config = DaemonConfig.load(status: status)
+        XCTAssertEqual(config.workDir, "/tmp/config-work")
+        XCTAssertEqual(config.port, "20444")
+
+        try prepareEnv("ALADUO_WORK_DIR=/tmp/env-work")
+        config = DaemonConfig.load(status: status)
+        XCTAssertEqual(config.workDir, "/tmp/env-work")
+        XCTAssertEqual(config.port, "20444")
+
+        try FileManager.default.removeItem(at: configURL)
+        try FileManager.default.removeItem(at: envURL)
+        config = DaemonConfig.load(status: status)
+        XCTAssertEqual(config.workDir, "/tmp/status-work")
     }
 
     private func prepareEnv(_ content: String) throws {

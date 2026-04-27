@@ -2,6 +2,7 @@ import Foundation
 
 enum ConfigStore {
     static var envURLOverride: URL?
+    static var configJSONURLOverride: URL?
 
     private static var envURL: URL {
         if let envURLOverride {
@@ -11,6 +12,19 @@ enum ConfigStore {
             .appendingPathComponent(".config", isDirectory: true)
             .appendingPathComponent("duoduo", isDirectory: true)
             .appendingPathComponent(".env", isDirectory: false)
+    }
+
+    private static var configJSONURL: URL {
+        if let configJSONURLOverride {
+            return configJSONURLOverride
+        }
+        if let envURLOverride {
+            return envURLOverride.deletingLastPathComponent().appendingPathComponent("config.json", isDirectory: false)
+        }
+        return URL(fileURLWithPath: NSHomeDirectory())
+            .appendingPathComponent(".config", isDirectory: true)
+            .appendingPathComponent("duoduo", isDirectory: true)
+            .appendingPathComponent("config.json", isDirectory: false)
     }
 
     private enum Line {
@@ -35,6 +49,45 @@ enum ConfigStore {
 
     static var envFileExists: Bool {
         FileManager.default.fileExists(atPath: envURL.path)
+    }
+
+    static func loadConfigJSONValues() -> [String: String] {
+        guard let document = loadOnboardingConfigDocument() else {
+            return [:]
+        }
+
+        var values: [String: String] = [:]
+        let workDir = document.workDir.trimmingCharacters(in: .whitespacesAndNewlines)
+        let daemonURL = document.daemonUrl.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !workDir.isEmpty {
+            values["ALADUO_WORK_DIR"] = workDir
+        }
+        if !daemonURL.isEmpty {
+            values["ALADUO_DAEMON_URL"] = daemonURL
+        }
+
+        return values
+    }
+
+    static func loadOnboardingConfigDocument() -> OnboardingConfigDocument? {
+        guard
+            let data = try? Data(contentsOf: configJSONURL),
+            let document = try? JSONDecoder().decode(OnboardingConfigDocument.self, from: data)
+        else {
+            return nil
+        }
+        return document
+    }
+
+    static func writeOnboardingConfigDocument(_ document: OnboardingConfigDocument) throws {
+        try FileManager.default.createDirectory(
+            at: configJSONURL.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
+        let data = try encoder.encode(document)
+        try data.write(to: configJSONURL, options: .atomic)
     }
 
     static func save(entries: [(key: String, value: String)], managedKeys: Set<String>) {

@@ -189,7 +189,6 @@ final class AppStoreTests: XCTestCase {
         let dependencies = AppStoreDependencies(
             versionService: FakeVersionService(installedVersions: ["@openduo/duoduo": "0.4.7"]),
             upgradeService: FakeUpgradeService(),
-            appUpdateService: FakeAppUpdateService(),
             runtimeEnvironment: FakeRuntimeEnvironment(),
             makeDaemonService: { url in
                 FakeDaemonService(
@@ -301,14 +300,12 @@ final class AppStoreTests: XCTestCase {
             feishuConfig: FeishuConfig()
         )
         let dependencies = TestFactory.dependencies(
-            latestVersions: ["@openduo/duoduo": "0.4.7", "@openduo/channel-feishu": "0.2.0"],
-            latestRelease: AppReleaseInfo(version: "1.6.9", url: URL(string: "https://example.com/release")!)
+            latestVersions: ["@openduo/duoduo": "0.4.7", "@openduo/channel-feishu": "0.2.0"]
         )
         let store = AppStore(runtime: runtime, dashboard: DashboardStore(), updates: UpdateStore(), command: CommandStore(), dependencies: dependencies)
 
-        await store.checkForUpdates(force: true)
+        await store.checkForUpdates()
 
-        XCTAssertEqual(store.updates.appLatestVersion, "1.6.9")
         XCTAssertEqual(store.updates.latestVersions["daemon"], "0.4.7")
         XCTAssertEqual(store.updates.latestVersions["feishu"], "0.2.0")
     }
@@ -367,7 +364,6 @@ final class AppStoreTests: XCTestCase {
         let dependencies = AppStoreDependencies(
             versionService: FakeVersionService(),
             upgradeService: upgradeService,
-            appUpdateService: FakeAppUpdateService(),
             runtimeEnvironment: FakeRuntimeEnvironment(),
             makeDaemonService: { _ in daemonService },
             makeChannelService: { _ in channelService },

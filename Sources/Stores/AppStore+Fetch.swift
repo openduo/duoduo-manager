@@ -40,6 +40,12 @@ extension AppStore {
             var updated = newStatus
             updated.version = await resolvedDaemonVersion(statusVersion: (try? await daemonService.getVersion()) ?? "")
             if runtime.status != updated { runtime.status = updated }
+            let resolvedConfig = DaemonConfig.load(status: updated)
+            if runtime.daemonConfig != resolvedConfig {
+                runtime.daemonConfig = resolvedConfig
+                resolvedConfig.save()
+                reconfigureConnectionsIfNeeded()
+            }
         } catch {
             runtime.status = DaemonStatus.empty
             runtime.status.output = L10n.Error.prefix(error.localizedDescription)

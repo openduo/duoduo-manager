@@ -79,13 +79,6 @@ struct FakeUpgradeService: UpgradeServicing {
     }
 }
 
-struct FakeAppUpdateService: AppUpdateServicing {
-    var latestRelease: AppReleaseInfo?
-
-    func fetchLatestReleaseVersion() async -> String? { latestRelease?.version }
-    func fetchLatestRelease() async -> AppReleaseInfo? { latestRelease }
-}
-
 struct FakeRuntimeEnvironment: RuntimeEnvironmentProviding {
     var isDuoduoInstalled = true
     var hasBundledNode = true
@@ -101,7 +94,6 @@ enum TestFactory {
         daemonVersion: String = "",
         channelStatuses: [String: ChannelInfo] = [:],
         latestVersions: [String: String] = [:],
-        latestRelease: AppReleaseInfo? = nil,
         systemStatus: SystemStatus = SystemStatus(sessions: [], health: HealthInfo(gateway: "ok", meta_session: "ok"), subconscious: nil, cadence: nil),
         usageTotals: UsageTotalsResponse = UsageTotalsResponse(totals: UsageTotals(total_cost_usd: 0, total_input_tokens: 0, total_output_tokens: 0, total_cache_read_tokens: 0, total_tool_calls: 0)),
         jobs: JobListResponse = JobListResponse(jobs: []),
@@ -112,7 +104,6 @@ enum TestFactory {
         AppStoreDependencies(
             versionService: FakeVersionService(latestVersions: latestVersions),
             upgradeService: FakeUpgradeService(),
-            appUpdateService: FakeAppUpdateService(latestRelease: latestRelease),
             runtimeEnvironment: runtimeEnvironment,
             makeDaemonService: { url in
                 FakeDaemonService(daemonURL: url, status: daemonStatus, version: daemonVersion)
