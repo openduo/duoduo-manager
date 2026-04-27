@@ -19,8 +19,8 @@ final class OnboardingStoreTests: XCTestCase {
                     daemonPID: nil
                 )
             },
-            installDuoduo: { _ in "" },
-            installClaude: { _ in },
+            installDuoduo: { "" },
+            installClaude: {},
             authStatus: { ClaudeAuthStatus(loggedIn: false, authMethod: nil, apiProvider: nil) },
             login: {},
             mergeProviderEnv: { _ in }
@@ -69,8 +69,8 @@ final class OnboardingStoreTests: XCTestCase {
                     daemonPID: appStore?.runtime.status.pid
                 )
             },
-            installDuoduo: { _ in "" },
-            installClaude: { _ in },
+            installDuoduo: { "" },
+            installClaude: {},
             authStatus: { ClaudeAuthStatus(loggedIn: false, authMethod: nil, apiProvider: nil) },
             login: {},
             mergeProviderEnv: { _ in }
@@ -100,18 +100,17 @@ final class OnboardingStoreTests: XCTestCase {
                     daemonPID: nil
                 )
             },
-            installDuoduo: { useMirror in
-                XCTAssertTrue(useMirror)
+            installDuoduo: {
                 return "installed"
             },
-            installClaude: { _ in },
+            installClaude: {},
             authStatus: { ClaudeAuthStatus(loggedIn: false, authMethod: nil, apiProvider: nil) },
             login: {},
             mergeProviderEnv: { _ in }
         )
         let store = OnboardingStore(dependencies: dependencies)
 
-        await store.run(.installDuoduo(useMirror: true))
+        await store.run(.installDuoduo)
         await waitFor { store.state.snapshot.duoduoInstalled }
 
         XCTAssertEqual(store.state.currentRequirement, .claudeCLI)
@@ -125,15 +124,15 @@ final class OnboardingStoreTests: XCTestCase {
         let dependencies = OnboardingStoreDependencies(
             currentEnv: { [:] },
             detect: { _, _, _, _ in .empty },
-            installDuoduo: { _ in "" },
-            installClaude: { _ in throw InstallError() },
+            installDuoduo: { "" },
+            installClaude: { throw InstallError() },
             authStatus: { ClaudeAuthStatus(loggedIn: false, authMethod: nil, apiProvider: nil) },
             login: {},
             mergeProviderEnv: { _ in }
         )
         let store = OnboardingStore(dependencies: dependencies)
 
-        await store.run(.installClaude(useMirror: false))
+        await store.run(.installClaude)
 
         XCTAssertEqual(store.state.errorMessage, "claude install failed")
         XCTAssertFalse(store.state.isBusy)
@@ -157,8 +156,8 @@ final class OnboardingStoreTests: XCTestCase {
                     daemonPID: "42"
                 )
             },
-            installDuoduo: { _ in "" },
-            installClaude: { _ in },
+            installDuoduo: { "" },
+            installClaude: {},
             authStatus: { ClaudeAuthStatus(loggedIn: true, authMethod: "api-key", apiProvider: "official") },
             login: {},
             mergeProviderEnv: { _ in }
@@ -180,8 +179,8 @@ final class OnboardingStoreTests: XCTestCase {
         let dependencies = OnboardingStoreDependencies(
             currentEnv: { [:] },
             detect: { _, _, _, _ in XCTFail("detect should not run when auth fails"); return .empty },
-            installDuoduo: { _ in "" },
-            installClaude: { _ in },
+            installDuoduo: { "" },
+            installClaude: {},
             authStatus: { ClaudeAuthStatus(loggedIn: false, authMethod: nil, apiProvider: nil) },
             login: {},
             mergeProviderEnv: { env in recorder.mergedEnv = env }
@@ -202,8 +201,8 @@ final class OnboardingStoreTests: XCTestCase {
         let dependencies = OnboardingStoreDependencies(
             currentEnv: { [:] },
             detect: { _, _, _, _ in .empty },
-            installDuoduo: { _ in "" },
-            installClaude: { _ in },
+            installDuoduo: { "" },
+            installClaude: {},
             authStatus: { ClaudeAuthStatus(loggedIn: false, authMethod: nil, apiProvider: nil) },
             login: { throw ExpectedError() },
             mergeProviderEnv: { _ in }
@@ -266,8 +265,8 @@ final class OnboardingStoreTests: XCTestCase {
                     daemonPID: appStore?.runtime.status.pid
                 )
             },
-            installDuoduo: { _ in "" },
-            installClaude: { _ in },
+            installDuoduo: { "" },
+            installClaude: {},
             authStatus: { ClaudeAuthStatus(loggedIn: true, authMethod: nil, apiProvider: nil) },
             login: {},
             mergeProviderEnv: { _ in }

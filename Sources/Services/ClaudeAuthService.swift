@@ -60,15 +60,7 @@ struct ClaudeCLIService: Sendable {
         }
     }
 
-    static func install(useMirror: Bool) async throws {
-        let previousRegistry = NodeRuntime.npmRegistryOverride
-        if useMirror {
-            NodeRuntime.npmRegistryOverride = "https://registry.npmmirror.com"
-        }
-        defer {
-            NodeRuntime.npmRegistryOverride = previousRegistry
-        }
-
+    static func install() async throws {
         _ = try await ShellService.run(
             "npm",
             arguments: ["install", "-g", "@anthropic-ai/claude-code"],

@@ -108,7 +108,6 @@ struct OnboardingState {
     var statusMessage: String?
     var errorMessage: String?
     var isBusy = false
-    var useNpmMirror = NodeRuntime.shouldUseMirror
     var selectedPreset: LLMProviderPreset = .official
     var authToken = ""
     var customBaseURL = ""
@@ -142,7 +141,6 @@ enum OnboardingEvent {
     case editRequirementRequested(OnboardingRequirement)
     case settingsHydrated([String: String])
     case hydrateSettingsFailed(String)
-    case useMirrorChanged(Bool)
     case providerPresetChanged(LLMProviderPreset)
     case authTokenChanged(String)
     case customBaseURLChanged(String)
@@ -162,8 +160,8 @@ enum OnboardingEvent {
 enum OnboardingCommand: Equatable {
     case hydrateSettings
     case detect(status: String)
-    case installDuoduo(useMirror: Bool)
-    case installClaude(useMirror: Bool)
+    case installDuoduo
+    case installClaude
     case verifyClaudeStatus
     case saveProviderConfig(envVars: [String: String], successStatus: String)
     case performOAuthLogin
@@ -199,10 +197,6 @@ enum OnboardingReducer {
             state.errorMessage = message
             return startDetection(state: &state, status: L10n.Onboard.statusDetecting)
 
-        case .useMirrorChanged(let value):
-            state.useNpmMirror = value
-            return nil
-
         case .providerPresetChanged(let preset):
             state.selectedPreset = preset
             if preset != .custom {
@@ -235,12 +229,12 @@ enum OnboardingReducer {
         case .installDuoduoRequested:
             guard !state.isBusy else { return nil }
             beginBusy(state: &state, message: L10n.Onboard.statusInstallingDuoduo)
-            return .installDuoduo(useMirror: state.useNpmMirror)
+            return .installDuoduo
 
         case .installClaudeRequested:
             guard !state.isBusy else { return nil }
             beginBusy(state: &state, message: L10n.Onboard.statusInstallingClaude)
-            return .installClaude(useMirror: state.useNpmMirror)
+            return .installClaude
 
         case .verifyClaudeStatusRequested:
             guard !state.isBusy else { return nil }
@@ -394,17 +388,17 @@ final class OnboardingStore {
             let snapshot = await dependencies.detect(appStore, nil, nil, nil)
             send(.detectionFinished(snapshot, status: status))
 
-        case .installDuoduo(let useMirror):
+        case .installDuoduo:
             do {
-                _ = try await dependencies.installDuoduo(useMirror)
+                _ = try await dependencies.installDuoduo()
                 send(.refreshRequested)
             } catch {
                 send(.operationFailed(error.localizedDescription))
             }
 
-        case .installClaude(let useMirror):
+        case .installClaude:
             do {
-                try await dependencies.installClaude(useMirror)
+                try await dependencies.installClaude()
                 send(.refreshRequested)
             } catch {
                 send(.operationFailed(error.localizedDescription))

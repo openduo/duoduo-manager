@@ -2,6 +2,27 @@ import Foundation
 
 struct UpgradeService: Sendable {
     private let versionService = VersionService()
+    private let runCommand: @Sendable (
+        _ executable: String,
+        _ arguments: [String],
+        _ environment: [String: String]
+    ) async throws -> String
+
+    init(
+        runCommand: @escaping @Sendable (
+            _ executable: String,
+            _ arguments: [String],
+            _ environment: [String: String]
+        ) async throws -> String = { executable, arguments, environment in
+            try await ShellService.run(
+                executable,
+                arguments: arguments,
+                environment: environment
+            )
+        }
+    ) {
+        self.runCommand = runCommand
+    }
 
     func checkVersions() async throws -> [PackageVersion] {
         let installed = try await versionService.getInstalledVersion("@openduo/duoduo")
@@ -15,10 +36,15 @@ struct UpgradeService: Sendable {
     }
 
     private func upgradeDaemon() async throws -> String {
-        try await ShellService.run(
-            "duoduo", arguments: ["upgrade"],
-            environment: NodeRuntime.environment
-        )
+        do {
+            return try await runCommand("duoduo", ["upgrade"], NodeRuntime.environment)
+        } catch {
+            return try await runCommand(
+                "npm",
+                ["install", "-g", "@openduo/duoduo"],
+                NodeRuntime.environment
+            )
+        }
     }
 
     /// Update only components that have newer versions available.

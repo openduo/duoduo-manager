@@ -8,8 +8,8 @@ struct OnboardingStoreDependencies {
         _ knownClaudeVersion: String?,
         _ knownClaudeAuthStatus: ClaudeAuthStatus?
     ) async -> OnboardingSnapshot
-    var installDuoduo: (_ useMirror: Bool) async throws -> String
-    var installClaude: (_ useMirror: Bool) async throws -> Void
+    var installDuoduo: () async throws -> String
+    var installClaude: () async throws -> Void
     var authStatus: () async throws -> ClaudeAuthStatus
     var login: () async throws -> Void
     var mergeProviderEnv: (_ env: [String: String]) throws -> Void
@@ -26,19 +26,11 @@ struct OnboardingStoreDependencies {
                 knownClaudeAuthStatus: knownClaudeAuthStatus
             )
         },
-        installDuoduo: { useMirror in
-            let previousRegistry = NodeRuntime.npmRegistryOverride
-            if useMirror {
-                NodeRuntime.npmRegistryOverride = "https://registry.npmmirror.com"
-            }
-            defer {
-                NodeRuntime.npmRegistryOverride = previousRegistry
-            }
-
-            return try await NodeRuntime.installDuoduo()
+        installDuoduo: {
+            try await NodeRuntime.installDuoduo()
         },
-        installClaude: { useMirror in
-            try await ClaudeCLIService.install(useMirror: useMirror)
+        installClaude: {
+            try await ClaudeCLIService.install()
         },
         authStatus: {
             try await ClaudeCLIService.authStatus()

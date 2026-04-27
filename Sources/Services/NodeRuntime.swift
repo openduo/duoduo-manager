@@ -12,16 +12,6 @@ struct NodeRuntime: Sendable {
             .path
     }()
 
-    /// When set, injects NPM_CONFIG_REGISTRY into the environment.
-    /// Set to "https://registry.npmmirror.com" for Chinese users.
-    static var npmRegistryOverride: String? = nil
-
-    /// Auto-detect whether Chinese locale is in use (defaults mirror preference).
-    static var shouldUseMirror: Bool {
-        let locales = Locale.preferredLanguages
-        return locales.contains { $0.hasPrefix("zh") }
-    }
-
     static let bundledNodePath: String? = {
         Bundle.main.resourceURL?.appendingPathComponent("node/bin/node").path
     }()
@@ -146,9 +136,6 @@ struct NodeRuntime: Sendable {
             paths.append(contentsOf: mergedSystemPaths(baseEnvironment: env))
             env["PATH"] = paths.joined(separator: ":")
             env["NPM_CONFIG_PREFIX"] = npmGlobalDir
-            if let registry = npmRegistryOverride {
-                env["NPM_CONFIG_REGISTRY"] = registry
-            }
             if hasBundledNode,
                 let bundledDir = Bundle.main.resourceURL?.appendingPathComponent("node").path
             {
@@ -202,9 +189,6 @@ struct NodeRuntime: Sendable {
         static var environment: [String: String] {
             var env = ProcessInfo.processInfo.environment
             env["PATH"] = mergedSystemPaths(baseEnvironment: env).joined(separator: ":")
-            if let registry = npmRegistryOverride {
-                env["NPM_CONFIG_REGISTRY"] = registry
-            }
             return env
         }
 
