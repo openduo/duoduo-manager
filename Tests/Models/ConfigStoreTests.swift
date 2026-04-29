@@ -111,6 +111,35 @@ final class ConfigStoreTests: XCTestCase {
         XCTAssertEqual(config.workDir, "/tmp/status-work")
     }
 
+    func testDaemonConfigSaveSyncsConfigJSON() throws {
+        let configURL = tempDirectory.appendingPathComponent(".config/duoduo/config.json")
+        ConfigStore.configJSONURLOverride = configURL
+
+        let config = DaemonConfig(
+            workDir: "/tmp/duoduo-work",
+            daemonHost: "localhost",
+            port: "20444",
+            logLevel: "debug",
+            permissionMode: "acceptEdits"
+        )
+
+        config.save()
+
+        let envContents = try String(contentsOf: envURL, encoding: .utf8)
+        XCTAssertTrue(envContents.contains("ALADUO_WORK_DIR=/tmp/duoduo-work"))
+        XCTAssertTrue(envContents.contains("ALADUO_DAEMON_HOST=localhost"))
+        XCTAssertTrue(envContents.contains("ALADUO_PORT=20444"))
+
+        let document = try JSONDecoder().decode(
+            OnboardingConfigDocument.self,
+            from: Data(contentsOf: configURL)
+        )
+        XCTAssertEqual(document.mode, "local")
+        XCTAssertEqual(document.authSource, "claude_code_local")
+        XCTAssertEqual(document.workDir, "/tmp/duoduo-work")
+        XCTAssertEqual(document.daemonUrl, "http://localhost:20444")
+    }
+
     private func prepareEnv(_ content: String) throws {
         try FileManager.default.createDirectory(at: envURL.deletingLastPathComponent(), withIntermediateDirectories: true)
         try content.write(to: envURL, atomically: true, encoding: .utf8)

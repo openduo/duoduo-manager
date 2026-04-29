@@ -40,6 +40,11 @@ struct DaemonConfig: Sendable, Equatable {
 
     func save() {
         ConfigStore.save(entries: persistedEntries, managedKeys: Self.managedKeys)
+        do {
+            try ConfigStore.writeOnboardingConfigDocument(onboardingConfigDocument)
+        } catch {
+            NSLog("DaemonConfig save failed to sync config.json: \(error.localizedDescription)")
+        }
     }
 
     var onboardingConfigDocument: OnboardingConfigDocument {
