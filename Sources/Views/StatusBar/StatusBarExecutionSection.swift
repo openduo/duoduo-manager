@@ -85,8 +85,6 @@ struct StatusExecutionPanel: View {
 }
 
 struct StatusFooterBar: View {
-    let statusMessage: String?
-    let statusIsError: Bool
     let preferredTerminalApp: PreferredTerminalApp
     let onDashboard: () -> Void
     let onOnboard: () -> Void
@@ -111,10 +109,6 @@ struct StatusFooterBar: View {
                 .onAppear { refreshInstalledTerminalApps() }
 
             Spacer(minLength: 8)
-
-            if let statusMessage, !statusMessage.isEmpty {
-                footerStatusMessage(statusMessage)
-            }
 
             footerButton(title: L10n.Status.quit, systemImage: "power", action: onQuit)
         }
@@ -218,17 +212,4 @@ struct StatusFooterBar: View {
         .buttonStyle(.plain)
     }
 
-    private func footerStatusMessage(_ message: String) -> some View {
-        HStack(spacing: 6) {
-            Image(systemName: statusIsError ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
-                .font(.system(size: 10, weight: .semibold))
-            Text(message)
-                .lineLimit(1)
-                .truncationMode(.tail)
-        }
-        .font(.system(size: 10, design: .monospaced))
-        .foregroundStyle(statusIsError ? ConsolePalette.critical : ConsolePalette.secondaryText)
-        .frame(maxWidth: 128, alignment: .trailing)
-        .help(message)
-    }
 }

@@ -63,9 +63,11 @@ struct StatusBarView: View {
 
             Divider().overlay(ConsolePalette.divider)
 
+            if let message = statusBarPresentation.footer.statusMessage, !message.isEmpty {
+                statusBarMessageStrip(message)
+            }
+
             StatusFooterBar(
-                statusMessage: statusBarPresentation.footer.statusMessage,
-                statusIsError: statusBarPresentation.footer.statusIsError,
                 preferredTerminalApp: PreferredTerminalApp(rawValue: preferredTerminalAppRaw) ?? .appleTerminal,
                 onDashboard: { openDashboard?() },
                 onOnboard: { openOnboard?() },
@@ -304,6 +306,21 @@ struct StatusBarView: View {
 
     private var transientOutputPanel: some View {
         EmptyView()
+    }
+
+    private func statusBarMessageStrip(_ message: String) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: statusBarPresentation.footer.statusIsError ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
+                .font(.system(size: 10, weight: .semibold))
+            Text(message)
+                .lineLimit(1)
+                .truncationMode(.middle)
+        }
+        .font(.system(size: 10, design: .monospaced))
+        .foregroundStyle(statusBarPresentation.footer.statusIsError ? ConsolePalette.critical : ConsolePalette.secondaryText)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var daemonInlineConfig: some View {
