@@ -55,7 +55,7 @@ struct StatusBarPresentationMapper {
             footer: StatusFooterPresentation(
                 costValue: DashboardTheme.formatCost(store.dashboard.totalCost),
                 tokenValue: DashboardTheme.formatTokens(store.dashboard.totalTokens),
-                cacheValue: "\(store.dashboard.cacheHitRate)%",
+                cacheValue: store.dashboard.cacheHitRate.map { "\($0)%" } ?? "--",
                 toolsValue: DashboardTheme.formatTools(store.dashboard.totalTools),
                 statusMessage: footerStatusMessage,
                 statusIsError: footerStatusIsError

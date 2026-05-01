@@ -61,7 +61,7 @@ enum DashboardPresentationMapper {
         return DashboardBottomStatsPresentation(
             costText: DashboardTheme.formatCost(store.dashboard.totalCost),
             tokenText: "tok:\(DashboardTheme.formatTokens(store.dashboard.totalTokens))",
-            cacheText: "cache:\(store.dashboard.cacheHitRate)%",
+            cacheText: "cache:\(store.dashboard.cacheHitRate.map { "\($0)%" } ?? "--")",
             toolText: "tools:\(DashboardTheme.formatTools(store.dashboard.totalTools))",
             subconsciousItems: (store.dashboard.subconscious?.partitions ?? []).map { part in
                 DashboardSubconsciousItemPresentation(

@@ -38,7 +38,10 @@ struct ChannelService: Sendable {
         let packageName =
             ChannelRegistry.entry(for: channelType, feishuConfig: FeishuConfig())?.packageName
             ?? "@openduo/channel-\(channelType)"
-        return try await runDuoduo(["channel", "install", packageName])
+        var output = try await runDuoduo(["channel", "install", packageName])
+        output += try await runDuoduo(["channel", channelType, "stop"])
+        output += try await runDuoduo(["channel", channelType, "start"], environment: [:])
+        return output
     }
 
     func installChannel(_ packageName: String) async throws -> String {

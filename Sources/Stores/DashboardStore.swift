@@ -12,7 +12,7 @@ final class DashboardStore {
     var totalCost: Double
     var totalTokens: Int
     var totalTools: Int
-    var cacheHitRate: Int
+    var cacheHitRate: Int?
     var config: SystemConfig?
 
     init(
@@ -25,7 +25,7 @@ final class DashboardStore {
         totalCost: Double = 0,
         totalTokens: Int = 0,
         totalTools: Int = 0,
-        cacheHitRate: Int = 0,
+        cacheHitRate: Int? = nil,
         config: SystemConfig? = nil
     ) {
         self.sessions = sessions

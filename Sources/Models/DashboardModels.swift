@@ -67,6 +67,20 @@ struct UsageTotals: Decodable, Sendable {
     let total_output_tokens: Int?
     let total_cache_read_tokens: Int?
     let total_tool_calls: Int?
+    let cache: CacheBreakdown?
+}
+
+struct CacheBreakdown: Decodable, Sendable {
+    let anthropic: CacheProtocolStats?
+    let codex: CacheProtocolStats?
+}
+
+struct CacheProtocolStats: Decodable, Sendable {
+    let cache_read_tokens: Int?
+    let cache_create_tokens: Int?
+    let fresh_input_tokens: Int?
+    let cached_tokens: Int?
+    let input_tokens: Int?
 }
 
 // MARK: - job.list

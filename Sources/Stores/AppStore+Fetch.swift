@@ -117,9 +117,7 @@ extension AppStore {
             dashboard.totalCost = totals.total_cost_usd ?? 0
             dashboard.totalTokens = (totals.total_input_tokens ?? 0) + (totals.total_output_tokens ?? 0) + (totals.total_cache_read_tokens ?? 0)
             dashboard.totalTools = totals.total_tool_calls ?? 0
-            let cacheRead = totals.total_cache_read_tokens ?? 0
-            let totalIn = (totals.total_input_tokens ?? 0) + cacheRead
-            dashboard.cacheHitRate = totalIn > 0 ? Int(round(Double(cacheRead) / Double(totalIn) * 100)) : 0
+            dashboard.cacheHitRate = Self.blendedCacheRate(totals: totals)
         }
 
         if let jobsResp = try? await jobsReq {
@@ -133,5 +131,24 @@ extension AppStore {
         if let d = formatter.date(from: s) { return d }
         formatter.formatOptions = [.withInternetDateTime]
         return formatter.date(from: s) ?? Date()
+    }
+
+    /// Per-protocol blended cache hit rate, matching the dashboard formula.
+    /// Anthropic: cache_read / (read + create + fresh_input).
+    /// Codex: cached / input_tokens.
+    /// Returns nil when no tagged drains exist yet (shows "--").
+    private static func blendedCacheRate(totals: UsageTotals) -> Int? {
+        guard let cache = totals.cache else { return nil }
+        let ant = cache.anthropic ?? CacheProtocolStats()
+        let cdn = cache.codex ?? CacheProtocolStats()
+
+        let antTotal = (ant.cache_read_tokens ?? 0)
+            + (ant.cache_create_tokens ?? 0)
+            + (ant.fresh_input_tokens ?? 0)
+        let blendedSave = (ant.cache_read_tokens ?? 0) + (cdn.cached_tokens ?? 0)
+        let blendedTotal = antTotal + (cdn.input_tokens ?? 0)
+
+        guard blendedTotal > 0 else { return nil }
+        return Int(round(Double(blendedSave) / Double(blendedTotal) * 100))
     }
 }
