@@ -13,7 +13,6 @@ struct OnboardingStoreDependencies {
     var authStatus: () async throws -> ClaudeAuthStatus
     var login: () async throws -> Void
     var mergeProviderEnv: (_ env: [String: String]) throws -> Void
-    var repairClaudeExecutablePath: () -> Void
 
     static let live = OnboardingStoreDependencies(
         currentEnv: {
@@ -41,9 +40,6 @@ struct OnboardingStoreDependencies {
         },
         mergeProviderEnv: { env in
             try ClaudeSettingsStore().mergeEnv(env)
-        },
-        repairClaudeExecutablePath: {
-            OnboardingCompletionMarker.repairClaudeExecutablePath()
         }
     )
 }

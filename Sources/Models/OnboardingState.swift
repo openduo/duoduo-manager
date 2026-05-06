@@ -399,7 +399,6 @@ final class OnboardingStore {
         case .installClaude:
             do {
                 try await dependencies.installClaude()
-                dependencies.repairClaudeExecutablePath()
                 send(.refreshRequested)
             } catch {
                 send(.operationFailed(error.localizedDescription))

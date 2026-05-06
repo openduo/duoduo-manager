@@ -34,36 +34,10 @@ struct OnboardingCompletionMarker {
 
     static func repairDerivedFilesIfNeeded(daemonConfig: DaemonConfig) throws {
         daemonConfig.save()
-        repairClaudeExecutablePath()
         if !hasConfigJSONAligned(daemonConfig: daemonConfig) {
             try writeConfig(daemonConfig: daemonConfig)
         }
         try markCompletedIfNeeded(daemonConfig: daemonConfig)
-    }
-
-    static func repairClaudeExecutablePath() {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/which")
-        process.arguments = ["claude"]
-        let pipe = Pipe()
-        process.standardOutput = pipe
-        process.standardError = FileHandle.nullDevice
-        process.environment = ProcessInfo.processInfo.environment
-        guard let result = try? runSynchronously(process, pipe),
-              !result.isEmpty else { return }
-        ConfigStore.save(
-            entries: [(key: "CLAUDE_CODE_EXECUTABLE", value: result)],
-            managedKeys: ["CLAUDE_CODE_EXECUTABLE"]
-        )
-    }
-
-    private static func runSynchronously(_ process: Process, _ pipe: Pipe) throws -> String {
-        try process.run()
-        process.waitUntilExit()
-        guard process.terminationStatus == 0 else { return "" }
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        return (String(data: data, encoding: .utf8) ?? "")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     static func markCompletedIfNeeded(daemonConfig: DaemonConfig) throws {
