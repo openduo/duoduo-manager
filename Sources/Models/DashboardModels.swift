@@ -81,6 +81,20 @@ struct CacheProtocolStats: Decodable, Sendable {
     let fresh_input_tokens: Int?
     let cached_tokens: Int?
     let input_tokens: Int?
+
+    init(
+        cache_read_tokens: Int? = nil,
+        cache_create_tokens: Int? = nil,
+        fresh_input_tokens: Int? = nil,
+        cached_tokens: Int? = nil,
+        input_tokens: Int? = nil
+    ) {
+        self.cache_read_tokens = cache_read_tokens
+        self.cache_create_tokens = cache_create_tokens
+        self.fresh_input_tokens = fresh_input_tokens
+        self.cached_tokens = cached_tokens
+        self.input_tokens = input_tokens
+    }
 }
 
 // MARK: - job.list
