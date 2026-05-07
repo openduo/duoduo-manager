@@ -116,10 +116,13 @@ final class OnboardingCompletionMarkerTests: XCTestCase {
         try OnboardingCompletionMarker.markCompletedIfNeeded(daemonConfig: config)
         XCTAssertTrue(OnboardingCompletionMarker.hasRequiredConfiguration(daemonConfig: config))
         XCTAssertTrue(OnboardingCompletionMarker.hasCompletedConfiguration(daemonConfig: config))
+        let staleDocument = config.onboardingConfigDocument
 
         config.workDir = tempRoot.appendingPathComponent("work-b", isDirectory: true).path
         config.port = "20555"
         config.save()
+        let staleData = try JSONEncoder().encode(staleDocument)
+        try staleData.write(to: configJSONURL)
         XCTAssertTrue(OnboardingCompletionMarker.hasRequiredConfiguration(daemonConfig: config))
         XCTAssertFalse(OnboardingCompletionMarker.hasCompletedConfiguration(daemonConfig: config))
 
