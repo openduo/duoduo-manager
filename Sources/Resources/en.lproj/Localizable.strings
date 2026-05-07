@@ -5,6 +5,7 @@
 "status.appUpdate %@" = "Update to %@";
 "status.configure" = "Configure";
 "status.updateAll" = "Update all";
+"status.updatingAll" = "Updating...";
 "status.install" = "Install";
 "status.clear" = "Clear";
 "status.quit" = "Quit";
@@ -78,6 +79,7 @@
 
 /* Upgrade */
 "upgrade.allUpToDate" = "All components are up to date";
+"upgrade.updatingHeader" = "Updating components:";
 
 /* Setup */
 "setup.installingDuoduo" = "Installing duoduo for the first time...";

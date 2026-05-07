@@ -146,11 +146,13 @@ struct StatusBarView: View {
     }
 
     private var controlPlaneUpdateButton: some View {
-        StatusSmallActionButton(
-            title: L10n.Status.updateAll,
+        let isUpdatingAll = store.command.activeOperation == .upgradeAll
+        return StatusSmallActionButton(
+            title: isUpdatingAll ? L10n.Status.updatingAll : L10n.Status.updateAll,
             systemImage: "arrow.up.circle.fill",
             tint: ConsolePalette.warning,
             isDisabled: store.command.isLoading,
+            isLoading: isUpdatingAll,
             action: { store.upgradeAll() }
         )
     }

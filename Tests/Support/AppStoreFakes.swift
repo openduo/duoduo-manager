@@ -95,7 +95,7 @@ enum TestFactory {
         channelStatuses: [String: ChannelInfo] = [:],
         latestVersions: [String: String] = [:],
         systemStatus: SystemStatus = SystemStatus(sessions: [], health: HealthInfo(gateway: "ok", meta_session: "ok"), subconscious: nil, cadence: nil),
-        usageTotals: UsageTotalsResponse = UsageTotalsResponse(totals: UsageTotals(total_cost_usd: 0, total_input_tokens: 0, total_output_tokens: 0, total_cache_read_tokens: 0, total_tool_calls: 0)),
+        usageTotals: UsageTotalsResponse = UsageTotalsResponse(totals: UsageTotals(total_cost_usd: 0, total_input_tokens: 0, total_output_tokens: 0, total_cache_read_tokens: 0, total_tool_calls: 0, cache: nil)),
         jobs: JobListResponse = JobListResponse(jobs: []),
         events: SpineTailResponse = SpineTailResponse(events: []),
         config: SystemConfig = SystemConfig(network: nil, sessions: nil, cadence: nil, transfer: nil, logging: nil, sdk: nil, paths: nil, subconscious: nil),

@@ -8,11 +8,16 @@ extension AppStore {
         return (try? await versionService.getInstalledVersion("@openduo/duoduo")) ?? ""
     }
 
-    func executeCommand(_ operation: @escaping () async throws -> String) {
+    func executeCommand(
+        activeOperation: CommandOperation? = nil,
+        initialOutput: String = "",
+        _ operation: @escaping () async throws -> String
+    ) {
         guard !command.isLoading else { return }
         command.isLoading = true
+        command.activeOperation = activeOperation
         command.errorMessage = nil
-        command.lastOutput = ""
+        command.lastOutput = initialOutput
 
         Task { [weak self] in
             guard let self else { return }
@@ -27,6 +32,7 @@ extension AppStore {
                 self.command.errorMessage = error.localizedDescription
             }
             self.command.isLoading = false
+            self.command.activeOperation = nil
             self.scheduleCommandFeedbackAutoClear()
             self.updateStatusBarIcon?()
         }

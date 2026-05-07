@@ -5,6 +5,7 @@
 "status.appUpdate %@" = "更新到 %@";
 "status.configure" = "配置";
 "status.updateAll" = "全部更新";
+"status.updatingAll" = "更新中...";
 "status.install" = "安装";
 "status.clear" = "清除";
 "status.quit" = "退出";
@@ -78,6 +79,7 @@
 
 /* Upgrade */
 "upgrade.allUpToDate" = "所有组件已是最新版本";
+"upgrade.updatingHeader" = "正在更新组件：";
 
 /* Setup */
 "setup.installingDuoduo" = "正在首次安装 duoduo...";

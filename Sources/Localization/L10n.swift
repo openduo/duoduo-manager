@@ -31,6 +31,7 @@ enum L10n {
         static let configure = String(localized: "status.configure", bundle: bundle)
         static let install = String(localized: "status.install", bundle: bundle)
         static let updateAll = String(localized: "status.updateAll", bundle: bundle)
+        static let updatingAll = String(localized: "status.updatingAll", bundle: bundle)
         static let clear = String(localized: "status.clear", bundle: bundle)
         static let quit = String(localized: "status.quit", bundle: bundle)
     }
@@ -127,6 +128,7 @@ enum L10n {
 
     enum Upgrade {
         static let allUpToDate = String(localized: "upgrade.allUpToDate", bundle: bundle)
+        static let updatingHeader = String(localized: "upgrade.updatingHeader", bundle: bundle)
     }
 
     // MARK: - Setup

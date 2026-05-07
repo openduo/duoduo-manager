@@ -186,13 +186,21 @@ struct StatusSmallActionButton: View {
     let systemImage: String
     let tint: Color
     let isDisabled: Bool
+    var isLoading: Bool = false
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 4) {
-                Image(systemName: systemImage)
-                    .font(.system(size: 10))
+                if isLoading {
+                    ProgressView()
+                        .controlSize(.small)
+                        .tint(tint)
+                        .frame(width: 10, height: 10)
+                } else {
+                    Image(systemName: systemImage)
+                        .font(.system(size: 10))
+                }
                 Text(title)
                     .font(.system(size: 11, weight: .medium))
             }

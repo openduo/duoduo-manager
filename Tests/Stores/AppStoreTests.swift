@@ -12,7 +12,7 @@ final class AppStoreTests: XCTestCase {
             dashboardService: FakeDashboardRPCService(
                 baseURL: "http://127.0.0.1:20233",
                 systemStatusResponse: SystemStatus(sessions: [], health: HealthInfo(gateway: "ok", meta_session: "ok"), subconscious: nil, cadence: nil),
-                usageTotalsResponse: UsageTotalsResponse(totals: UsageTotals(total_cost_usd: 0, total_input_tokens: 0, total_output_tokens: 0, total_cache_read_tokens: 0, total_tool_calls: 0)),
+                usageTotalsResponse: UsageTotalsResponse(totals: UsageTotals(total_cost_usd: 0, total_input_tokens: 0, total_output_tokens: 0, total_cache_read_tokens: 0, total_tool_calls: 0, cache: nil)),
                 jobListResponse: JobListResponse(jobs: []),
                 spineTailResponse: SpineTailResponse(events: []),
                 systemConfigResponse: SystemConfig(network: nil, sessions: nil, cadence: nil, transfer: nil, logging: nil, sdk: nil, paths: nil, subconscious: nil)
@@ -44,6 +44,9 @@ final class AppStoreTests: XCTestCase {
         store.updates.latestVersions = ["daemon": "0.4.9", "feishu": "0.2.0"]
 
         store.upgradeAll()
+        XCTAssertEqual(store.command.activeOperation, .upgradeAll)
+        XCTAssertTrue(store.command.lastOutput.contains("duoduo: v0.4.8 → v0.4.9"))
+        XCTAssertTrue(store.command.lastOutput.contains("v0.1.0 → v0.2.0"))
         await fulfillment(of: [loadingFinishedExpectation(for: store)], timeout: 2)
 
         XCTAssertEqual(upgradeService.recordedDaemonInstalledVersion, "0.4.8")
@@ -67,7 +70,11 @@ final class AppStoreTests: XCTestCase {
                 total_input_tokens: 100,
                 total_output_tokens: 40,
                 total_cache_read_tokens: 60,
-                total_tool_calls: 7
+                total_tool_calls: 7,
+                cache: CacheBreakdown(
+                    anthropic: CacheProtocolStats(cache_read_tokens: 60, cache_create_tokens: 40, fresh_input_tokens: 60),
+                    codex: nil
+                )
             )
         )
         let systemStatus = SystemStatus(
@@ -204,7 +211,7 @@ final class AppStoreTests: XCTestCase {
                 FakeDashboardRPCService(
                     baseURL: url,
                     systemStatusResponse: SystemStatus(sessions: [], health: HealthInfo(gateway: "ok", meta_session: "ok"), subconscious: nil, cadence: nil),
-                    usageTotalsResponse: UsageTotalsResponse(totals: UsageTotals(total_cost_usd: 0, total_input_tokens: 0, total_output_tokens: 0, total_cache_read_tokens: 0, total_tool_calls: 0)),
+                    usageTotalsResponse: UsageTotalsResponse(totals: UsageTotals(total_cost_usd: 0, total_input_tokens: 0, total_output_tokens: 0, total_cache_read_tokens: 0, total_tool_calls: 0, cache: nil)),
                     jobListResponse: JobListResponse(jobs: []),
                     spineTailResponse: SpineTailResponse(events: []),
                     systemConfigResponse: SystemConfig(network: nil, sessions: nil, cadence: nil, transfer: nil, logging: nil, sdk: nil, paths: nil, subconscious: nil)
@@ -354,7 +361,7 @@ final class AppStoreTests: XCTestCase {
         dashboardService: any DashboardRPCServicing = FakeDashboardRPCService(
             baseURL: "http://127.0.0.1:20233",
             systemStatusResponse: SystemStatus(sessions: [], health: HealthInfo(gateway: "ok", meta_session: "ok"), subconscious: nil, cadence: nil),
-            usageTotalsResponse: UsageTotalsResponse(totals: UsageTotals(total_cost_usd: 0, total_input_tokens: 0, total_output_tokens: 0, total_cache_read_tokens: 0, total_tool_calls: 0)),
+            usageTotalsResponse: UsageTotalsResponse(totals: UsageTotals(total_cost_usd: 0, total_input_tokens: 0, total_output_tokens: 0, total_cache_read_tokens: 0, total_tool_calls: 0, cache: nil)),
             jobListResponse: JobListResponse(jobs: []),
             spineTailResponse: SpineTailResponse(events: []),
             systemConfigResponse: SystemConfig(network: nil, sessions: nil, cadence: nil, transfer: nil, logging: nil, sdk: nil, paths: nil, subconscious: nil)

@@ -101,9 +101,12 @@ extension AppStore {
     }
 
     func upgradeAll() {
-        executeCommand {
+        executeCommand(
+            activeOperation: .upgradeAll,
+            initialOutput: upgradeAllProgressMessage()
+        ) {
             let daemonWasRunning = self.runtime.status.isRunning
-            return try await self.upgradeService.upgradeAll(
+            let output = try await self.upgradeService.upgradeAll(
                 daemonInstalledVersion: self.runtime.status.version,
                 daemonWasRunning: daemonWasRunning,
                 channels: self.runtime.channels,
@@ -113,7 +116,37 @@ extension AppStore {
                 startChannel: { type in try await self.channelService.startChannel(type, extraEnv: [:]) },
                 restartDaemon: { try await self.daemonService.restart(extraEnv: [:]) }
             )
+            return output.isEmpty ? L10n.Upgrade.allUpToDate : output
         }
+    }
+
+    private func upgradeAllProgressMessage() -> String {
+        var rows: [String] = []
+
+        if let latest = updates.latestVersions["daemon"],
+           !latest.isEmpty,
+           !runtime.status.version.isEmpty,
+           runtime.status.version.compare(latest, options: .numeric) == .orderedAscending
+        {
+            rows.append("duoduo: v\(runtime.status.version) → v\(latest)")
+        }
+
+        for channel in runtime.channels {
+            guard let latest = updates.latestVersions[channel.type],
+                  !latest.isEmpty,
+                  !channel.version.isEmpty,
+                  channel.version.compare(latest, options: .numeric) == .orderedAscending
+            else { continue }
+
+            let displayName = ChannelRegistry.entry(
+                for: channel.type,
+                feishuConfig: runtime.feishuConfig
+            )?.displayName ?? channel.type
+            rows.append("\(displayName): v\(channel.version) → v\(latest)")
+        }
+
+        guard !rows.isEmpty else { return L10n.Upgrade.allUpToDate }
+        return ([L10n.Upgrade.updatingHeader] + rows.map { "• \($0)" }).joined(separator: "\n")
     }
 
     func showConfigRequired() {
@@ -124,6 +157,7 @@ extension AppStore {
     func clearOutput() {
         clearCommandFeedbackTask?.cancel()
         clearCommandFeedbackTask = nil
+        command.activeOperation = nil
         command.lastOutput = ""
         command.errorMessage = nil
     }
