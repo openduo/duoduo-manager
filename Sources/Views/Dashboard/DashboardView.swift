@@ -312,13 +312,13 @@ struct DashboardView: View {
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundStyle(DashboardTheme.text)
 
-            Spacer()
-
             if !dashboardPresentation.bottomStats.subconsciousItems.isEmpty {
+                bottomDivider
                 HStack(spacing: 6) {
                     Text("sub:")
                         .font(.system(size: 10, design: .monospaced))
                         .foregroundStyle(DashboardTheme.accent)
+                        .fixedSize(horizontal: true, vertical: false)
                     ForEach(dashboardPresentation.bottomStats.subconsciousItems) { item in
                         HStack(spacing: 2) {
                             Text(item.marker)
@@ -328,10 +328,15 @@ struct DashboardView: View {
                             Text(item.name)
                                 .font(.system(size: 10, design: .monospaced))
                                 .foregroundStyle(item.textColor)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.85)
+                                .truncationMode(.middle)
                         }
                     }
                 }
                 bottomDivider
+            } else {
+                Spacer()
             }
 
             HStack(spacing: 5) {

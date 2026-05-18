@@ -67,7 +67,7 @@ enum DashboardPresentationMapper {
                 DashboardSubconsciousItemPresentation(
                     id: part.id,
                     marker: part.done ? "✓" : ".",
-                    name: SharedPresentationFormatting.shortPartitionName(part.name),
+                    name: part.name,
                     markerColor: part.done ? DashboardTheme.emerald : DashboardTheme.amber,
                     textColor: part.done ? DashboardTheme.textSecondary : DashboardTheme.textTertiary
                 )

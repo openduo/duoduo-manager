@@ -105,12 +105,13 @@ struct StatusSubconsciousList: View {
                                         : ConsolePalette.primaryText
                                 )
                                 .lineLimit(1)
-                                .truncationMode(.tail)
+                                .minimumScaleFactor(0.85)
+                                .truncationMode(.middle)
                         }
-                        .layoutPriority(1)
+                        .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .center)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

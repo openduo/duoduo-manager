@@ -35,7 +35,7 @@ final class DashboardPresentationMapperTests: XCTestCase {
         XCTAssertEqual(presentation.systemEvents.map(\.id), ["4"])
         XCTAssertEqual(presentation.bottomStats.costText, DashboardTheme.formatCost(12.34))
         XCTAssertEqual(presentation.bottomStats.tokenText, "tok:\(DashboardTheme.formatTokens(12345))")
-        XCTAssertEqual(presentation.bottomStats.subconsciousItems.first?.name, SharedPresentationFormatting.shortPartitionName("partition-long-name"))
+        XCTAssertEqual(presentation.bottomStats.subconsciousItems.first?.name, "partition-long-name")
     }
 
     func testBottomStatsUsesErrorColorWhenHealthIsDown() {

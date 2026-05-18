@@ -107,7 +107,7 @@ struct StatusBarPresentationMapper {
     private var subconsciousRows: [SummaryRowData] {
         (store.dashboard.subconscious?.partitions ?? []).map { partition in
             SummaryRowData(
-                title: SharedPresentationFormatting.shortPartitionName(partition.name),
+                title: partition.name,
                 detail: partition.done ? "partition warm and ready" : "partition currently executing",
                 state: partition.done ? "WARM" : "RUN",
                 tint: partition.done ? ConsolePalette.fuchsia : ConsolePalette.warning
