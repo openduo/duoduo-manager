@@ -7,42 +7,42 @@
     <language>en</language>
     <item>
       <title>DuoduoManager 1.6.14</title>
-      <pubDate>Mon, 18 May 2026 01:37:32 +0000</pubDate>
+      <pubDate>Mon, 18 May 2026 02:25:25 +0000</pubDate>
       <sparkle:channel>arm64-with-nodejs</sparkle:channel>
       <enclosure
         url="https://github.com/openduo/duoduo-manager/releases/download/v1.6.14/DuoduoManager-1.6.14-arm64-with-nodejs.dmg"
         sparkle:version="1.6.14"
         sparkle:shortVersionString="1.6.14"
-        sparkle:edSignature="p+ZbgU59119cGBX43CkhPXuq2DhZ+nprLmYUUwQCaTZl1Hy+I67TzyEpxyNgLui7pFBat3ri74ayvrX8Iw7rCA=="
-        length="93963338"
+        sparkle:edSignature="dj8PE3jQBGZS3yvo84938Zv7eLtzSGW3wEe2kMRttSHLtefgr0MFutL6UkHjbyvQOHNlhCEppEgB7EsAZRMSDA=="
+        length="93853769"
         type="application/octet-stream"
       />
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
     </item>
     <item>
       <title>DuoduoManager 1.6.14</title>
-      <pubDate>Mon, 18 May 2026 01:37:32 +0000</pubDate>
+      <pubDate>Mon, 18 May 2026 02:25:25 +0000</pubDate>
       <sparkle:channel>x86_64-with-nodejs</sparkle:channel>
       <enclosure
         url="https://github.com/openduo/duoduo-manager/releases/download/v1.6.14/DuoduoManager-1.6.14-x86_64-with-nodejs.dmg"
         sparkle:version="1.6.14"
         sparkle:shortVersionString="1.6.14"
-        sparkle:edSignature="8cn0IvmoGjtqU0h0cRcGMuYuvQFoGr7KuKYHLmx+kQkJJm8eRmr5/QohtPmsRNUgJ3X88rOwwCIN7j+FB8ucDw=="
-        length="97189300"
+        sparkle:edSignature="vBE9Sk8hMVCpPTnQu8RQzvDrblNS/v1HUpJonpjYkBhiTDBXpdLW5hXLV3FiDlH1nQxbGn4clKxc7KDkMC0VCg=="
+        length="100411367"
         type="application/octet-stream"
       />
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
     </item>
     <item>
       <title>DuoduoManager 1.6.14</title>
-      <pubDate>Mon, 18 May 2026 01:37:32 +0000</pubDate>
+      <pubDate>Mon, 18 May 2026 02:25:25 +0000</pubDate>
       <sparkle:channel>universal-lite</sparkle:channel>
       <enclosure
         url="https://github.com/openduo/duoduo-manager/releases/download/v1.6.14/DuoduoManager-1.6.14-universal-lite.dmg"
         sparkle:version="1.6.14"
         sparkle:shortVersionString="1.6.14"
-        sparkle:edSignature="utn7eyEi3jI7IVGrBtwR9FFjfWDuZKefJqSymF1+nCsJdltWS7AGsGPvlnXXk6iBq8n5hJtkrhOY9xTuDWUPDw=="
-        length="5921067"
+        sparkle:edSignature="zSreD72vOwBm/QBTrDrXhYGa5xgw315PChzZLC4xmy7nWRTQrBmJWPBDREkdz/ywsiHKyyP0LfyB5PghyfVGDQ=="
+        length="5923530"
         type="application/octet-stream"
       />
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
