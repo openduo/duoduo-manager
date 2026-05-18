@@ -80,6 +80,7 @@
 /* Upgrade */
 "upgrade.allUpToDate" = "所有组件已是最新版本";
 "upgrade.updatingHeader" = "正在更新组件：";
+"upgrade.updatingCount" = "正在更新 %d 个组件…";
 
 /* Setup */
 "setup.installingDuoduo" = "正在首次安装 duoduo...";

@@ -316,7 +316,7 @@ struct StatusBarView: View {
                 .font(.system(size: 10, weight: .semibold))
             Text(message)
                 .lineLimit(1)
-                .truncationMode(.middle)
+                .truncationMode(.tail)
         }
         .font(.system(size: 10, design: .monospaced))
         .foregroundStyle(statusBarPresentation.footer.statusIsError ? ConsolePalette.critical : ConsolePalette.secondaryText)

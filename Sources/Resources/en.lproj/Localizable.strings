@@ -80,6 +80,7 @@
 /* Upgrade */
 "upgrade.allUpToDate" = "All components are up to date";
 "upgrade.updatingHeader" = "Updating components:";
+"upgrade.updatingCount" = "Updating %d component(s)…";
 
 /* Setup */
 "setup.installingDuoduo" = "Installing duoduo for the first time...";

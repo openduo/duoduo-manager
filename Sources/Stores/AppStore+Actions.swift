@@ -121,14 +121,14 @@ extension AppStore {
     }
 
     private func upgradeAllProgressMessage() -> String {
-        var rows: [String] = []
+        var count = 0
 
         if let latest = updates.latestVersions["daemon"],
            !latest.isEmpty,
            !runtime.status.version.isEmpty,
            runtime.status.version.compare(latest, options: .numeric) == .orderedAscending
         {
-            rows.append("duoduo: v\(runtime.status.version) → v\(latest)")
+            count += 1
         }
 
         for channel in runtime.channels {
@@ -137,16 +137,11 @@ extension AppStore {
                   !channel.version.isEmpty,
                   channel.version.compare(latest, options: .numeric) == .orderedAscending
             else { continue }
-
-            let displayName = ChannelRegistry.entry(
-                for: channel.type,
-                feishuConfig: runtime.feishuConfig
-            )?.displayName ?? channel.type
-            rows.append("\(displayName): v\(channel.version) → v\(latest)")
+            count += 1
         }
 
-        guard !rows.isEmpty else { return L10n.Upgrade.allUpToDate }
-        return ([L10n.Upgrade.updatingHeader] + rows.map { "• \($0)" }).joined(separator: "\n")
+        guard count > 0 else { return L10n.Upgrade.allUpToDate }
+        return L10n.Upgrade.updatingCount(count)
     }
 
     func showConfigRequired() {

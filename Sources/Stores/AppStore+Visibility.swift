@@ -79,6 +79,7 @@ extension AppStore {
         guard runtimeRefreshTask == nil else { return }
 
         Task {
+            guard !command.isLoading else { return }
             await refreshRuntime()
             updateStatusBarIcon?()
         }
@@ -87,6 +88,7 @@ extension AppStore {
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(self?.runtimeRefreshInterval ?? 30))
                 guard !Task.isCancelled else { break }
+                guard !(self?.command.isLoading ?? false) else { continue }
                 await self?.refreshRuntime()
             }
         }

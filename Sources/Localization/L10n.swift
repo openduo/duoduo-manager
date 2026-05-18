@@ -129,6 +129,9 @@ enum L10n {
     enum Upgrade {
         static let allUpToDate = String(localized: "upgrade.allUpToDate", bundle: bundle)
         static let updatingHeader = String(localized: "upgrade.updatingHeader", bundle: bundle)
+        static func updatingCount(_ count: Int) -> String {
+            String(localized: "upgrade.updatingCount", defaultValue: "Updating \(count) component(s)…", bundle: bundle)
+        }
     }
 
     // MARK: - Setup
