@@ -3,8 +3,11 @@
 This document is a manual reference for `duoduo-manager`. The app only edits a small basic subset of env keys. If you need more, edit `~/.config/duoduo/.env` directly or extend the app later.
 
 Version baseline:
-- `@openduo/duoduo@0.5.0-rc.1`
-- `@openduo/channel-feishu@0.5.0-rc.1`
+- `@openduo/duoduo@0.5.2`
+- `@openduo/channel-feishu@0.5.1`
+- `@openduo/protocol@0.5.0`
+
+`duoduo` v0.5.2 did not introduce new manager-managed env keys.
 
 ## Managed By duoduo-manager
 
