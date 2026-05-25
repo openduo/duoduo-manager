@@ -23,6 +23,24 @@ struct SystemStatus: Decodable, Sendable {
     let cadence: CadenceInfo?
 }
 
+/// Decodes a JSON value that may be a plain string or an object with a `message` key.
+/// Handles breaking changes where a field evolves from `String?` to `{message: String, at: String}?`.
+struct FlexibleString: Decodable, Sendable {
+    let value: String?
+
+    init(from decoder: Decoder) throws {
+        if let str = try? decoder.singleValueContainer().decode(String.self) {
+            value = str
+        } else if let obj = try? decoder.singleValueContainer().decode(MessageObject.self) {
+            value = obj.message
+        } else {
+            value = nil
+        }
+    }
+
+    private struct MessageObject: Decodable { let message: String }
+}
+
 struct SessionInfo: Decodable, Sendable, Identifiable {
     var id: String { session_key }
     let session_key: String
@@ -30,9 +48,12 @@ struct SessionInfo: Decodable, Sendable, Identifiable {
     let health: String?
     let last_event_at: String?
     let created_at: String?
-    let last_error: String?
+    let last_error: FlexibleString?
     let cwd: String?
     let display_name: String?
+    let runtime: String?
+
+    var lastErrorText: String? { last_error?.value }
 }
 
 struct HealthInfo: Decodable, Sendable {

@@ -127,7 +127,7 @@ struct SessionsContentView: View {
                     }
                 }
 
-                if let lastError = s.last_error {
+                if let lastError = s.lastErrorText {
                     Text("err: \(lastError)")
                         .font(.system(size: 10, design: .monospaced))
                         .foregroundStyle(DashboardTheme.red)
