@@ -72,6 +72,23 @@
 "channel.feishuConfigHint" = "飞书配置";
 "channel.feishuConfigRequired" = "请先配置 App ID 和 App Secret";
 
+/* Dashboard */
+"dashboard.activeSessionsHeader" = "活跃会话";
+"dashboard.sessionsTitle" = "会话";
+"dashboard.noSessions" = "暂无会话";
+"dashboard.workSessions" = "工作会话";
+"dashboard.jobSessions" = "任务会话";
+"dashboard.metaSessions" = "元会话";
+"dashboard.alias" = "别名";
+"dashboard.notify" = "通知";
+"dashboard.archive" = "归档";
+"dashboard.archiveSessionTitle" = "归档会话？";
+"dashboard.sessionAliasTitle" = "会话别名";
+"dashboard.displayNamePlaceholder" = "显示名称";
+"dashboard.clearAlias" = "清除";
+"dashboard.notifySessionTitle" = "通知会话";
+"dashboard.send" = "发送";
+
 /* Error */
 "error.executionFailed %@" = "执行失败: %@";
 "error.commandNotFound %@" = "找不到命令: %@";

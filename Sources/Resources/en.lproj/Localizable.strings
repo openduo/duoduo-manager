@@ -72,6 +72,23 @@
 "channel.feishuConfigHint" = "Feishu Settings";
 "channel.feishuConfigRequired" = "Please configure App ID and App Secret first";
 
+/* Dashboard */
+"dashboard.activeSessionsHeader" = "ACTIVE SESSIONS";
+"dashboard.sessionsTitle" = "sessions";
+"dashboard.noSessions" = "no sessions";
+"dashboard.workSessions" = "work";
+"dashboard.jobSessions" = "jobs";
+"dashboard.metaSessions" = "meta";
+"dashboard.alias" = "Alias";
+"dashboard.notify" = "Notify";
+"dashboard.archive" = "Archive";
+"dashboard.archiveSessionTitle" = "Archive session?";
+"dashboard.sessionAliasTitle" = "session alias";
+"dashboard.displayNamePlaceholder" = "display name";
+"dashboard.clearAlias" = "Clear";
+"dashboard.notifySessionTitle" = "notify session";
+"dashboard.send" = "Send";
+
 /* Error */
 "error.executionFailed %@" = "Execution failed: %@";
 "error.commandNotFound %@" = "Command not found: %@";

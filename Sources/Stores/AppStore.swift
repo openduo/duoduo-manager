@@ -23,6 +23,7 @@ final class AppStore {
     var daemonService: any DaemonServicing
     var channelService: any ChannelServicing
     var rpc: any DashboardRPCServicing
+    var sessionService: any SessionServicing
 
     var runtimeRefreshTask: Task<Void, Never>?
     var dashboardEventsTask: Task<Void, Never>?
@@ -67,6 +68,7 @@ final class AppStore {
         daemonService = dependencies.makeDaemonService(runtimeStore.daemonConfig.daemonURL)
         channelService = dependencies.makeChannelService(runtimeStore.daemonConfig.daemonURL)
         rpc = dependencies.makeDashboardRPCService(runtimeStore.daemonConfig.daemonURL)
+        sessionService = dependencies.makeSessionService(runtimeStore.daemonConfig.daemonURL)
     }
 
     func reconfigureConnectionsIfNeeded() {
@@ -75,6 +77,7 @@ final class AppStore {
             daemonService = dependencies.makeDaemonService(daemonURL)
             channelService = dependencies.makeChannelService(daemonURL)
             rpc = dependencies.makeDashboardRPCService(daemonURL)
+            sessionService = dependencies.makeSessionService(daemonURL)
             lastEventId = nil
             lastSeenBySession.removeAll()
             dashboard.events.removeAll()

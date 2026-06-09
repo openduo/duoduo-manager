@@ -58,7 +58,7 @@ struct DashboardView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     if !dashboardPresentation.sidebarGroups.isEmpty {
-                        sectionLabel("SESSIONS")
+                        sectionLabel(L10n.Dashboard.activeSessionsHeader)
                         ForEach(dashboardPresentation.sidebarGroups) { group in
                             sessionGroupItem(group)
                             if expandedGroups.contains(group.key) {
@@ -273,19 +273,22 @@ struct DashboardView: View {
     private var mainContent: some View {
         switch selectedEntry {
         case .sessions:
-            SessionsContentView(sessions: store.dashboard.sessions)
+            SessionsContentView(store: store)
         case .config:
             ConfigContentView(config: store.dashboard.config)
         case .jobs:
             JobsContentView(jobs: store.dashboard.jobs, isJobRunning: store.isJobRunning)
         case .system:
             EventsContentView(events: dashboardPresentation.systemEvents, sessionKey: "system")
+                .id("system")
         case .sessionGroup(let key):
             let filtered = store.dashboard.events.filter { $0.session_key == key }
             EventsContentView(events: filtered, sessionKey: key)
+                .id("session:\(key)")
         case .sessionTypeItem(let key, let eventType):
             let filtered = store.dashboard.events.filter { $0.session_key == key && $0.type == eventType }
             EventsContentView(events: filtered, sessionKey: "\(key)  [\(DashboardPresentationMapper.shortTypeName(eventType))]")
+                .id("session-type:\(key):\(eventType)")
         }
     }
 

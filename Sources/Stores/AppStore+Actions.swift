@@ -121,14 +121,14 @@ extension AppStore {
     }
 
     private func upgradeAllProgressMessage() -> String {
-        var count = 0
+        var lines: [String] = []
 
         if let latest = updates.latestVersions["daemon"],
            !latest.isEmpty,
            !runtime.status.version.isEmpty,
            runtime.status.version.compare(latest, options: .numeric) == .orderedAscending
         {
-            count += 1
+            lines.append("duoduo: v\(runtime.status.version) → v\(latest)")
         }
 
         for channel in runtime.channels {
@@ -137,11 +137,11 @@ extension AppStore {
                   !channel.version.isEmpty,
                   channel.version.compare(latest, options: .numeric) == .orderedAscending
             else { continue }
-            count += 1
+            lines.append("\(channel.displayName): v\(channel.version) → v\(latest)")
         }
 
-        guard count > 0 else { return L10n.Upgrade.allUpToDate }
-        return L10n.Upgrade.updatingCount(count)
+        guard !lines.isEmpty else { return L10n.Upgrade.allUpToDate }
+        return ([L10n.Upgrade.updatingCount(lines.count)] + lines).joined(separator: "\n")
     }
 
     func showConfigRequired() {
@@ -159,5 +159,29 @@ extension AppStore {
 
     func fetchConfig() async {
         dashboard.config = try? await rpc.systemConfig()
+    }
+
+    func aliasSession(_ sessionKey: String, name: String?) {
+        executeCommand {
+            let output = try await self.sessionService.alias(sessionKey: sessionKey, name: name)
+            await self.fetchDashboardStatus()
+            return output
+        }
+    }
+
+    func notifySession(_ target: String, message: String) {
+        executeCommand {
+            let output = try await self.sessionService.notify(target: target, message: message, source: "duoduo-atc")
+            await self.fetchDashboardStatus()
+            return output
+        }
+    }
+
+    func archiveSession(_ sessionKey: String) {
+        executeCommand {
+            let output = try await self.sessionService.archive(sessionKey: sessionKey)
+            await self.fetchDashboardStatus()
+            return output
+        }
     }
 }

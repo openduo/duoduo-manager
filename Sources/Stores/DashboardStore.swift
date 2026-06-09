@@ -5,6 +5,7 @@ import Foundation
 final class DashboardStore {
     var sessions: [SessionInfo]
     var health: HealthInfo?
+    var allSessions: [SessionRegistryEntry]
     var subconscious: SubconsciousInfo?
     var cadence: CadenceInfo?
     var jobs: [JobInfo]
@@ -18,6 +19,7 @@ final class DashboardStore {
     init(
         sessions: [SessionInfo] = [],
         health: HealthInfo? = nil,
+        allSessions: [SessionRegistryEntry] = [],
         subconscious: SubconsciousInfo? = nil,
         cadence: CadenceInfo? = nil,
         jobs: [JobInfo] = [],
@@ -30,6 +32,7 @@ final class DashboardStore {
     ) {
         self.sessions = sessions
         self.health = health
+        self.allSessions = allSessions
         self.subconscious = subconscious
         self.cadence = cadence
         self.jobs = jobs

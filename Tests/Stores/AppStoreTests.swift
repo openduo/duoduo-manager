@@ -113,6 +113,88 @@ final class AppStoreTests: XCTestCase {
         XCTAssertEqual(store.dashboard.jobs.map(\.id), ["job-1"])
     }
 
+    func testFetchDashboardStatusPopulatesAllSessionsFromRegistry() async {
+        let systemStatus = SystemStatus(
+            sessions: [
+                SessionInfo(
+                    session_key: "session:active",
+                    status: "active",
+                    health: "ok",
+                    last_event_at: "2026-04-21T00:00:00Z",
+                    created_at: nil,
+                    last_error: nil,
+                    cwd: "/active",
+                    display_name: "Active"
+                )
+            ],
+            health: HealthInfo(gateway: "ok", meta_session: "ok"),
+            subconscious: nil,
+            cadence: nil
+        )
+        let registry = [
+            SessionRegistryEntry(
+                session_key: "session:archived",
+                display_name: "Archived",
+                kind: "agent",
+                plane: "work",
+                cwd: "/archived",
+                last_event_at: "2026-04-20T00:00:00Z",
+                source_channel_id: "feishu",
+                last_error: nil,
+                orphan: nil
+            )
+        ]
+        let store = AppStore(
+            runtime: RuntimeStore(daemonConfig: DaemonConfig(), feishuConfig: FeishuConfig()),
+            dashboard: DashboardStore(),
+            updates: UpdateStore(),
+            command: CommandStore(),
+            dependencies: TestFactory.dependencies(systemStatus: systemStatus, sessionRegistry: registry)
+        )
+
+        await store.fetchDashboardStatus()
+
+        XCTAssertEqual(store.dashboard.sessions.map(\.session_key), ["session:active"])
+        XCTAssertEqual(store.dashboard.allSessions.map(\.session_key), ["session:archived"])
+    }
+
+    func testFetchDashboardStatusFallsBackToActiveSessionsWhenRegistryFails() async {
+        let systemStatus = SystemStatus(
+            sessions: [
+                SessionInfo(
+                    session_key: "session:active",
+                    status: "active",
+                    health: "ok",
+                    last_event_at: "2026-04-21T00:00:00Z",
+                    created_at: nil,
+                    last_error: nil,
+                    cwd: "/active",
+                    display_name: "Active"
+                )
+            ],
+            health: HealthInfo(gateway: "ok", meta_session: "ok"),
+            subconscious: nil,
+            cadence: nil
+        )
+        let sessionService = FakeSessionService(daemonURL: "http://127.0.0.1:20233", listAllFails: true)
+        let store = makeStore(
+            dashboardService: FakeDashboardRPCService(
+                baseURL: "http://127.0.0.1:20233",
+                systemStatusResponse: systemStatus,
+                usageTotalsResponse: UsageTotalsResponse(totals: UsageTotals(total_cost_usd: 0, total_input_tokens: 0, total_output_tokens: 0, total_cache_read_tokens: 0, total_tool_calls: 0, cache: nil)),
+                jobListResponse: JobListResponse(jobs: []),
+                spineTailResponse: SpineTailResponse(events: []),
+                systemConfigResponse: SystemConfig(network: nil, sessions: nil, cadence: nil, transfer: nil, logging: nil, sdk: nil, paths: nil, subconscious: nil)
+            ),
+            sessionService: sessionService
+        )
+
+        await store.fetchDashboardStatus()
+
+        XCTAssertEqual(store.dashboard.allSessions.map(\.session_key), ["session:active"])
+        XCTAssertEqual(store.dashboard.allSessions.first?.display_name, "Active")
+    }
+
     func testFetchDashboardEventsAppendsEventsAndTracksSessionTimestamps() async {
         let events = SpineTailResponse(events: [
             SpineEvent(id: "evt-1", type: "agent.tool_use", session_key: "session:1", ts: "2026-04-21T00:00:01Z", payload: nil),
@@ -216,6 +298,9 @@ final class AppStoreTests: XCTestCase {
                     spineTailResponse: SpineTailResponse(events: []),
                     systemConfigResponse: SystemConfig(network: nil, sessions: nil, cadence: nil, transfer: nil, logging: nil, sdk: nil, paths: nil, subconscious: nil)
                 )
+            },
+            makeSessionService: { url in
+                FakeSessionService(daemonURL: url)
             }
         )
         let store = AppStore(
@@ -366,7 +451,8 @@ final class AppStoreTests: XCTestCase {
             spineTailResponse: SpineTailResponse(events: []),
             systemConfigResponse: SystemConfig(network: nil, sessions: nil, cadence: nil, transfer: nil, logging: nil, sdk: nil, paths: nil, subconscious: nil)
         ),
-        upgradeService: any UpgradeServicing = FakeUpgradeService()
+        upgradeService: any UpgradeServicing = FakeUpgradeService(),
+        sessionService: any SessionServicing = FakeSessionService(daemonURL: "http://127.0.0.1:20233")
     ) -> AppStore {
         let dependencies = AppStoreDependencies(
             versionService: FakeVersionService(),
@@ -374,7 +460,8 @@ final class AppStoreTests: XCTestCase {
             runtimeEnvironment: FakeRuntimeEnvironment(),
             makeDaemonService: { _ in daemonService },
             makeChannelService: { _ in channelService },
-            makeDashboardRPCService: { _ in dashboardService }
+            makeDashboardRPCService: { _ in dashboardService },
+            makeSessionService: { _ in sessionService }
         )
         return AppStore(
             runtime: RuntimeStore(daemonConfig: DaemonConfig(), feishuConfig: FeishuConfig()),

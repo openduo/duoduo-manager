@@ -54,6 +54,25 @@ struct FakeDashboardRPCService: DashboardRPCServicing {
     func systemConfig() async throws -> SystemConfig { systemConfigResponse }
 }
 
+struct FakeSessionService: SessionServicing {
+    let daemonURL: String
+    var sessions: [SessionRegistryEntry] = []
+    var listAllFails = false
+    var aliasResult = ""
+    var notifyResult = ""
+    var archiveResult = ""
+
+    func listAll() async throws -> [SessionRegistryEntry] {
+        if listAllFails {
+            throw ShellError.executionFailed("session list failed", exitCode: 1)
+        }
+        return sessions
+    }
+    func alias(sessionKey: String, name: String?) async throws -> String { aliasResult }
+    func notify(target: String, message: String, source: String) async throws -> String { notifyResult }
+    func archive(sessionKey: String) async throws -> String { archiveResult }
+}
+
 struct FakeVersionService: VersionServicing {
     var installedVersions: [String: String?] = [:]
     var latestVersions: [String: String] = [:]
@@ -99,6 +118,7 @@ enum TestFactory {
         jobs: JobListResponse = JobListResponse(jobs: []),
         events: SpineTailResponse = SpineTailResponse(events: []),
         config: SystemConfig = SystemConfig(network: nil, sessions: nil, cadence: nil, transfer: nil, logging: nil, sdk: nil, paths: nil, subconscious: nil),
+        sessionRegistry: [SessionRegistryEntry] = [],
         runtimeEnvironment: any RuntimeEnvironmentProviding = FakeRuntimeEnvironment()
     ) -> AppStoreDependencies {
         AppStoreDependencies(
@@ -120,6 +140,9 @@ enum TestFactory {
                     spineTailResponse: events,
                     systemConfigResponse: config
                 )
+            },
+            makeSessionService: { url in
+                FakeSessionService(daemonURL: url, sessions: sessionRegistry)
             }
         )
     }

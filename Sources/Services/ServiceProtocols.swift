@@ -28,6 +28,14 @@ protocol DashboardRPCServicing: Sendable {
     func systemConfig() async throws -> SystemConfig
 }
 
+protocol SessionServicing: Sendable {
+    var daemonURL: String { get }
+    func listAll() async throws -> [SessionRegistryEntry]
+    func alias(sessionKey: String, name: String?) async throws -> String
+    func notify(target: String, message: String, source: String) async throws -> String
+    func archive(sessionKey: String) async throws -> String
+}
+
 protocol VersionServicing: Sendable {
     func getInstalledVersion(_ pkg: String) async throws -> String?
     func getNpmLatestVersion(_ pkg: String) async throws -> String
@@ -66,5 +74,6 @@ struct LiveRuntimeEnvironment: RuntimeEnvironmentProviding {
 extension DaemonService: DaemonServicing {}
 extension ChannelService: ChannelServicing {}
 extension DashboardRPCService: DashboardRPCServicing {}
+extension SessionService: SessionServicing {}
 extension VersionService: VersionServicing {}
 extension UpgradeService: UpgradeServicing {}

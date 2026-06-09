@@ -114,6 +114,11 @@ extension AppStore {
 
         guard let status = try? await statusReq else { return }
         dashboard.sessions = status.sessions
+        if let allSessions = try? await sessionService.listAll() {
+            dashboard.allSessions = allSessions
+        } else {
+            dashboard.allSessions = status.sessions.map(SessionRegistryEntry.fromActive)
+        }
         dashboard.health = status.health
         dashboard.subconscious = status.subconscious
         dashboard.cadence = status.cadence

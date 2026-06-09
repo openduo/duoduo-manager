@@ -54,6 +54,59 @@ struct SessionInfo: Decodable, Sendable, Identifiable {
     let runtime: String?
 
     var lastErrorText: String? { last_error?.value }
+
+    init(
+        session_key: String,
+        status: String,
+        health: String?,
+        last_event_at: String?,
+        created_at: String?,
+        last_error: FlexibleString?,
+        cwd: String?,
+        display_name: String?,
+        runtime: String? = nil
+    ) {
+        self.session_key = session_key
+        self.status = status
+        self.health = health
+        self.last_event_at = last_event_at
+        self.created_at = created_at
+        self.last_error = last_error
+        self.cwd = cwd
+        self.display_name = display_name
+        self.runtime = runtime
+    }
+}
+
+// MARK: - duoduo session list
+
+struct SessionRegistryEntry: Decodable, Sendable, Identifiable {
+    var id: String { session_key }
+    let session_key: String
+    let display_name: String?
+    let kind: String?
+    let plane: String?
+    let cwd: String?
+    let last_event_at: String?
+    let source_channel_id: String?
+    let last_error: FlexibleString?
+    let orphan: Bool?
+
+    var lastErrorText: String? { last_error?.value }
+
+    static func fromActive(_ session: SessionInfo) -> SessionRegistryEntry {
+        SessionRegistryEntry(
+            session_key: session.session_key,
+            display_name: session.display_name,
+            kind: nil,
+            plane: nil,
+            cwd: session.cwd,
+            last_event_at: session.last_event_at,
+            source_channel_id: nil,
+            last_error: session.last_error,
+            orphan: nil
+        )
+    }
 }
 
 struct HealthInfo: Decodable, Sendable {

@@ -64,11 +64,22 @@ struct EventsContentView: View {
                 DragGesture(minimumDistance: 1)
                     .onChanged { _ in autoFollow = false }
             )
+            .onAppear {
+                scrollToBottom(proxy)
+            }
+            .onChange(of: sessionKey) { _, _ in
+                autoFollow = true
+                expandedIDs.removeAll()
+                scrollToBottom(proxy)
+            }
             .onChange(of: events.count) { old, new in
-                if autoFollow { proxy.scrollTo(bottomAnchor, anchor: .bottom) }
+                if autoFollow { scrollToBottom(proxy) }
+            }
+            .onChange(of: events.last?.id) { _, _ in
+                if autoFollow { scrollToBottom(proxy) }
             }
             .onChange(of: autoFollow) { old, new in
-                if autoFollow { proxy.scrollTo(bottomAnchor, anchor: .bottom) }
+                if autoFollow { scrollToBottom(proxy) }
             }
         }
     }
@@ -84,8 +95,8 @@ struct EventsContentView: View {
                 ForEach(events) { evt in
                     row(for: evt)
                 }
-                Color.clear.frame(height: 1).id(bottomAnchor)
             }
+            Color.clear.frame(height: 1).id(bottomAnchor)
         }
         .padding(.horizontal, 16)
         .padding(.bottom, 8)
@@ -130,5 +141,14 @@ struct EventsContentView: View {
 
     private func rawJSON(_ evt: SpineEvent) -> String {
         DashboardTheme.prettyJSON(evt)
+    }
+
+    private func scrollToBottom(_ proxy: ScrollViewProxy) {
+        DispatchQueue.main.async {
+            proxy.scrollTo(bottomAnchor, anchor: .bottom)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                proxy.scrollTo(bottomAnchor, anchor: .bottom)
+            }
+        }
     }
 }

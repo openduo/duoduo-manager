@@ -110,6 +110,26 @@ enum L10n {
         static let feishuConfigRequired = String(localized: "channel.feishuConfigRequired", bundle: bundle)
     }
 
+    // MARK: - Dashboard
+
+    enum Dashboard {
+        static let activeSessionsHeader = String(localized: "dashboard.activeSessionsHeader", bundle: bundle)
+        static let sessionsTitle = String(localized: "dashboard.sessionsTitle", bundle: bundle)
+        static let noSessions = String(localized: "dashboard.noSessions", bundle: bundle)
+        static let workSessions = String(localized: "dashboard.workSessions", bundle: bundle)
+        static let jobSessions = String(localized: "dashboard.jobSessions", bundle: bundle)
+        static let metaSessions = String(localized: "dashboard.metaSessions", bundle: bundle)
+        static let alias = String(localized: "dashboard.alias", bundle: bundle)
+        static let notify = String(localized: "dashboard.notify", bundle: bundle)
+        static let archive = String(localized: "dashboard.archive", bundle: bundle)
+        static let archiveSessionTitle = String(localized: "dashboard.archiveSessionTitle", bundle: bundle)
+        static let sessionAliasTitle = String(localized: "dashboard.sessionAliasTitle", bundle: bundle)
+        static let displayNamePlaceholder = String(localized: "dashboard.displayNamePlaceholder", bundle: bundle)
+        static let clearAlias = String(localized: "dashboard.clearAlias", bundle: bundle)
+        static let notifySessionTitle = String(localized: "dashboard.notifySessionTitle", bundle: bundle)
+        static let send = String(localized: "dashboard.send", bundle: bundle)
+    }
+
     // MARK: - Error (with interpolation)
 
     enum Error {
