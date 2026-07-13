@@ -35,8 +35,14 @@ struct SkillService: Sendable {
     /// npx noise, etc.) is swallowed and reported as a short note so it never
     /// aborts the surrounding daemon/channel upgrade.
     func refreshSkills() async -> String {
-        guard ensureInstallRootPrepared() else {
-            return "\n[skills] install root not available, skipped\n"
+        let fm = FileManager.default
+        var isDir: ObjCBool = false
+        if !fm.fileExists(atPath: Self.installRoot, isDirectory: &isDir) || !isDir.boolValue {
+            do {
+                try fm.createDirectory(atPath: Self.installRoot, withIntermediateDirectories: true)
+            } catch {
+                return "\n[skills] install root not available, skipped\n"
+            }
         }
 
         do {
@@ -54,35 +60,6 @@ struct SkillService: Sendable {
     }
 
     // MARK: - Private
-
-    /// Make sure `~/aladuo` exists and has a `package.json`; the skills CLI
-    /// errors with ENOENT when run outside a directory containing one
-    /// (vercel-labs/skills#983). Returns false only if the root itself cannot
-    /// be used.
-    private func ensureInstallRootPrepared() -> Bool {
-        let fm = FileManager.default
-        let root = Self.installRoot
-
-        var isDir: ObjCBool = false
-        if !fm.fileExists(atPath: root, isDirectory: &isDir) || !isDir.boolValue {
-            do {
-                try fm.createDirectory(atPath: root, withIntermediateDirectories: true)
-            } catch {
-                return false
-            }
-        }
-
-        let packageJSON = (root as NSString).appendingPathComponent("package.json")
-        if !fm.fileExists(atPath: packageJSON) {
-            let minimal = #"{"private":true}"#
-            do {
-                try minimal.write(toFile: packageJSON, atomically: true, encoding: .utf8)
-            } catch {
-                return false
-            }
-        }
-        return true
-    }
 
     /// Pull a short, human-readable summary out of the skills CLI output
     /// (which is heavily ANSI-painted). We look for the installed skill count.
