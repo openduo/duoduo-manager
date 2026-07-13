@@ -54,6 +54,7 @@
 		7FF1731F71DAE350C34EA241 /* OnboardingWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434F837F54C3ACF3FE2C30AA /* OnboardingWindow.swift */; };
 		8411541E31AA0B794EA8AFE4 /* DaemonService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8355C197B1A02286E7764494 /* DaemonService.swift */; };
 		84B87284D0CFC7204F39037A /* ShellService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F54D68D0A4635B98DE788042 /* ShellService.swift */; };
+		8775F782D6DAD002BE8C7114 /* SkillService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01ACE9AB79D74D4821A30336 /* SkillService.swift */; };
 		88E8A60676091CE351ED2CEA /* UpgradeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E1AD037DDD7C23ACFA1C9D8 /* UpgradeService.swift */; };
 		8974A9E40949FFE2C32CBDD5 /* DashboardModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBAA39C3D4832508EC728871 /* DashboardModels.swift */; };
 		8B4D212F543C9D136745A3EB /* EventStreamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BEA40D33E29FED5A01BEB28 /* EventStreamView.swift */; };
@@ -101,6 +102,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		01ACE9AB79D74D4821A30336 /* SkillService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillService.swift; sourceTree = "<group>"; };
 		03425568CBEA034CCB4597B3 /* OnboardingStoreDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStoreDependencies.swift; sourceTree = "<group>"; };
 		03599F7BD1273B95205930E6 /* StatusBarPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarPresentation.swift; sourceTree = "<group>"; };
 		041E74EBC327977A9E15D883 /* AppStoreVisibilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStoreVisibilityTests.swift; sourceTree = "<group>"; };
@@ -304,6 +306,7 @@
 				DCE4F5A1FB03F4C1E92430C0 /* SessionService.swift */,
 				677F998568B75268A4907439 /* ShellPathInstaller.swift */,
 				F54D68D0A4635B98DE788042 /* ShellService.swift */,
+				01ACE9AB79D74D4821A30336 /* SkillService.swift */,
 				1E1AD037DDD7C23ACFA1C9D8 /* UpgradeService.swift */,
 				B18C58A264D7928F215FD2C1 /* VersionService.swift */,
 			);
@@ -616,6 +619,7 @@
 				5626E057C5F55FFA555E32E4 /* SharedPresentationFormatting.swift in Sources */,
 				E7CEAFC11D802BE358E07367 /* ShellPathInstaller.swift in Sources */,
 				84B87284D0CFC7204F39037A /* ShellService.swift in Sources */,
+				8775F782D6DAD002BE8C7114 /* SkillService.swift in Sources */,
 				3E5A505F3C91E1C0F4DC2336 /* StatusBarControlSection.swift in Sources */,
 				1AE91AE673A239BECE21292F /* StatusBarExecutionSection.swift in Sources */,
 				CD22515C383306E95C3EC463 /* StatusBarHeaderSection.swift in Sources */,

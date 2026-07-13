@@ -92,10 +92,17 @@ struct FakeUpgradeService: UpgradeServicing {
         stopChannel: (String) async throws -> String,
         syncChannel: (String) async throws -> String,
         startChannel: (String) async throws -> String,
-        restartDaemon: () async throws -> String
+        restartDaemon: () async throws -> String,
+        refreshSkills: () async throws -> String
     ) async throws -> String {
         output
     }
+}
+
+struct FakeSkillService: SkillServicing {
+    var output = ""
+
+    func refreshSkills() async -> String { output }
 }
 
 struct FakeRuntimeEnvironment: RuntimeEnvironmentProviding {
@@ -143,7 +150,8 @@ enum TestFactory {
             },
             makeSessionService: { url in
                 FakeSessionService(daemonURL: url, sessions: sessionRegistry)
-            }
+            },
+            makeSkillService: { FakeSkillService() }
         )
     }
 }

@@ -50,8 +50,13 @@ protocol UpgradeServicing: Sendable {
         stopChannel: (String) async throws -> String,
         syncChannel: (String) async throws -> String,
         startChannel: (String) async throws -> String,
-        restartDaemon: () async throws -> String
+        restartDaemon: () async throws -> String,
+        refreshSkills: () async throws -> String
     ) async throws -> String
+}
+
+protocol SkillServicing: Sendable {
+    func refreshSkills() async -> String
 }
 
 protocol RuntimeEnvironmentProviding: Sendable {
@@ -77,3 +82,4 @@ extension DashboardRPCService: DashboardRPCServicing {}
 extension SessionService: SessionServicing {}
 extension VersionService: VersionServicing {}
 extension UpgradeService: UpgradeServicing {}
+extension SkillService: SkillServicing {}

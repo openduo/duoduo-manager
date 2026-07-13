@@ -114,7 +114,8 @@ extension AppStore {
                 stopChannel: { type in try await self.channelService.stopChannel(type) },
                 syncChannel: { pkg in try await self.channelService.syncChannel(pkg) },
                 startChannel: { type in try await self.channelService.startChannel(type, extraEnv: [:]) },
-                restartDaemon: { try await self.daemonService.restart(extraEnv: [:]) }
+                restartDaemon: { try await self.daemonService.restart(extraEnv: [:]) },
+                refreshSkills: { await self.skillService.refreshSkills() }
             )
             return output.isEmpty ? L10n.Upgrade.allUpToDate : output
         }
@@ -129,6 +130,9 @@ extension AppStore {
            runtime.status.version.compare(latest, options: .numeric) == .orderedAscending
         {
             lines.append("duoduo: v\(runtime.status.version) → v\(latest)")
+            // Skills describe the CLI surface, so they refresh alongside it
+            // (see #11). Counted as part of the same component move.
+            lines.append("skills: → v\(latest) (with CLI)")
         }
 
         for channel in runtime.channels {

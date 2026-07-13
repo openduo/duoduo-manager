@@ -8,6 +8,7 @@ struct AppStoreDependencies {
     var makeChannelService: @Sendable (String) -> any ChannelServicing
     var makeDashboardRPCService: @Sendable (String) -> any DashboardRPCServicing
     var makeSessionService: @Sendable (String) -> any SessionServicing
+    var makeSkillService: @Sendable () -> any SkillServicing
 
     static let live = AppStoreDependencies(
         versionService: VersionService(),
@@ -16,6 +17,7 @@ struct AppStoreDependencies {
         makeDaemonService: { DaemonService(daemonURL: $0) },
         makeChannelService: { ChannelService(daemonURL: $0) },
         makeDashboardRPCService: { DashboardRPCService(daemonURL: $0) },
-        makeSessionService: { SessionService(daemonURL: $0) }
+        makeSessionService: { SessionService(daemonURL: $0) },
+        makeSkillService: { SkillService() }
     )
 }
