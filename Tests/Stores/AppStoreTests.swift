@@ -301,7 +301,8 @@ final class AppStoreTests: XCTestCase {
             },
             makeSessionService: { url in
                 FakeSessionService(daemonURL: url)
-            }
+            },
+            makeSkillService: { FakeSkillService() }
         )
         let store = AppStore(
             runtime: RuntimeStore(daemonConfig: DaemonConfig(), feishuConfig: FeishuConfig()),
@@ -461,7 +462,8 @@ final class AppStoreTests: XCTestCase {
             makeDaemonService: { _ in daemonService },
             makeChannelService: { _ in channelService },
             makeDashboardRPCService: { _ in dashboardService },
-            makeSessionService: { _ in sessionService }
+            makeSessionService: { _ in sessionService },
+            makeSkillService: { FakeSkillService() }
         )
         return AppStore(
             runtime: RuntimeStore(daemonConfig: DaemonConfig(), feishuConfig: FeishuConfig()),
@@ -548,7 +550,8 @@ private final class RecordingUpgradeService: UpgradeServicing, @unchecked Sendab
         stopChannel: (String) async throws -> String,
         syncChannel: (String) async throws -> String,
         startChannel: (String) async throws -> String,
-        restartDaemon: () async throws -> String
+        restartDaemon: () async throws -> String,
+        refreshSkills: () async throws -> String
     ) async throws -> String {
         recordedDaemonInstalledVersion = daemonInstalledVersion
         recordedDaemonWasRunning = daemonWasRunning

@@ -56,7 +56,8 @@ struct UpgradeService: Sendable {
         stopChannel: (String) async throws -> String,
         syncChannel: (String) async throws -> String,
         startChannel: (String) async throws -> String,
-        restartDaemon: () async throws -> String
+        restartDaemon: () async throws -> String,
+        refreshSkills: () async throws -> String
     ) async throws -> String {
         var output = ""
 
@@ -95,6 +96,16 @@ struct UpgradeService: Sendable {
             output += try await syncChannel(pkg)
             if ch.isRunning {
                 output += try await startChannel(ch.type)
+            }
+        }
+
+        // 5. Refresh the bundled openduo/duoduo skills only when the daemon was
+        // updated — they describe the CLI behavior surface, so they move in
+        // lockstep with the CLI. Skills are read by new sessions only, so no
+        // daemon restart is needed. Failures are non-fatal (see #11).
+        if daemonNeedsUpdate {
+            if let skillsOutput = try? await refreshSkills(), !skillsOutput.isEmpty {
+                output += skillsOutput
             }
         }
 

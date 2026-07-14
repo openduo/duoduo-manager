@@ -24,6 +24,7 @@ final class AppStore {
     var channelService: any ChannelServicing
     var rpc: any DashboardRPCServicing
     var sessionService: any SessionServicing
+    var skillService: any SkillServicing
 
     var runtimeRefreshTask: Task<Void, Never>?
     var dashboardEventsTask: Task<Void, Never>?
@@ -69,6 +70,7 @@ final class AppStore {
         channelService = dependencies.makeChannelService(runtimeStore.daemonConfig.daemonURL)
         rpc = dependencies.makeDashboardRPCService(runtimeStore.daemonConfig.daemonURL)
         sessionService = dependencies.makeSessionService(runtimeStore.daemonConfig.daemonURL)
+        skillService = dependencies.makeSkillService()
     }
 
     func reconfigureConnectionsIfNeeded() {
