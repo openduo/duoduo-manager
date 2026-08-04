@@ -19,6 +19,20 @@ enum DuoduoCompat {
     /// 0.6.x tag that ships it once the duoduo side is released.
     static let minVersionForRestartReason = "0.6.3"
 
+    /// Minimum installed duoduo version with the daemon transport rework:
+    /// the write surface (and `/ws`) moved to a unix socket; the TCP port
+    /// (`127.0.0.1:20233`) became read-only; remote full access is opt-in
+    /// and bearer-authenticated; `ALADUO_DAEMON_HOST` was redefined from
+    /// "main port bind address" to "remote listener address selector",
+    /// paired with `ALADUO_REMOTE_PORT` + `ALADUO_DAEMON_TOKEN` (see #15).
+    ///
+    /// Below this version a non-loopback `ALADUO_DAEMON_HOST` still selects
+    /// the (then full-access) main port, so manager must not surface the
+    /// new remote-access UI nor the non-loopback host warning before the
+    /// gate passes. Confirmed against the 0.6.3-pre.8 canary; same release
+    /// family as `minVersionForRestartReason`.
+    static let minVersionForUnixSocket = "0.6.3"
+
     /// Minimum installed duoduo version that honors `DUODUO_NODE_BIN`.
     /// Below this, exporting the variable is a silent no-op (older
     /// wrappers ignore it), so injection is always backward-safe — but

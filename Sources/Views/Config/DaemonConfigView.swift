@@ -5,9 +5,24 @@ struct DaemonConfigView: View {
     var mode: ConfigEditorMode = .panel
     var onSave: (() -> Void)?
     var onCancel: (() -> Void)?
+    /// Installed duoduo version, used to gate the remote-access UI to
+    /// unix-socket builds (see #15). Nil ⇒ unknown ⇒ hide the new UI.
+    var installedDaemonVersion: String? = nil
+    /// Generate a new remote-access token (`duoduo daemon token new`).
+    /// `force` rotates an existing one. Nil when remote access is gated off.
+    var onNewDaemonToken: ((_ force: Bool) -> Void)? = nil
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @State private var didSave = false
+
+    /// True when the running CLI is a unix-socket build, so the remote-access
+    /// surface (remote port + token) and the non-loopback host warning apply.
+    private var supportsUnixSocket: Bool {
+        DuoduoCompat.meetsMinimum(
+            installed: installedDaemonVersion,
+            minimum: DuoduoCompat.minVersionForUnixSocket
+        )
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -19,6 +34,9 @@ struct DaemonConfigView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     workDirSection
                     networkSection
+                    if supportsUnixSocket {
+                        remoteAccessSection
+                    }
                     runtimeSection
                 }
                 .padding(.bottom, 16)
@@ -88,6 +106,9 @@ struct DaemonConfigView: View {
                     .textFieldStyle(.roundedBorder)
                     .font(.system(size: 12, design: .monospaced))
             }
+            if supportsUnixSocket && config.isNonLoopbackHost {
+                remoteHostWarningRow
+            }
             configRowDivider(mode: mode)
             configRow(mode: mode, label: L10n.DaemonConfig.listenPort, hint: "ALADUO_PORT") {
                 TextField("20233", text: $config.port)
@@ -95,6 +116,80 @@ struct DaemonConfigView: View {
                     .font(.system(size: 12, design: .monospaced))
             }
         }
+    }
+
+    /// Warns that a non-loopback host now selects the opt-in remote listener
+    /// (fail-close without token + remote port). Shown only on unix-socket
+    /// builds so it never appears on the currently-released CLI (see #15).
+    private var remoteHostWarningRow: some View {
+        HStack(alignment: .top, spacing: 6) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(ConsolePalette.warning)
+            Text(L10n.DaemonConfig.remoteHostWarning)
+                .font(.system(size: 10))
+                .foregroundStyle(ConfigPalette.secondary(for: mode))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 6)
+    }
+
+    /// Remote (bearer-authenticated) listener configuration. Opt-in: the
+    /// listener starts only when host + remote port + token are all present.
+    /// Token is generated via the CLI; manager never stores its plaintext
+    /// (per upstream guidance in #15).
+    private var remoteAccessSection: some View {
+        Group {
+            configRowDivider(mode: mode)
+            configSectionLabel(L10n.DaemonConfig.remoteAccess, mode: mode)
+            configRow(mode: mode, label: L10n.DaemonConfig.remotePort, hint: L10n.DaemonConfig.remotePortHint) {
+                TextField(L10n.DaemonConfig.remotePortPlaceholder, text: $config.remotePort)
+                    .textFieldStyle(.roundedBorder)
+                    .font(.system(size: 12, design: .monospaced))
+            }
+            if config.hasRemotePortCollision {
+                remotePortCollisionRow
+            }
+            configRowDivider(mode: mode)
+            configRow(mode: mode, label: L10n.DaemonConfig.daemonToken, hint: L10n.DaemonConfig.daemonTokenHint) {
+                HStack(spacing: 6) {
+                    if let onNewDaemonToken {
+                        Button(L10n.DaemonConfig.daemonTokenNew) {
+                            onNewDaemonToken(false)
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                        Button(L10n.DaemonConfig.daemonTokenRotate) {
+                            onNewDaemonToken(true)
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                    }
+                    Spacer()
+                }
+            }
+            configRowDivider(mode: mode)
+            Text(L10n.DaemonConfig.remoteRequiresRestart)
+                .font(.system(size: 9, design: .monospaced))
+                .foregroundStyle(ConfigPalette.tertiary(for: mode))
+                .padding(.horizontal, 14)
+                .padding(.vertical, 6)
+        }
+    }
+
+    private var remotePortCollisionRow: some View {
+        HStack(alignment: .top, spacing: 6) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(ConsolePalette.warning)
+            Text(L10n.DaemonConfig.remotePortCollision(config.port))
+                .font(.system(size: 10))
+                .foregroundStyle(ConfigPalette.secondary(for: mode))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 6)
     }
 
     private var runtimeSection: some View {

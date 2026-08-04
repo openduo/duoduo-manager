@@ -89,6 +89,8 @@
 		F7A144EB6254AE07E38EBB12 /* DaemonConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F208FDB32EE95280C59DE480 /* DaemonConfig.swift */; };
 		F97089A9A67B81FF81F9BB4C /* DashboardPresentationMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D50E480BA7922E6B4768AAD /* DashboardPresentationMapper.swift */; };
 		FA953AF57994D9DB7B81424A /* StatusBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 905C0CACFCF03BAA771CC96E /* StatusBarView.swift */; };
+		A1B2C3D4E5F6000100000001 /* DaemonServiceRestartReasonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000200000001 /* DaemonServiceRestartReasonTests.swift */; };
+		A1B2C3D4E5F6000100000002 /* DaemonConfigRemoteAccessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000200000002 /* DaemonConfigRemoteAccessTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -128,6 +130,8 @@
 		52ABF56B3A67B044533AB057 /* DashboardPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardPresentation.swift; sourceTree = "<group>"; };
 		54840B6846285AED341E1271 /* AppStore+Actions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppStore+Actions.swift"; sourceTree = "<group>"; };
 		57487CEBE75A5F2A3A38E3B6 /* OnboardingCompletionMarkerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCompletionMarkerTests.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000200000001 /* DaemonServiceRestartReasonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonServiceRestartReasonTests.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000200000002 /* DaemonConfigRemoteAccessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonConfigRemoteAccessTests.swift; sourceTree = "<group>"; };
 		5AC685DCE1F6A1F29867B8AF /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		63FD10798EC2CABC731AE9AB /* DaemonStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonStatus.swift; sourceTree = "<group>"; };
 		652BAAFCF820EB15493EC29E /* AppStoreDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStoreDependencies.swift; sourceTree = "<group>"; };
@@ -403,6 +407,7 @@
 			isa = PBXGroup;
 			children = (
 				8064F089733E58BAC77B5177 /* DuoduoCompatTests.swift */,
+				A1B2C3D4E5F6000200000001 /* DaemonServiceRestartReasonTests.swift */,
 				57487CEBE75A5F2A3A38E3B6 /* OnboardingCompletionMarkerTests.swift */,
 				A7B76EA8B4B8C9BDDFEA34FB /* ShellPathInstallerTests.swift */,
 				D84B7A191D1444F5A91A770F /* UpgradeServiceTests.swift */,
@@ -445,6 +450,7 @@
 			children = (
 				7DCB7518B9AB30913638E9F7 /* ConfigStoreTests.swift */,
 				3BEF6EA57DA0120926D8BA4A /* DashboardModelsTests.swift */,
+				A1B2C3D4E5F6000200000002 /* DaemonConfigRemoteAccessTests.swift */,
 				A88DC70212764AEEF0CFF431 /* OnboardingReducerTests.swift */,
 				F3220EB9A822D51F1DEDA8C5 /* OnboardingStoreTests.swift */,
 			);
@@ -646,6 +652,8 @@
 				F6DCEA3DDBDCCB645A131B97 /* ConfigStoreTests.swift in Sources */,
 				24A56450A55E7D5764F74855 /* DashboardModelsTests.swift in Sources */,
 				AD05E125ED2B830AEE70A269 /* DashboardPresentationMapperTests.swift in Sources */,
+				A1B2C3D4E5F6000100000002 /* DaemonConfigRemoteAccessTests.swift in Sources */,
+				A1B2C3D4E5F6000100000001 /* DaemonServiceRestartReasonTests.swift in Sources */,
 				2F895A0585E7DA19070AC821 /* DuoduoCompatTests.swift in Sources */,
 				F649C5C985E54CCB40D61CB9 /* OnboardingCompletionMarkerTests.swift in Sources */,
 				08B19C66F8B4067F10052A15 /* OnboardingReducerTests.swift in Sources */,

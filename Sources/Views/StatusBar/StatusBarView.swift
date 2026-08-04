@@ -330,7 +330,9 @@ struct StatusBarView: View {
             config: $daemonDraft,
             mode: .inline,
             onSave: saveDaemonDraft,
-            onCancel: { cancelConfig(.daemon) }
+            onCancel: { cancelConfig(.daemon) },
+            installedDaemonVersion: store.runtime.status.version,
+            onNewDaemonToken: { force in store.newDaemonToken(force: force) }
         )
     }
 

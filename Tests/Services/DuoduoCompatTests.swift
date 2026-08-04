@@ -34,4 +34,19 @@ final class DuoduoCompatTests: XCTestCase {
             minimum: DuoduoCompat.minVersionForRestartReason
         ))
     }
+
+    func testMinVersionForUnixSocketGatesBelowThreshold() {
+        // The transport rework (unix socket + read-only TCP + remote
+        // listener) is not in a published release yet (latest is 0.6.2).
+        // The gate must let through the first version that ships it and
+        // nothing older (see #15).
+        XCTAssertTrue(DuoduoCompat.meetsMinimum(
+            installed: DuoduoCompat.minVersionForUnixSocket,
+            minimum: DuoduoCompat.minVersionForUnixSocket
+        ))
+        XCTAssertFalse(DuoduoCompat.meetsMinimum(
+            installed: "0.6.2",
+            minimum: DuoduoCompat.minVersionForUnixSocket
+        ))
+    }
 }

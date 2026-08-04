@@ -40,6 +40,18 @@
 "daemonConfig.autoMainDisabled" = "已禁用自动创建";
 "daemonConfig.autoMainDefault" = "默认自动创建";
 "daemonConfig.pullLimit" = "拉取限制";
+"daemonConfig.remoteAccess" = "远程访问";
+"daemonConfig.remotePort" = "远程端口";
+"daemonConfig.remotePortHint" = "ALADUO_REMOTE_PORT";
+"daemonConfig.remotePortPlaceholder" = "关闭";
+"daemonConfig.remotePortCollision" = "远程端口必须与只读端口（%@）不同。";
+"daemonConfig.daemonToken" = "远程令牌";
+"daemonConfig.daemonTokenHint" = "ALADUO_DAEMON_TOKEN";
+"daemonConfig.daemonTokenNew" = "生成令牌";
+"daemonConfig.daemonTokenRotate" = "轮换令牌";
+"daemonConfig.daemonTokenGenerated" = "令牌已生成（见下方）。请立即保存——它不会再次显示。";
+"daemonConfig.remoteHostWarning" = "非 loopback 的主机地址现在会选择可选的远程监听器，它只有在配齐令牌和不同的远程端口时才会启动。缺少任一项 daemon 将拒绝启动。";
+"daemonConfig.remoteRequiresRestart" = "主机、远程端口或令牌的改动需要重启 daemon 后生效。";
 
 /* Feishu Config */
 "feishuConfig.title" = "飞书配置";

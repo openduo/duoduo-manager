@@ -66,6 +66,29 @@ final class DaemonService: Sendable {
         return output
     }
 
+    // MARK: - Remote Access Token
+    //
+    // The opt-in remote listener is bearer-authenticated with a token the
+    // daemon loads from `~/.config/duoduo/.env`. Manager never touches that
+    // file directly — it goes through the CLI (per the upstream "manager only
+    // talks to the CLI" principle). The token body is printed once to stdout
+    // (stderr is human-readable hint text), and persists behind the scenes;
+    // an existing token is refused unless `force` rotates it (see #15).
+
+    /// Generate a new remote-access token via `duoduo daemon token new`.
+    /// Pass `force: true` to rotate an existing token (`token new --force`).
+    /// Returns the raw CLI stdout (the token body, printed once).
+    func newDaemonToken(force: Bool = false) async throws -> String {
+        var arguments = ["daemon", "token", "new"]
+        if force { arguments.append("--force") }
+        return try await ShellService.run(
+            NodeRuntime.duoduoPath,
+            arguments: arguments,
+            environment: NodeRuntime.duoduoSpawnEnv,
+            workingDirectory: NodeRuntime.duoduoPackageDir
+        )
+    }
+
     func restart(
         extraEnv: [String: String] = [:],
         reason: String? = nil,

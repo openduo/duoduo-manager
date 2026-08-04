@@ -27,6 +27,18 @@ final class AppStoreTests: XCTestCase {
         XCTAssertEqual(store.command.lastOutput, "stopped\nstarted")
     }
 
+    func testNewDaemonTokenDispatchesToServiceWithForceFlag() async {
+        let recorder = RecordingDaemonService(daemonURL: "http://127.0.0.1:20233")
+        recorder.newTokenResult = "tok_abc\n"
+        let store = makeStore(daemonService: recorder)
+
+        store.newDaemonToken(force: true)
+        await fulfillment(of: [loadingFinishedExpectation(for: store)], timeout: 2)
+
+        XCTAssertEqual(recorder.newTokenCalls, [true])
+        XCTAssertEqual(store.command.lastOutput, "tok_abc\n")
+    }
+
     func testUpgradeAllDelegatesToUpgradeServiceWithRuntimeContext() async {
         let upgradeService = RecordingUpgradeService(output: "upgraded")
         let store = makeStore(
@@ -553,5 +565,29 @@ private final class RecordingUpgradeService: UpgradeServicing, @unchecked Sendab
         recordedChannels = channels
         recordedLatestVersions = latestVersions
         return output
+    }
+}
+
+private final class RecordingDaemonService: DaemonServicing, @unchecked Sendable {
+    let daemonURL: String
+    var newTokenResult = ""
+    private(set) var newTokenCalls: [Bool] = []
+
+    init(daemonURL: String) {
+        self.daemonURL = daemonURL
+    }
+
+    func getStatus() async throws -> DaemonStatus { .empty }
+    func getVersion() async throws -> String { "" }
+    func start(extraEnv: [String: String]) async throws -> String { "" }
+    func stop() async throws -> String { "" }
+    func restart(
+        extraEnv: [String: String],
+        reason: String?,
+        installedVersion: String?
+    ) async throws -> String { "" }
+    func newDaemonToken(force: Bool) async throws -> String {
+        newTokenCalls.append(force)
+        return newTokenResult
     }
 }
