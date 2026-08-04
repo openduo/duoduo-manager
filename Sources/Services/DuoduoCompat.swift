@@ -10,6 +10,15 @@ enum DuoduoCompat {
     /// See openduo/duoduo#50.
     static let nodeBinEnvVar = "DUODUO_NODE_BIN"
 
+    /// Minimum installed duoduo version that accepts a `--reason` flag on
+    /// `daemon restart`. Below this, passing the flag is a hard error
+    /// (unknown argument), so callers must gate on this version before
+    /// building the flag — see `DaemonService.restart(reason:)`.
+    ///
+    /// The flag is not in a published release yet; bump this to the first
+    /// 0.6.x tag that ships it once the duoduo side is released.
+    static let minVersionForRestartReason = "0.6.3"
+
     /// Minimum installed duoduo version that honors `DUODUO_NODE_BIN`.
     /// Below this, exporting the variable is a silent no-op (older
     /// wrappers ignore it), so injection is always backward-safe — but

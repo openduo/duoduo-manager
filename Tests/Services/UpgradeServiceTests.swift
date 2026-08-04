@@ -9,25 +9,20 @@ final class UpgradeServiceTests: XCTestCase {
             .success("npm upgraded\n")
         ])
         let service = UpgradeService(runCommand: recorder.runner)
-        let restartRecorder = CallRecorder()
 
         let output = try await service.upgradeAll(
             daemonInstalledVersion: "0.2.5",
-            daemonWasRunning: true,
             channels: [],
             latestVersions: ["daemon": "0.4.6"],
             stopChannel: { _ in "" },
             syncChannel: { _ in "" },
             startChannel: { _ in "" },
-            restartDaemon: {
-                restartRecorder.record()
-                return "daemon restarted\n"
-            },
             refreshSkills: { "" }
         )
 
-        XCTAssertEqual(output, "npm upgraded\ndaemon restarted\n")
-        XCTAssertEqual(restartRecorder.count, 1)
+        // `duoduo upgrade` restarts the daemon itself, so Manager no longer
+        // issues a second restart (see #13).
+        XCTAssertEqual(output, "npm upgraded\n")
         XCTAssertEqual(recorder.commands.map(\.executable), ["duoduo", "npm"])
         XCTAssertEqual(recorder.commands.map(\.arguments), [
             ["upgrade"],
@@ -43,17 +38,37 @@ final class UpgradeServiceTests: XCTestCase {
 
         let output = try await service.upgradeAll(
             daemonInstalledVersion: "0.4.5",
-            daemonWasRunning: false,
             channels: [],
             latestVersions: ["daemon": "0.4.6"],
             stopChannel: { _ in "" },
             syncChannel: { _ in "" },
             startChannel: { _ in "" },
-            restartDaemon: { "daemon restarted\n" },
             refreshSkills: { "" }
         )
 
         XCTAssertEqual(output, "cli upgraded\n")
+        XCTAssertEqual(recorder.commands.map(\.executable), ["duoduo"])
+        XCTAssertEqual(recorder.commands.map(\.arguments), [["upgrade"]])
+    }
+
+    func testDaemonUpgradeDoesNotRestartDaemonSecondTime() async throws {
+        // Regression guard for #13: `duoduo upgrade` already restarts the
+        // daemon internally, so Manager must not call restart again (it would
+        // kill any in-flight turn a second time, without a reason).
+        let recorder = CommandRecorder(results: [.success("cli upgraded\n")])
+        let service = UpgradeService(runCommand: recorder.runner)
+
+        _ = try await service.upgradeAll(
+            daemonInstalledVersion: "0.4.5",
+            channels: [],
+            latestVersions: ["daemon": "0.4.6"],
+            stopChannel: { _ in "" },
+            syncChannel: { _ in "" },
+            startChannel: { _ in "" },
+            refreshSkills: { "" }
+        )
+
+        // Only the `duoduo upgrade` command — no `daemon restart`.
         XCTAssertEqual(recorder.commands.map(\.executable), ["duoduo"])
         XCTAssertEqual(recorder.commands.map(\.arguments), [["upgrade"]])
     }
@@ -65,13 +80,11 @@ final class UpgradeServiceTests: XCTestCase {
 
         let output = try await service.upgradeAll(
             daemonInstalledVersion: "0.4.5",
-            daemonWasRunning: false,
             channels: [],
             latestVersions: ["daemon": "0.4.6"],
             stopChannel: { _ in "" },
             syncChannel: { _ in "" },
             startChannel: { _ in "" },
-            restartDaemon: { "" },
             refreshSkills: {
                 skillsRecorder.record()
                 return "[skills] refreshed\n"
@@ -90,13 +103,11 @@ final class UpgradeServiceTests: XCTestCase {
         let channel = ChannelInfo(type: "feishu", version: "0.1.0", isRunning: false)
         let output = try await service.upgradeAll(
             daemonInstalledVersion: "0.4.6",
-            daemonWasRunning: false,
             channels: [channel],
             latestVersions: ["daemon": "0.4.6", "feishu": "0.2.0"],
             stopChannel: { _ in "" },
             syncChannel: { _ in "channel synced\n" },
             startChannel: { _ in "" },
-            restartDaemon: { "" },
             refreshSkills: {
                 skillsRecorder.record()
                 return "[skills] refreshed\n"
@@ -115,13 +126,11 @@ final class UpgradeServiceTests: XCTestCase {
 
         let output = try await service.upgradeAll(
             daemonInstalledVersion: "0.4.5",
-            daemonWasRunning: false,
             channels: [],
             latestVersions: ["daemon": "0.4.6"],
             stopChannel: { _ in "" },
             syncChannel: { _ in "" },
             startChannel: { _ in "" },
-            restartDaemon: { "" },
             refreshSkills: { throw Boom() }
         )
 

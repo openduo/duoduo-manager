@@ -50,7 +50,6 @@ final class AppStoreTests: XCTestCase {
         await fulfillment(of: [loadingFinishedExpectation(for: store)], timeout: 2)
 
         XCTAssertEqual(upgradeService.recordedDaemonInstalledVersion, "0.4.8")
-        XCTAssertEqual(upgradeService.recordedDaemonWasRunning, true)
         XCTAssertEqual(upgradeService.recordedChannels.map(\.type), ["feishu"])
         XCTAssertEqual(upgradeService.recordedLatestVersions["daemon"], "0.4.9")
         XCTAssertEqual(store.command.lastOutput, "upgraded")
@@ -534,7 +533,6 @@ private final class RecordingChannelService: ChannelServicing, @unchecked Sendab
 private final class RecordingUpgradeService: UpgradeServicing, @unchecked Sendable {
     let output: String
     private(set) var recordedDaemonInstalledVersion: String?
-    private(set) var recordedDaemonWasRunning: Bool?
     private(set) var recordedChannels: [ChannelInfo] = []
     private(set) var recordedLatestVersions: [String: String] = [:]
 
@@ -544,17 +542,14 @@ private final class RecordingUpgradeService: UpgradeServicing, @unchecked Sendab
 
     func upgradeAll(
         daemonInstalledVersion: String,
-        daemonWasRunning: Bool,
         channels: [ChannelInfo],
         latestVersions: [String : String],
         stopChannel: (String) async throws -> String,
         syncChannel: (String) async throws -> String,
         startChannel: (String) async throws -> String,
-        restartDaemon: () async throws -> String,
         refreshSkills: () async throws -> String
     ) async throws -> String {
         recordedDaemonInstalledVersion = daemonInstalledVersion
-        recordedDaemonWasRunning = daemonWasRunning
         recordedChannels = channels
         recordedLatestVersions = latestVersions
         return output
