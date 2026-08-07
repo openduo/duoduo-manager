@@ -11,6 +11,7 @@ protocol DaemonServicing: Sendable {
         reason: String?,
         installedVersion: String?
     ) async throws -> String
+    func newDaemonToken(force: Bool) async throws -> String
 }
 
 protocol ChannelServicing: Sendable {

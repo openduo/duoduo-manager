@@ -22,7 +22,7 @@ struct StatusBarPresentationMapper {
                 currentVersion: AppStore.currentVersion
             ),
             topology: StatusTopologyPresentation(
-                endpoint: store.runtime.daemonConfig.daemonURL,
+                endpoint: topologyEndpoint,
                 runtimeHost: nodeAddressValue,
                 system: SharedPresentationFormatting.systemHealthSummary(store.dashboard.health),
                 systemTint: systemHealthTint,
@@ -88,10 +88,36 @@ struct StatusBarPresentationMapper {
 
     private var nodeAddressValue: String {
         let host = store.runtime.daemonConfig.host
-        if host == "127.0.0.1" || host == "localhost" {
-            return "local runtime"
+        // Pre-unix-socket: the host value describes the port the dashboard
+        // talks to, so map loopback to "local runtime" and surface the rest.
+        if !supportsUnixSocket {
+            if host == "127.0.0.1" || host == "localhost" {
+                return "local runtime"
+            }
+            return host
         }
-        return host
+        // Post-rework: the dashboard always talks to the local read-only
+        // port (loopback) regardless of `ALADUO_DAEMON_HOST`, which now only
+        // selects the optional remote listener. Label it accordingly so the
+        // metric is not mistaken for the remote address (see #15).
+        return "local runtime"
+    }
+
+    /// The "daemon endpoint" metric. On unix-socket builds the dashboard
+    /// always reaches the loopback read-only port, so show that fixed value
+    /// rather than the (possibly remote) configured URL (see #15).
+    private var topologyEndpoint: String {
+        guard supportsUnixSocket else {
+            return store.runtime.daemonConfig.daemonURL
+        }
+        return "http://127.0.0.1:\(store.runtime.daemonConfig.port.isEmpty ? "20233" : store.runtime.daemonConfig.port)"
+    }
+
+    private var supportsUnixSocket: Bool {
+        DuoduoCompat.meetsMinimum(
+            installed: store.runtime.status.version,
+            minimum: DuoduoCompat.minVersionForUnixSocket
+        )
     }
 
     private var systemHealthTint: Color {

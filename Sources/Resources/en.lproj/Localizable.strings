@@ -40,6 +40,18 @@
 "daemonConfig.autoMainDisabled" = "Auto-create disabled";
 "daemonConfig.autoMainDefault" = "Auto-create enabled (default)";
 "daemonConfig.pullLimit" = "Pull Limit";
+"daemonConfig.remoteAccess" = "Remote Access";
+"daemonConfig.remotePort" = "Remote Port";
+"daemonConfig.remotePortHint" = "ALADUO_REMOTE_PORT";
+"daemonConfig.remotePortPlaceholder" = "off";
+"daemonConfig.remotePortCollision" = "Remote port must differ from the read-only port (%@).";
+"daemonConfig.daemonToken" = "Remote Token";
+"daemonConfig.daemonTokenHint" = "ALADUO_DAEMON_TOKEN";
+"daemonConfig.daemonTokenNew" = "Generate Token";
+"daemonConfig.daemonTokenRotate" = "Rotate Token";
+"daemonConfig.daemonTokenGenerated" = "Token generated (shown below). Store it now — it is not shown again.";
+"daemonConfig.remoteHostWarning" = "A non-loopback host now selects the opt-in remote listener, which starts only with a token and a distinct remote port. Without both the daemon refuses to start.";
+"daemonConfig.remoteRequiresRestart" = "Changes to host, remote port, or token take effect after a daemon restart.";
 
 /* Feishu Config */
 "feishuConfig.title" = "Feishu Settings";

@@ -6,6 +6,10 @@ struct DaemonConfig: Sendable, Equatable {
     var port: String = "20233"
     var logLevel: String = "info"
     var permissionMode: String = "default"
+    /// Port for the opt-in remote (bearer-authenticated) listener. Empty by
+    /// default — the remote listener is off. Must differ from the read-only
+    /// `port`; the daemon refuses to start when the two collide (see #15).
+    var remotePort: String = ""
 
     static var defaultWorkDir: String {
         URL(fileURLWithPath: NSHomeDirectory())
@@ -23,6 +27,27 @@ struct DaemonConfig: Sendable, Equatable {
         set { daemonHost = newValue }
     }
 
+    /// Loopback addresses — the daemon's read-only TCP port is hard-bound
+    /// to these regardless of `ALADUO_DAEMON_HOST` (see #15).
+    private static let loopbackHosts: Set<String> = ["127.0.0.1", "localhost", "::1"]
+
+    /// True when `daemonHost` points off-loopback. Under the transport
+    /// rework such a value selects the remote listener, which only starts
+    /// when paired with a token + a distinct remote port — otherwise the
+    /// daemon refuses to start (fail-close).
+    var isNonLoopbackHost: Bool {
+        let trimmed = daemonHost.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return !trimmed.isEmpty && !Self.loopbackHosts.contains(trimmed)
+    }
+
+    /// True when a remote port is set and collides with the read-only port.
+    /// The daemon rejects this combination at startup (see #15).
+    var hasRemotePortCollision: Bool {
+        let remote = remotePort.trimmingCharacters(in: .whitespacesAndNewlines)
+        let readOnly = port.trimmingCharacters(in: .whitespacesAndNewlines)
+        return !remote.isEmpty && remote == readOnly
+    }
+
     static func load(status: DaemonStatus? = nil) -> DaemonConfig {
         var values = mergeFallbackValues(ConfigStore.loadValues(), into: [:])
         values = mergeFallbackValues(ConfigStore.loadConfigJSONValues(), into: values)
@@ -33,6 +58,7 @@ struct DaemonConfig: Sendable, Equatable {
         config.workDir = values["ALADUO_WORK_DIR"] ?? config.workDir
         config.daemonHost = values["ALADUO_DAEMON_HOST"] ?? values["ALADUO_HOST"] ?? config.daemonHost
         config.port = values["ALADUO_PORT"] ?? config.port
+        config.remotePort = values["ALADUO_REMOTE_PORT"] ?? config.remotePort
         config.logLevel = values["ALADUO_LOG_LEVEL"] ?? config.logLevel
         config.permissionMode = values["ALADUO_PERMISSION_MODE"] ?? config.permissionMode
         return config
@@ -61,6 +87,7 @@ struct DaemonConfig: Sendable, Equatable {
         appendIfNonEmpty(&entries, "ALADUO_WORK_DIR", workDir)
         appendIfDifferent(&entries, "ALADUO_DAEMON_HOST", daemonHost, defaultValue: "127.0.0.1")
         appendIfDifferent(&entries, "ALADUO_PORT", port, defaultValue: "20233")
+        appendIfNonEmpty(&entries, "ALADUO_REMOTE_PORT", remotePort)
         appendIfDifferent(&entries, "ALADUO_LOG_LEVEL", logLevel, defaultValue: "info")
         appendIfDifferent(&entries, "ALADUO_PERMISSION_MODE", permissionMode, defaultValue: "default")
         return entries
@@ -71,6 +98,7 @@ struct DaemonConfig: Sendable, Equatable {
         "ALADUO_DAEMON_HOST",
         "ALADUO_HOST",
         "ALADUO_PORT",
+        "ALADUO_REMOTE_PORT",
         "ALADUO_LOG_LEVEL",
         "ALADUO_PERMISSION_MODE",
     ]

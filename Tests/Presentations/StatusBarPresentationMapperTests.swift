@@ -46,4 +46,52 @@ final class StatusBarPresentationMapperTests: XCTestCase {
         let presentation = StatusBarPresentationMapper(store: store).make(expandedEventIDs: [])
         XCTAssertEqual(presentation.stream.hint, "waiting for activity")
     }
+
+    // MARK: - Daemon transport topology semantics (#15)
+
+    func testTopologyShowsConfiguredURLAndHostBeforeUnixSocket() {
+        // On a pre-rework CLI, the host value still describes the port the
+        // dashboard talks to: loopback → "local runtime", remote → the host.
+        var remoteConfig = DaemonConfig()
+        remoteConfig.daemonHost = "10.0.0.5"
+        remoteConfig.port = "20233"
+
+        let remoteStore = AppStore(
+            runtime: RuntimeStore(
+                status: DaemonStatus(isRunning: true, version: "0.6.2", pid: "1", output: "", lastUpdated: .now),
+                daemonConfig: remoteConfig,
+                feishuConfig: FeishuConfig()
+            ),
+            dashboard: DashboardStore(),
+            updates: UpdateStore(),
+            command: CommandStore(),
+            dependencies: .live
+        )
+        let remote = StatusBarPresentationMapper(store: remoteStore).make(expandedEventIDs: [])
+        XCTAssertEqual(remote.topology.endpoint, "http://10.0.0.5:20233")
+        XCTAssertEqual(remote.topology.runtimeHost, "10.0.0.5")
+    }
+
+    func testTopologyShowsLoopbackEndpointOnUnixSocketBuild() {
+        // After the rework the dashboard always talks to the loopback
+        // read-only port, even when the configured host is remote.
+        var remoteConfig = DaemonConfig()
+        remoteConfig.daemonHost = "10.0.0.5"
+        remoteConfig.port = "20233"
+
+        let store = AppStore(
+            runtime: RuntimeStore(
+                status: DaemonStatus(isRunning: true, version: "0.7.0", pid: "1", output: "", lastUpdated: .now),
+                daemonConfig: remoteConfig,
+                feishuConfig: FeishuConfig()
+            ),
+            dashboard: DashboardStore(),
+            updates: UpdateStore(),
+            command: CommandStore(),
+            dependencies: .live
+        )
+        let presentation = StatusBarPresentationMapper(store: store).make(expandedEventIDs: [])
+        XCTAssertEqual(presentation.topology.endpoint, "http://127.0.0.1:20233")
+        XCTAssertEqual(presentation.topology.runtimeHost, "local runtime")
+    }
 }

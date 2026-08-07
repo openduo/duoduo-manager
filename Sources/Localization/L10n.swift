@@ -71,6 +71,20 @@ enum L10n {
         static let autoMainDisabled = String(localized: "daemonConfig.autoMainDisabled", bundle: bundle)
         static let autoMainDefault = String(localized: "daemonConfig.autoMainDefault", bundle: bundle)
         static let pullLimit = String(localized: "daemonConfig.pullLimit", bundle: bundle)
+        static let remoteAccess = String(localized: "daemonConfig.remoteAccess", bundle: bundle)
+        static let remotePort = String(localized: "daemonConfig.remotePort", bundle: bundle)
+        static let remotePortHint = String(localized: "daemonConfig.remotePortHint", bundle: bundle)
+        static let remotePortPlaceholder = String(localized: "daemonConfig.remotePortPlaceholder", bundle: bundle)
+        static let daemonToken = String(localized: "daemonConfig.daemonToken", bundle: bundle)
+        static let daemonTokenHint = String(localized: "daemonConfig.daemonTokenHint", bundle: bundle)
+        static let daemonTokenNew = String(localized: "daemonConfig.daemonTokenNew", bundle: bundle)
+        static let daemonTokenRotate = String(localized: "daemonConfig.daemonTokenRotate", bundle: bundle)
+        static let daemonTokenGenerated = String(localized: "daemonConfig.daemonTokenGenerated", bundle: bundle)
+        static let remoteHostWarning = String(localized: "daemonConfig.remoteHostWarning", bundle: bundle)
+        static let remoteRequiresRestart = String(localized: "daemonConfig.remoteRequiresRestart", bundle: bundle)
+        static func remotePortCollision(_ readOnlyPort: String) -> String {
+            String(localized: "daemonConfig.remotePortCollision \(readOnlyPort)", bundle: bundle)
+        }
     }
 
     // MARK: - Feishu Config

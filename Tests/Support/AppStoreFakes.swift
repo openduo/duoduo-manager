@@ -8,6 +8,7 @@ struct FakeDaemonService: DaemonServicing {
     var startResult = ""
     var stopResult = ""
     var restartResult = ""
+    var newTokenResult = ""
 
     func getStatus() async throws -> DaemonStatus { status }
     func getVersion() async throws -> String { version }
@@ -18,6 +19,7 @@ struct FakeDaemonService: DaemonServicing {
         reason: String?,
         installedVersion: String?
     ) async throws -> String { restartResult }
+    func newDaemonToken(force: Bool) async throws -> String { newTokenResult }
 }
 
 struct FakeChannelService: ChannelServicing {
