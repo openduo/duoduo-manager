@@ -81,7 +81,7 @@ final class StatusBarPresentationMapperTests: XCTestCase {
 
         let store = AppStore(
             runtime: RuntimeStore(
-                status: DaemonStatus(isRunning: true, version: "0.6.3", pid: "1", output: "", lastUpdated: .now),
+                status: DaemonStatus(isRunning: true, version: "0.7.0", pid: "1", output: "", lastUpdated: .now),
                 daemonConfig: remoteConfig,
                 feishuConfig: FeishuConfig()
             ),

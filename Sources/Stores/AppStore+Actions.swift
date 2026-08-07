@@ -90,7 +90,7 @@ extension AppStore {
     /// Generate a new remote-access bearer token via `duoduo daemon token
     /// new`. The token body lands in `command.lastOutput` (it is printed
     /// once to stdout); manager never persists it. Pass `force` to rotate.
-    /// Available only on unix-socket builds (0.6.3+) — gate the caller on
+    /// Available only on unix-socket builds (0.7.0+) — gate the caller on
     /// `DuoduoCompat.meetsMinimum(... minVersionForUnixSocket)` (see #15).
     func newDaemonToken(force: Bool = false) {
         executeCommand {

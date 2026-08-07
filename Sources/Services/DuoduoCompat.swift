@@ -29,9 +29,8 @@ enum DuoduoCompat {
     /// Below this version a non-loopback `ALADUO_DAEMON_HOST` still selects
     /// the (then full-access) main port, so manager must not surface the
     /// new remote-access UI nor the non-loopback host warning before the
-    /// gate passes. Confirmed against the 0.6.3-pre.8 canary; same release
-    /// family as `minVersionForRestartReason`.
-    static let minVersionForUnixSocket = "0.6.3"
+    /// gate passes. Shipped in v0.7.0 (no 0.6.x release carried it).
+    static let minVersionForUnixSocket = "0.7.0"
 
     /// Minimum installed duoduo version that honors `DUODUO_NODE_BIN`.
     /// Below this, exporting the variable is a silent no-op (older
