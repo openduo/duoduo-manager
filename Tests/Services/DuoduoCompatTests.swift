@@ -21,16 +21,24 @@ final class DuoduoCompatTests: XCTestCase {
     }
 
     func testMinVersionForRestartReasonGatesBelowThreshold() {
-        // The `--reason` flag on `daemon restart` is not in a published
-        // release yet (latest is 0.6.2); older CLIs reject it as an unknown
-        // argument. The gate must let through the first version that ships
-        // it and nothing older (see #13).
+        // The `--reason` flag on `daemon restart` shipped in v0.7.0; there
+        // was no 0.6.x release that carried it (0.6.2 → 0.7.0). Older CLIs
+        // reject it as an unknown argument. The gate must pass 0.7.0 and
+        // reject everything older, including the never-released 0.6.3 (see #13).
         XCTAssertTrue(DuoduoCompat.meetsMinimum(
             installed: DuoduoCompat.minVersionForRestartReason,
             minimum: DuoduoCompat.minVersionForRestartReason
         ))
+        XCTAssertTrue(DuoduoCompat.meetsMinimum(
+            installed: "0.7.1",
+            minimum: DuoduoCompat.minVersionForRestartReason
+        ))
         XCTAssertFalse(DuoduoCompat.meetsMinimum(
             installed: "0.6.2",
+            minimum: DuoduoCompat.minVersionForRestartReason
+        ))
+        XCTAssertFalse(DuoduoCompat.meetsMinimum(
+            installed: "0.6.3",
             minimum: DuoduoCompat.minVersionForRestartReason
         ))
     }

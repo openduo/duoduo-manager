@@ -10,7 +10,7 @@ final class DaemonServiceRestartReasonTests: XCTestCase {
         let args = DaemonService.restartArguments(
             daemonURL: url,
             reason: "manual restart from duoduo-manager menubar",
-            installedVersion: "0.6.3"
+            installedVersion: "0.7.0"
         )
         XCTAssertEqual(args, [
             "daemon", "restart", "--daemon-url", url,
@@ -47,7 +47,7 @@ final class DaemonServiceRestartReasonTests: XCTestCase {
             let args = DaemonService.restartArguments(
                 daemonURL: url,
                 reason: blank,
-                installedVersion: "0.6.3"
+                installedVersion: "0.7.0"
             )
             XCTAssertEqual(args, ["daemon", "restart", "--daemon-url", url])
         }
@@ -56,17 +56,17 @@ final class DaemonServiceRestartReasonTests: XCTestCase {
     func testTrimsReasonWhitespace() {
         let args = DaemonService.restartArguments(
             daemonURL: url,
-            reason: "  upgraded @openduo/duoduo to 0.6.3  ",
-            installedVersion: "0.6.3"
+            reason: "  upgraded @openduo/duoduo to 0.7.0  ",
+            installedVersion: "0.7.0"
         )
-        XCTAssertEqual(args.last, "upgraded @openduo/duoduo to 0.6.3")
+        XCTAssertEqual(args.last, "upgraded @openduo/duoduo to 0.7.0")
     }
 
     func testOmitsReasonWhenNilEvenIfVersionNewEnough() {
         let args = DaemonService.restartArguments(
             daemonURL: url,
             reason: nil,
-            installedVersion: "0.6.3"
+            installedVersion: "0.7.0"
         )
         XCTAssertEqual(args, ["daemon", "restart", "--daemon-url", url])
     }

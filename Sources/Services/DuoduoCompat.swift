@@ -15,9 +15,8 @@ enum DuoduoCompat {
     /// (unknown argument), so callers must gate on this version before
     /// building the flag — see `DaemonService.restart(reason:)`.
     ///
-    /// The flag is not in a published release yet; bump this to the first
-    /// 0.6.x tag that ships it once the duoduo side is released.
-    static let minVersionForRestartReason = "0.6.3"
+    /// Shipped in v0.7.0 (no 0.6.x release carried it; 0.6.2 → 0.7.0).
+    static let minVersionForRestartReason = "0.7.0"
 
     /// Minimum installed duoduo version that honors `DUODUO_NODE_BIN`.
     /// Below this, exporting the variable is a silent no-op (older
