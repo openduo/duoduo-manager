@@ -6,7 +6,11 @@ protocol DaemonServicing: Sendable {
     func getVersion() async throws -> String
     func start(extraEnv: [String: String]) async throws -> String
     func stop() async throws -> String
-    func restart(extraEnv: [String: String]) async throws -> String
+    func restart(
+        extraEnv: [String: String],
+        reason: String?,
+        installedVersion: String?
+    ) async throws -> String
 }
 
 protocol ChannelServicing: Sendable {
@@ -44,13 +48,11 @@ protocol VersionServicing: Sendable {
 protocol UpgradeServicing: Sendable {
     func upgradeAll(
         daemonInstalledVersion: String,
-        daemonWasRunning: Bool,
         channels: [ChannelInfo],
         latestVersions: [String: String],
         stopChannel: (String) async throws -> String,
         syncChannel: (String) async throws -> String,
         startChannel: (String) async throws -> String,
-        restartDaemon: () async throws -> String,
         refreshSkills: () async throws -> String
     ) async throws -> String
 }

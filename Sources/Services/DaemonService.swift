@@ -66,7 +66,11 @@ final class DaemonService: Sendable {
         return output
     }
 
-    func restart(extraEnv: [String: String] = [:]) async throws -> String {
+    func restart(
+        extraEnv: [String: String] = [:],
+        reason: String? = nil,
+        installedVersion: String? = nil
+    ) async throws -> String {
         guard NodeRuntime.isDuoduoInstalled else {
             return "duoduo not installed"
         }
@@ -76,10 +80,35 @@ final class DaemonService: Sendable {
 
         return try await ShellService.run(
             NodeRuntime.duoduoPath,
-            arguments: ["daemon", "restart", "--daemon-url", daemonURL],
+            arguments: Self.restartArguments(daemonURL: daemonURL, reason: reason, installedVersion: installedVersion),
             environment: env,
             workingDirectory: NodeRuntime.duoduoPackageDir
         )
+    }
+
+    /// Builds the argument vector for `daemon restart`, appending `--reason`
+    /// only when the running duoduo is new enough to accept it (the flag is a
+    /// hard error on older CLIs — an unknown argument — so the version gate is
+    /// mandatory, not cosmetic). Split out so it can be unit-tested without
+    /// shelling out.
+    static func restartArguments(
+        daemonURL: String,
+        reason: String?,
+        installedVersion: String?
+    ) -> [String] {
+        var arguments = ["daemon", "restart", "--daemon-url", daemonURL]
+
+        // Trim whitespace; an empty reason carries no information, so drop it.
+        let trimmed = reason?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard !trimmed.isEmpty,
+              DuoduoCompat.meetsMinimum(
+                  installed: installedVersion,
+                  minimum: DuoduoCompat.minVersionForRestartReason
+              )
+        else { return arguments }
+
+        arguments += ["--reason", trimmed]
+        return arguments
     }
 
     // MARK: - Environment

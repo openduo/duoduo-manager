@@ -13,7 +13,11 @@ struct FakeDaemonService: DaemonServicing {
     func getVersion() async throws -> String { version }
     func start(extraEnv: [String: String]) async throws -> String { startResult }
     func stop() async throws -> String { stopResult }
-    func restart(extraEnv: [String: String]) async throws -> String { restartResult }
+    func restart(
+        extraEnv: [String: String],
+        reason: String?,
+        installedVersion: String?
+    ) async throws -> String { restartResult }
 }
 
 struct FakeChannelService: ChannelServicing {
@@ -86,13 +90,11 @@ struct FakeUpgradeService: UpgradeServicing {
 
     func upgradeAll(
         daemonInstalledVersion: String,
-        daemonWasRunning: Bool,
         channels: [ChannelInfo],
         latestVersions: [String: String],
         stopChannel: (String) async throws -> String,
         syncChannel: (String) async throws -> String,
         startChannel: (String) async throws -> String,
-        restartDaemon: () async throws -> String,
         refreshSkills: () async throws -> String
     ) async throws -> String {
         output

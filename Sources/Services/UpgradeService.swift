@@ -50,13 +50,11 @@ struct UpgradeService: Sendable {
     /// Update only components that have newer versions available.
     func upgradeAll(
         daemonInstalledVersion: String,
-        daemonWasRunning: Bool,
         channels: [ChannelInfo],
         latestVersions: [String: String],
         stopChannel: (String) async throws -> String,
         syncChannel: (String) async throws -> String,
         startChannel: (String) async throws -> String,
-        restartDaemon: () async throws -> String,
         refreshSkills: () async throws -> String
     ) async throws -> String {
         var output = ""
@@ -81,12 +79,16 @@ struct UpgradeService: Sendable {
             output += try await stopChannel(ch.type)
         }
 
-        // 3. Update + restart daemon if needed
+        // 3. Update the daemon if needed. `duoduo upgrade` restarts the
+        // daemon itself (health-checking the replacement before returning)
+        // and — on new enough CLIs — attributes that restart with a reason.
+        // Do NOT restart a second time: it would kill any in-flight turn
+        // again, and (per #13) without a reason, so a session that survives
+        // to read a reason sees the one before the restart that actually
+        // cut it off. The pre-attribution behavior of `duoduo upgrade`
+        // already covers this path.
         if daemonNeedsUpdate {
             output += try await upgradeDaemon()
-            if daemonWasRunning {
-                output += try await restartDaemon()
-            }
         }
 
         // 4. Update + restart channels

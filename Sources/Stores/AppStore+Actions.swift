@@ -72,7 +72,20 @@ extension AppStore {
 
     func startDaemon() { executeCommand { try await self.daemonService.start(extraEnv: [:]) } }
     func stopDaemon() { executeCommand { try await self.daemonService.stop() } }
-    func restartDaemon() { executeCommand { try await self.daemonService.restart(extraEnv: [:]) } }
+
+    /// Manual restart from the menubar card. A deliberate human action —
+    /// Manager knows this where the CLI cannot, so attribute it explicitly
+    /// (see #13). `--reason` is dropped automatically on CLIs too old to
+    /// accept it (see `DaemonService.restart(reason:installedVersion:)`).
+    func restartDaemon() {
+        executeCommand {
+            try await self.daemonService.restart(
+                extraEnv: [:],
+                reason: "manual restart from duoduo-manager menubar",
+                installedVersion: self.runtime.status.version
+            )
+        }
+    }
 
     func startChannel(_ channelType: String) {
         executeCommand {
@@ -105,16 +118,13 @@ extension AppStore {
             activeOperation: .upgradeAll,
             initialOutput: upgradeAllProgressMessage()
         ) {
-            let daemonWasRunning = self.runtime.status.isRunning
             let output = try await self.upgradeService.upgradeAll(
                 daemonInstalledVersion: self.runtime.status.version,
-                daemonWasRunning: daemonWasRunning,
                 channels: self.runtime.channels,
                 latestVersions: self.updates.latestVersions,
                 stopChannel: { type in try await self.channelService.stopChannel(type) },
                 syncChannel: { pkg in try await self.channelService.syncChannel(pkg) },
                 startChannel: { type in try await self.channelService.startChannel(type, extraEnv: [:]) },
-                restartDaemon: { try await self.daemonService.restart(extraEnv: [:]) },
                 refreshSkills: { await self.skillService.refreshSkills() }
             )
             return output.isEmpty ? L10n.Upgrade.allUpToDate : output
