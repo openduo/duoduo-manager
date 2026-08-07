@@ -31,6 +31,7 @@
 		3C743456229643B52CF20F78 /* DashboardPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52ABF56B3A67B044533AB057 /* DashboardPresentation.swift */; };
 		3E5A505F3C91E1C0F4DC2336 /* StatusBarControlSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = E65007E3653DF04BA1B28A14 /* StatusBarControlSection.swift */; };
 		3F06193C066E4B68CD4DB443 /* StatusBarView+Support.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEC650582C38EC2C96D4C1D5 /* StatusBarView+Support.swift */; };
+		4222185AF35FDA82754D0AB3 /* DaemonServiceRestartReasonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 389CB96D37729402A1A97FFF /* DaemonServiceRestartReasonTests.swift */; };
 		4ACF648B9B30BAF598EF35C2 /* StatusBarPresentationMapperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89EFE42BC8CDEF5987274498 /* StatusBarPresentationMapperTests.swift */; };
 		4DEC4D220CA3E1F92EF901CF /* ChannelService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 926633CA04F758F9BC2A5064 /* ChannelService.swift */; };
 		4F00CADDB45EB3F1B31246C8 /* FeishuConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = E29BB270BCC709AA4E4A82B6 /* FeishuConfig.swift */; };
@@ -89,8 +90,7 @@
 		F7A144EB6254AE07E38EBB12 /* DaemonConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F208FDB32EE95280C59DE480 /* DaemonConfig.swift */; };
 		F97089A9A67B81FF81F9BB4C /* DashboardPresentationMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D50E480BA7922E6B4768AAD /* DashboardPresentationMapper.swift */; };
 		FA953AF57994D9DB7B81424A /* StatusBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 905C0CACFCF03BAA771CC96E /* StatusBarView.swift */; };
-		A1B2C3D4E5F6000100000001 /* DaemonServiceRestartReasonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000200000001 /* DaemonServiceRestartReasonTests.swift */; };
-		A1B2C3D4E5F6000100000002 /* DaemonConfigRemoteAccessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000200000002 /* DaemonConfigRemoteAccessTests.swift */; };
+		FEE338AA20046B115C56C6C5 /* DaemonConfigRemoteAccessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1280F8B308E84DC23B96C1C5 /* DaemonConfigRemoteAccessTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -110,6 +110,7 @@
 		041E74EBC327977A9E15D883 /* AppStoreVisibilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStoreVisibilityTests.swift; sourceTree = "<group>"; };
 		08AF8879FC0820B8606A783C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		0E0046CA8AE532D210FB92F7 /* SharedPresentationFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedPresentationFormatting.swift; sourceTree = "<group>"; };
+		1280F8B308E84DC23B96C1C5 /* DaemonConfigRemoteAccessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonConfigRemoteAccessTests.swift; sourceTree = "<group>"; };
 		18799A79169815D636D94496 /* DaemonConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonConfigView.swift; sourceTree = "<group>"; };
 		1E1AD037DDD7C23ACFA1C9D8 /* UpgradeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpgradeService.swift; sourceTree = "<group>"; };
 		210C266E6749AEA8B72E0E08 /* DashboardRPCService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardRPCService.swift; sourceTree = "<group>"; };
@@ -119,6 +120,7 @@
 		2AFE377434F91AB5220C4E12 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		33AEA42E718AE2B948BAB6FB /* StatusBarTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarTheme.swift; sourceTree = "<group>"; };
 		383647EF2C49D5F7595B6F3E /* SessionsContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionsContentView.swift; sourceTree = "<group>"; };
+		389CB96D37729402A1A97FFF /* DaemonServiceRestartReasonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonServiceRestartReasonTests.swift; sourceTree = "<group>"; };
 		3BEA40D33E29FED5A01BEB28 /* EventStreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventStreamView.swift; sourceTree = "<group>"; };
 		3BEF6EA57DA0120926D8BA4A /* DashboardModelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardModelsTests.swift; sourceTree = "<group>"; };
 		4038281C88477EE5D39B06F4 /* ServiceProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceProtocols.swift; sourceTree = "<group>"; };
@@ -130,8 +132,6 @@
 		52ABF56B3A67B044533AB057 /* DashboardPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardPresentation.swift; sourceTree = "<group>"; };
 		54840B6846285AED341E1271 /* AppStore+Actions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppStore+Actions.swift"; sourceTree = "<group>"; };
 		57487CEBE75A5F2A3A38E3B6 /* OnboardingCompletionMarkerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCompletionMarkerTests.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6000200000001 /* DaemonServiceRestartReasonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonServiceRestartReasonTests.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6000200000002 /* DaemonConfigRemoteAccessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonConfigRemoteAccessTests.swift; sourceTree = "<group>"; };
 		5AC685DCE1F6A1F29867B8AF /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		63FD10798EC2CABC731AE9AB /* DaemonStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonStatus.swift; sourceTree = "<group>"; };
 		652BAAFCF820EB15493EC29E /* AppStoreDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStoreDependencies.swift; sourceTree = "<group>"; };
@@ -406,8 +406,8 @@
 		C98CDD1ABB9CB55690671B97 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				389CB96D37729402A1A97FFF /* DaemonServiceRestartReasonTests.swift */,
 				8064F089733E58BAC77B5177 /* DuoduoCompatTests.swift */,
-				A1B2C3D4E5F6000200000001 /* DaemonServiceRestartReasonTests.swift */,
 				57487CEBE75A5F2A3A38E3B6 /* OnboardingCompletionMarkerTests.swift */,
 				A7B76EA8B4B8C9BDDFEA34FB /* ShellPathInstallerTests.swift */,
 				D84B7A191D1444F5A91A770F /* UpgradeServiceTests.swift */,
@@ -449,8 +449,8 @@
 			isa = PBXGroup;
 			children = (
 				7DCB7518B9AB30913638E9F7 /* ConfigStoreTests.swift */,
+				1280F8B308E84DC23B96C1C5 /* DaemonConfigRemoteAccessTests.swift */,
 				3BEF6EA57DA0120926D8BA4A /* DashboardModelsTests.swift */,
-				A1B2C3D4E5F6000200000002 /* DaemonConfigRemoteAccessTests.swift */,
 				A88DC70212764AEEF0CFF431 /* OnboardingReducerTests.swift */,
 				F3220EB9A822D51F1DEDA8C5 /* OnboardingStoreTests.swift */,
 			);
@@ -650,10 +650,10 @@
 				C5C9A12A9740F3DFB6753330 /* AppStoreTests.swift in Sources */,
 				ACCD474DEE8340DC403DE614 /* AppStoreVisibilityTests.swift in Sources */,
 				F6DCEA3DDBDCCB645A131B97 /* ConfigStoreTests.swift in Sources */,
+				FEE338AA20046B115C56C6C5 /* DaemonConfigRemoteAccessTests.swift in Sources */,
+				4222185AF35FDA82754D0AB3 /* DaemonServiceRestartReasonTests.swift in Sources */,
 				24A56450A55E7D5764F74855 /* DashboardModelsTests.swift in Sources */,
 				AD05E125ED2B830AEE70A269 /* DashboardPresentationMapperTests.swift in Sources */,
-				A1B2C3D4E5F6000100000002 /* DaemonConfigRemoteAccessTests.swift in Sources */,
-				A1B2C3D4E5F6000100000001 /* DaemonServiceRestartReasonTests.swift in Sources */,
 				2F895A0585E7DA19070AC821 /* DuoduoCompatTests.swift in Sources */,
 				F649C5C985E54CCB40D61CB9 /* OnboardingCompletionMarkerTests.swift in Sources */,
 				08B19C66F8B4067F10052A15 /* OnboardingReducerTests.swift in Sources */,
@@ -752,7 +752,7 @@
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Config/Info.plist;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.6.17;
+				MARKETING_VERSION = 1.7.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -887,7 +887,7 @@
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Config/Info.plist;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.6.17;
+				MARKETING_VERSION = 1.7.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.openduo.manager;
