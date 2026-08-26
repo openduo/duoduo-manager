@@ -94,4 +94,31 @@ final class StatusBarPresentationMapperTests: XCTestCase {
         XCTAssertEqual(presentation.topology.endpoint, "http://127.0.0.1:20233")
         XCTAssertEqual(presentation.topology.runtimeHost, "local runtime")
     }
+
+    func testSessionDetailIncludesRuntimeWhenPresent() {
+        let withRuntime = SessionInfo(
+            session_key: "s1",
+            status: "active",
+            health: "ok",
+            last_event_at: nil,
+            created_at: nil,
+            last_error: nil,
+            cwd: nil,
+            display_name: "Ada",
+            runtime: "codex"
+        )
+        let withoutRuntime = SessionInfo(
+            session_key: "s2",
+            status: "idle",
+            health: nil,
+            last_event_at: nil,
+            created_at: nil,
+            last_error: nil,
+            cwd: nil,
+            display_name: "Bob"
+        )
+
+        XCTAssertEqual(SharedPresentationFormatting.sessionDetail(withRuntime), "codex · ok")
+        XCTAssertEqual(SharedPresentationFormatting.sessionDetail(withoutRuntime), "idle")
+    }
 }

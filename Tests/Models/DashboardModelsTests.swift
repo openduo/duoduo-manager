@@ -66,6 +66,61 @@ final class DashboardModelsTests: XCTestCase {
         XCTAssertFalse(dotenv.contains("sdk_debug"))
     }
 
+    func testSessionInfoDecodesAgentRuntime() throws {
+        let session = try JSONDecoder().decode(SessionInfo.self, from: Data(#"""
+        {
+          "session_key": "feishu:oc_1",
+          "status": "active",
+          "health": "ok",
+          "last_event_at": null,
+          "created_at": null,
+          "last_error": null,
+          "cwd": "/tmp",
+          "display_name": "Ada",
+          "runtime": "grok"
+        }
+        """#.utf8))
+
+        XCTAssertEqual(session.runtime, "grok")
+        XCTAssertEqual(SessionRegistryEntry.fromActive(session).runtime, "grok")
+    }
+
+    func testSessionInfoDecodesWhenRuntimeIsAbsent() throws {
+        let session = try JSONDecoder().decode(SessionInfo.self, from: Data(#"""
+        {
+          "session_key": "feishu:oc_1",
+          "status": "idle",
+          "health": "ok",
+          "last_event_at": null,
+          "created_at": null,
+          "cwd": null,
+          "display_name": null
+        }
+        """#.utf8))
+
+        XCTAssertNil(session.runtime)
+    }
+
+    func testSessionRegistryEntryDecodesOptionalRuntime() throws {
+        let withRuntime = try JSONDecoder().decode(SessionRegistryEntry.self, from: Data(#"""
+        {
+          "session_key": "stdio:default",
+          "display_name": "stdio",
+          "kind": "channel",
+          "runtime": "codex"
+        }
+        """#.utf8))
+        let withoutRuntime = try JSONDecoder().decode(SessionRegistryEntry.self, from: Data(#"""
+        {
+          "session_key": "stdio:default",
+          "kind": "channel"
+        }
+        """#.utf8))
+
+        XCTAssertEqual(withRuntime.runtime, "codex")
+        XCTAssertNil(withoutRuntime.runtime)
+    }
+
     private func decodeConfigEntry(_ json: String) throws -> ConfigEntry {
         try JSONDecoder().decode(ConfigEntry.self, from: Data(json.utf8))
     }

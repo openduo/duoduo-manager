@@ -91,6 +91,7 @@ struct SessionRegistryEntry: Decodable, Sendable, Identifiable {
     let source_channel_id: String?
     let last_error: FlexibleString?
     let orphan: Bool?
+    let runtime: String?
 
     var lastErrorText: String? { last_error?.value }
 
@@ -104,7 +105,8 @@ struct SessionRegistryEntry: Decodable, Sendable, Identifiable {
             last_event_at: session.last_event_at,
             source_channel_id: nil,
             last_error: session.last_error,
-            orphan: nil
+            orphan: nil,
+            runtime: session.runtime
         )
     }
 }
