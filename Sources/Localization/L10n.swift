@@ -46,6 +46,106 @@ enum L10n {
         static let disabled = String(localized: "config.disabled", bundle: bundle)
     }
 
+    // MARK: - Model Profiles
+
+    enum ModelProfiles {
+        static let title = String(localized: "modelProfiles.title", bundle: bundle)
+        static let windowTitle = String(localized: "modelProfiles.windowTitle", bundle: bundle)
+        static let footerButton = String(localized: "modelProfiles.footerButton", bundle: bundle)
+        static let subtitle = String(localized: "modelProfiles.subtitle", bundle: bundle)
+        static let layer = String(localized: "modelProfiles.layer", bundle: bundle)
+        static let scopeGlobal = String(localized: "modelProfiles.scopeGlobal", bundle: bundle)
+        static let scopeGlobalDetail = String(localized: "modelProfiles.scopeGlobalDetail", bundle: bundle)
+        static func scopeKindDetail(_ kind: String) -> String {
+            String(localized: "modelProfiles.scopeKindDetail \(kind)", bundle: bundle)
+        }
+        static let profilesSection = String(localized: "modelProfiles.profilesSection", bundle: bundle)
+        static let aliasesSection = String(localized: "modelProfiles.aliasesSection", bundle: bundle)
+        static let add = String(localized: "modelProfiles.add", bundle: bundle)
+        static let edit = String(localized: "modelProfiles.edit", bundle: bundle)
+        static let remove = String(localized: "modelProfiles.remove", bundle: bundle)
+        static let refresh = String(localized: "modelProfiles.refresh", bundle: bundle)
+        static let empty = String(localized: "modelProfiles.empty", bundle: bundle)
+        static let modelID = String(localized: "modelProfiles.modelID", bundle: bundle)
+        static let modelIDHint = String(localized: "modelProfiles.modelIDHint", bundle: bundle)
+        static let windowTokens = String(localized: "modelProfiles.windowTokens", bundle: bundle)
+        static let windowTokensHint = String(localized: "modelProfiles.windowTokensHint", bundle: bundle)
+        static let routeToggle = String(localized: "modelProfiles.routeToggle", bundle: bundle)
+        static let routeHint = String(localized: "modelProfiles.routeHint", bundle: bundle)
+        static let baseURL = String(localized: "modelProfiles.baseURL", bundle: bundle)
+        static let baseURLPlaceholder = String(localized: "modelProfiles.baseURLPlaceholder", bundle: bundle)
+        static let credential = String(localized: "modelProfiles.credential", bundle: bundle)
+        static let authToken = String(localized: "modelProfiles.authToken", bundle: bundle)
+        static let oauthToken = String(localized: "modelProfiles.oauthToken", bundle: bundle)
+        static let token = String(localized: "modelProfiles.token", bundle: bundle)
+        static let tokenRequiredAgain = String(localized: "modelProfiles.tokenRequiredAgain", bundle: bundle)
+        static let existingToken = String(localized: "modelProfiles.existingToken", bundle: bundle)
+        static let hostEndpoint = String(localized: "modelProfiles.hostEndpoint", bundle: bundle)
+        static let rebuildNote = String(localized: "modelProfiles.rebuildNote", bundle: bundle)
+        static let aliasesHint = String(localized: "modelProfiles.aliasesHint", bundle: bundle)
+        static let aliasPlaceholder = String(localized: "modelProfiles.aliasPlaceholder", bundle: bundle)
+        static let aliasClear = String(localized: "modelProfiles.aliasClear", bundle: bundle)
+        static let aliasSaved = String(localized: "modelProfiles.aliasSaved", bundle: bundle)
+        static let saved = String(localized: "modelProfiles.saved", bundle: bundle)
+        static let editorAddTitle = String(localized: "modelProfiles.editorAddTitle", bundle: bundle)
+        static let editorEditTitle = String(localized: "modelProfiles.editorEditTitle", bundle: bundle)
+        static let deleteTitle = String(localized: "modelProfiles.deleteTitle", bundle: bundle)
+        static func deleteMessage(_ model: String) -> String {
+            String(localized: "modelProfiles.deleteMessage \(model)", bundle: bundle)
+        }
+        static let daemonRequired = String(localized: "modelProfiles.daemonRequired", bundle: bundle)
+        static let unreadableOutput = String(localized: "modelProfiles.unreadableOutput", bundle: bundle)
+        static func requiresVersion(_ minimum: String, _ installed: String) -> String {
+            String(localized: "modelProfiles.requiresVersion \(minimum) \(installed)", bundle: bundle)
+        }
+        static func tokenCount(_ formatted: String) -> String {
+            String(localized: "modelProfiles.tokenCount \(formatted)", bundle: bundle)
+        }
+        static func removed(_ model: String) -> String {
+            String(localized: "modelProfiles.removed \(model)", bundle: bundle)
+        }
+        static func rejectedEntry(_ model: String, _ reason: String, _ layer: String) -> String {
+            String(localized: "modelProfiles.rejectedEntry \(model) \(reason) \(layer)", bundle: bundle)
+        }
+        static func settingsConflict(_ file: String, _ value: String) -> String {
+            String(localized: "modelProfiles.settingsConflict \(file) \(value)", bundle: bundle)
+        }
+        static func aliasEndpointWarning(_ model: String, _ endpoint: String) -> String {
+            String(localized: "modelProfiles.aliasEndpointWarning \(model) \(endpoint)", bundle: bundle)
+        }
+        static func validationMessage(_ issue: ModelProfileValidation.Issue) -> String {
+            switch issue {
+            case .emptyModelID:
+                return String(localized: "modelProfiles.validation.emptyModelID", bundle: bundle)
+            case .modelIDWhitespace:
+                return String(localized: "modelProfiles.validation.modelIDWhitespace", bundle: bundle)
+            case .nativeClaudeID:
+                return String(localized: "modelProfiles.validation.nativeClaudeID", bundle: bundle)
+            case .oneMSuffix:
+                return String(localized: "modelProfiles.validation.oneMSuffix", bundle: bundle)
+            case .protoKey:
+                return String(localized: "modelProfiles.validation.protoKey", bundle: bundle)
+            case .tokensNotPositive:
+                return String(localized: "modelProfiles.validation.tokensNotPositive", bundle: bundle)
+            case .invalidBaseURL:
+                return String(localized: "modelProfiles.validation.invalidBaseURL", bundle: bundle)
+            case .baseURLCarriesCredentials:
+                return String(localized: "modelProfiles.validation.baseURLCarriesCredentials", bundle: bundle)
+            case .routedMissingToken:
+                return String(localized: "modelProfiles.validation.routedMissingToken", bundle: bundle)
+            case .routedMissingBaseURL:
+                return String(localized: "modelProfiles.validation.routedMissingBaseURL", bundle: bundle)
+            case .emptyToken:
+                return String(localized: "modelProfiles.validation.emptyToken", bundle: bundle)
+            }
+        }
+        static let columnModel = String(localized: "modelProfiles.columnModel", bundle: bundle)
+        static let columnWindow = String(localized: "modelProfiles.columnWindow", bundle: bundle)
+        static let columnEndpoint = String(localized: "modelProfiles.columnEndpoint", bundle: bundle)
+        static let columnAuth = String(localized: "modelProfiles.columnAuth", bundle: bundle)
+        static let claudeOnly = String(localized: "modelProfiles.claudeOnly", bundle: bundle)
+    }
+
     // MARK: - Daemon Config
 
     enum DaemonConfig {

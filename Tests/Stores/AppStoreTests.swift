@@ -187,7 +187,8 @@ final class AppStoreTests: XCTestCase {
             subconscious: nil,
             cadence: nil
         )
-        let sessionService = FakeSessionService(daemonURL: "http://127.0.0.1:20233", listAllFails: true)
+        let sessionService = FakeSessionService(daemonURL: "http://127.0.0.1:20233")
+        sessionService.listAllFails = true
         let store = makeStore(
             dashboardService: FakeDashboardRPCService(
                 baseURL: "http://127.0.0.1:20233",

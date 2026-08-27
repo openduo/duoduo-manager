@@ -89,6 +89,7 @@ struct StatusFooterBar: View {
     let onDashboard: () -> Void
     let onOnboard: () -> Void
     let onReader: () -> Void
+    let onModelProfiles: () -> Void
     let onTerminal: () -> Void
     let onSelectTerminalApp: (PreferredTerminalApp) -> Void
     let onQuit: () -> Void
@@ -104,6 +105,7 @@ struct StatusFooterBar: View {
         HStack(spacing: 8) {
             footerButton(title: "ATC", systemImage: "square.grid.2x2", action: onDashboard)
             footerButton(title: "Reader", systemImage: "book.closed", action: onReader)
+            footerButton(title: L10n.ModelProfiles.footerButton, systemImage: "cpu", action: onModelProfiles)
             footerButton(title: "Onboard", systemImage: "checklist", action: onOnboard)
             terminalControl
                 .onAppear { refreshInstalledTerminalApps() }

@@ -35,16 +35,23 @@ struct ShellService: Sendable {
     }
 
     /// Run a subprocess directly — no shell intermediate.
+    ///
+    /// `stdin` is written and the pipe closed before waiting. It is never
+    /// logged — callers that pass a secret (profile credentials) rely on that.
     static func run(
         _ executable: String,
         arguments: [String],
         environment overrides: [String: String] = [:],
-        workingDirectory: String? = nil
+        workingDirectory: String? = nil,
+        stdin: Data? = nil
     ) async throws -> String {
         let cmdDesc = "\(executable) \(arguments.joined(separator: " "))"
         writeLog(">>> \(cmdDesc)")
         if let dir = workingDirectory {
             writeLog("    cwd: \(dir)")
+        }
+        if let stdin {
+            writeLog("    stdin: (\(stdin.count) bytes, not logged)")
         }
 
         return try await withCheckedThrowingContinuation { continuation in
@@ -73,8 +80,17 @@ struct ShellService: Sendable {
             process.standardOutput = outputPipe
             process.standardError = errorPipe
 
+            let inputPipe: Pipe? = stdin == nil ? nil : Pipe()
+            if let inputPipe {
+                process.standardInput = inputPipe
+            }
+
             do {
                 try process.run()
+                if let stdin, let inputPipe {
+                    inputPipe.fileHandleForWriting.write(stdin)
+                    try? inputPipe.fileHandleForWriting.close()
+                }
                 process.waitUntilExit()
 
                 let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()

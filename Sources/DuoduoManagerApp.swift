@@ -58,6 +58,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
     private var statusController: AppStatusController?
     private var windowController: AppWindowController?
     private var onboardingController: OnboardingWindowController?
+    private var modelProfilesController: ModelProfilesWindowController?
     private var openReaderWindowAction: (() -> Void)?
     lazy var updaterController = SPUStandardUpdaterController(
         startingUpdater: true,
@@ -156,7 +157,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
             store: store,
             openDashboard: { [weak self] in self?.openDashboard() },
             openReader: { [weak self] in self?.openReader() },
-            openOnboard: { [weak self] in self?.openOnboarding(at: .claudeAccess) }
+            openOnboard: { [weak self] in self?.openOnboarding(at: .claudeAccess) },
+            openModelProfiles: { [weak self] in self?.openModelProfiles() }
         ))
         updateStatusBarIcon()
     }
@@ -180,6 +182,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
     private func openOnboarding(at preferredRequirement: OnboardingRequirement?) {
         statusController?.dismissPopover()
         showOnboarding(at: preferredRequirement)
+    }
+
+    private func openModelProfiles() {
+        statusController?.dismissPopover()
+        guard let store else { return }
+        if modelProfilesController == nil {
+            let controller = ModelProfilesWindowController(appStore: store)
+            controller.onClose = { [weak self] in
+                self?.modelProfilesController = nil
+            }
+            modelProfilesController = controller
+        }
+        modelProfilesController?.show()
     }
 
     // MARK: - CC Reader

@@ -39,6 +39,18 @@ protocol SessionServicing: Sendable {
     func alias(sessionKey: String, name: String?) async throws -> String
     func notify(target: String, message: String, source: String) async throws -> String
     func archive(sessionKey: String) async throws -> String
+    func profileGet(scope: ModelProfileScope) async throws -> ModelProfileSnapshot
+    func profileSet(
+        scope: ModelProfileScope,
+        modelID: String,
+        maxContextTokens: Int,
+        baseURL: String?,
+        authField: ModelProfileAuthField?,
+        authToken: String?
+    ) async throws -> ModelProfileSnapshot
+    func profileUnset(scope: ModelProfileScope, modelID: String) async throws -> ModelProfileSnapshot
+    func profileAliasSet(scope: ModelProfileScope, tier: String, modelID: String) async throws -> ModelProfileSnapshot
+    func profileAliasUnset(scope: ModelProfileScope, tier: String) async throws -> ModelProfileSnapshot
 }
 
 protocol VersionServicing: Sendable {

@@ -12,6 +12,7 @@ final class AppStore {
     let dashboard: DashboardStore
     let updates: UpdateStore
     let command: CommandStore
+    let modelProfiles: ModelProfileStore
 
     let dependencies: AppStoreDependencies
     let versionService: any VersionServicing
@@ -69,8 +70,10 @@ final class AppStore {
         daemonService = dependencies.makeDaemonService(runtimeStore.daemonConfig.daemonURL)
         channelService = dependencies.makeChannelService(runtimeStore.daemonConfig.daemonURL)
         rpc = dependencies.makeDashboardRPCService(runtimeStore.daemonConfig.daemonURL)
-        sessionService = dependencies.makeSessionService(runtimeStore.daemonConfig.daemonURL)
+        let session = dependencies.makeSessionService(runtimeStore.daemonConfig.daemonURL)
+        sessionService = session
         skillService = dependencies.makeSkillService()
+        modelProfiles = ModelProfileStore(sessionService: session)
     }
 
     func reconfigureConnectionsIfNeeded() {
@@ -80,6 +83,7 @@ final class AppStore {
             channelService = dependencies.makeChannelService(daemonURL)
             rpc = dependencies.makeDashboardRPCService(daemonURL)
             sessionService = dependencies.makeSessionService(daemonURL)
+            modelProfiles.sessionService = sessionService
             lastEventId = nil
             lastSeenBySession.removeAll()
             dashboard.events.removeAll()

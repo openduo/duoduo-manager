@@ -41,6 +41,11 @@ enum DuoduoCompat {
     /// the wrapper change merged in 0.5.0-pre.22.
     static let minVersionForNodeBinEnv = "0.5.0-rc.1"
 
+    /// Minimum installed duoduo version that exposes
+    /// `duoduo session config … profile` (per-model context windows,
+    /// endpoint routing, and tier aliases). Shipped in v0.7.0.
+    static let minVersionForModelProfiles = "0.7.0"
+
     /// Returns true if `installed` is at or above `minimum` under a
     /// simplified semver order: compare the numeric `MAJOR.MINOR.PATCH`
     /// triple first; if equal, a build with a pre-release suffix

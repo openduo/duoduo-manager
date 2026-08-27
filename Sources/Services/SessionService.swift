@@ -28,12 +28,82 @@ struct SessionService: Sendable {
         try await runSession(["archive", sessionKey])
     }
 
-    private func runSession(_ arguments: [String]) async throws -> String {
+    func profileGet(scope: ModelProfileScope) async throws -> ModelProfileSnapshot {
+        try await runProfile(ModelProfileCLI.getArguments(scope: scope), scope: scope)
+    }
+
+    func profileSet(
+        scope: ModelProfileScope,
+        modelID: String,
+        maxContextTokens: Int,
+        baseURL: String?,
+        authField: ModelProfileAuthField?,
+        authToken: String?
+    ) async throws -> ModelProfileSnapshot {
+        let args = ModelProfileCLI.setArgumentsJSON(
+            scope: scope,
+            modelID: modelID,
+            maxContextTokens: maxContextTokens,
+            baseURL: baseURL,
+            authField: authField
+        )
+        let stdin: Data?
+        if authField != nil, let authToken, !authToken.isEmpty {
+            stdin = Data(authToken.utf8)
+        } else {
+            stdin = nil
+        }
+        return try await runProfile(args, scope: scope, stdin: stdin)
+    }
+
+    func profileUnset(scope: ModelProfileScope, modelID: String) async throws -> ModelProfileSnapshot {
+        try await runProfile(ModelProfileCLI.unsetArguments(scope: scope, modelID: modelID), scope: scope)
+    }
+
+    func profileAliasSet(scope: ModelProfileScope, tier: String, modelID: String) async throws -> ModelProfileSnapshot {
+        try await runProfile(
+            ModelProfileCLI.aliasSetArguments(scope: scope, tier: tier, modelID: modelID),
+            scope: scope
+        )
+    }
+
+    func profileAliasUnset(scope: ModelProfileScope, tier: String) async throws -> ModelProfileSnapshot {
+        try await runProfile(
+            ModelProfileCLI.aliasUnsetArguments(scope: scope, tier: tier),
+            scope: scope
+        )
+    }
+
+    private func runSession(_ arguments: [String], stdin: Data? = nil) async throws -> String {
         try await ShellService.run(
             NodeRuntime.duoduoPath,
             arguments: ["session"] + arguments,
-            environment: sessionEnv
+            environment: sessionEnv,
+            stdin: stdin
         )
+    }
+
+    private func runProfile(
+        _ arguments: [String],
+        scope: ModelProfileScope,
+        stdin: Data? = nil
+    ) async throws -> ModelProfileSnapshot {
+        let output: String
+        do {
+            output = try await runSession(arguments, stdin: stdin)
+        } catch let ShellError.executionFailed(message, _) {
+            output = message
+        }
+        let result: SessionConfigResult
+        do {
+            result = try SessionConfigJSON.decodeResult(from: output)
+        } catch {
+            throw ModelProfileError.unreadableOutput
+        }
+        guard result.ok else {
+            throw ModelProfileError.cli(result.failureMessage)
+        }
+        return result.snapshot(fallbackScope: scope)
     }
 
     private var sessionEnv: [String: String] {

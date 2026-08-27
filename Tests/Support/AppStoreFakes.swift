@@ -60,13 +60,20 @@ struct FakeDashboardRPCService: DashboardRPCServicing {
     func systemConfig() async throws -> SystemConfig { systemConfigResponse }
 }
 
-struct FakeSessionService: SessionServicing {
+final class FakeSessionService: SessionServicing, @unchecked Sendable {
     let daemonURL: String
     var sessions: [SessionRegistryEntry] = []
     var listAllFails = false
     var aliasResult = ""
     var notifyResult = ""
     var archiveResult = ""
+    var profileSnapshot = ModelProfileSnapshot.empty
+    var profileGetFails = false
+
+    init(daemonURL: String, sessions: [SessionRegistryEntry] = []) {
+        self.daemonURL = daemonURL
+        self.sessions = sessions
+    }
 
     func listAll() async throws -> [SessionRegistryEntry] {
         if listAllFails {
@@ -77,6 +84,64 @@ struct FakeSessionService: SessionServicing {
     func alias(sessionKey: String, name: String?) async throws -> String { aliasResult }
     func notify(target: String, message: String, source: String) async throws -> String { notifyResult }
     func archive(sessionKey: String) async throws -> String { archiveResult }
+
+    func profileGet(scope: ModelProfileScope) async throws -> ModelProfileSnapshot {
+        if profileGetFails {
+            throw ModelProfileError.cli("profile get failed")
+        }
+        var snapshot = profileSnapshot
+        snapshot.scope = scope
+        return snapshot
+    }
+
+    func profileSet(
+        scope: ModelProfileScope,
+        modelID: String,
+        maxContextTokens: Int,
+        baseURL: String?,
+        authField: ModelProfileAuthField?,
+        authToken: String?
+    ) async throws -> ModelProfileSnapshot {
+        let auth: ModelProfileAuth?
+        if let authField, let authToken, !authToken.isEmpty {
+            let suffix = String(authToken.suffix(4))
+            auth = ModelProfileAuth(field: authField.rawValue, masked: "…\(suffix)")
+        } else {
+            auth = nil
+        }
+        let entry = ModelProfileEntry(
+            model: modelID,
+            max_context_tokens: maxContextTokens,
+            base_url: baseURL,
+            auth: auth,
+            source: scope == .global ? "global" : "kind"
+        )
+        var entries = profileSnapshot.entries.filter { $0.model != modelID }
+        entries.append(entry)
+        profileSnapshot.entries = entries.sorted { $0.model < $1.model }
+        profileSnapshot.scope = scope
+        return profileSnapshot
+    }
+
+    func profileUnset(scope: ModelProfileScope, modelID: String) async throws -> ModelProfileSnapshot {
+        profileSnapshot.entries.removeAll { $0.model == modelID }
+        profileSnapshot.scope = scope
+        return profileSnapshot
+    }
+
+    func profileAliasSet(scope: ModelProfileScope, tier: String, modelID: String) async throws -> ModelProfileSnapshot {
+        var aliases = profileSnapshot.aliases.filter { $0.tier != tier }
+        aliases.append(ModelProfileAlias(tier: tier, model: modelID, source: scope == .global ? "global" : "kind"))
+        profileSnapshot.aliases = aliases
+        profileSnapshot.scope = scope
+        return profileSnapshot
+    }
+
+    func profileAliasUnset(scope: ModelProfileScope, tier: String) async throws -> ModelProfileSnapshot {
+        profileSnapshot.aliases.removeAll { $0.tier == tier }
+        profileSnapshot.scope = scope
+        return profileSnapshot
+    }
 }
 
 struct FakeVersionService: VersionServicing {

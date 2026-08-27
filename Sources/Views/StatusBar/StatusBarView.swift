@@ -6,6 +6,7 @@ struct StatusBarView: View {
     var openDashboard: (() -> Void)?
     var openReader: (() -> Void)?
     var openOnboard: (() -> Void)?
+    var openModelProfiles: (() -> Void)?
     @AppStorage("statusBar.preferredTerminalApp") var preferredTerminalAppRaw: String = PreferredTerminalApp.appleTerminal.rawValue
 
     @State var expandedEventIDs: Set<String> = []
@@ -21,11 +22,18 @@ struct StatusBarView: View {
     let panelContentInset: CGFloat = 10
     let overviewDividerWidth: CGFloat = 1
 
-    init(store: AppStore, openDashboard: (() -> Void)? = nil, openReader: (() -> Void)? = nil, openOnboard: (() -> Void)? = nil) {
+    init(
+        store: AppStore,
+        openDashboard: (() -> Void)? = nil,
+        openReader: (() -> Void)? = nil,
+        openOnboard: (() -> Void)? = nil,
+        openModelProfiles: (() -> Void)? = nil
+    ) {
         self.store = store
         self.openDashboard = openDashboard
         self.openReader = openReader
         self.openOnboard = openOnboard
+        self.openModelProfiles = openModelProfiles
         _daemonDraft = State(initialValue: store.runtime.daemonConfig)
         _feishuDraft = State(initialValue: store.runtime.feishuConfig)
     }
@@ -72,6 +80,7 @@ struct StatusBarView: View {
                 onDashboard: { openDashboard?() },
                 onOnboard: { openOnboard?() },
                 onReader: { openCCReader() },
+                onModelProfiles: { openModelProfiles?() },
                 onTerminal: { openTerminal() },
                 onSelectTerminalApp: { preferredTerminalAppRaw = $0.rawValue },
                 onQuit: { NSApplication.shared.terminate(nil) }
