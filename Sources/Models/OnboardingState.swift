@@ -2,7 +2,6 @@ import Foundation
 
 enum OnboardingRequirement: String, CaseIterable, Identifiable, Hashable {
     case duoduoCLI
-    case claudeCLI
     case claudeAccess
     case daemon
 
@@ -12,8 +11,6 @@ enum OnboardingRequirement: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .duoduoCLI:
             return L10n.Onboard.reqDuoduoCLI
-        case .claudeCLI:
-            return L10n.Onboard.reqClaudeCLI
         case .claudeAccess:
             return L10n.Onboard.reqClaudeAccess
         case .daemon:
@@ -25,8 +22,6 @@ enum OnboardingRequirement: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .duoduoCLI:
             return "shippingbox.fill"
-        case .claudeCLI:
-            return "terminal.fill"
         case .claudeAccess:
             return "key.radiowaves.forward.fill"
         case .daemon:
@@ -38,8 +33,6 @@ enum OnboardingRequirement: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .duoduoCLI:
             return L10n.Onboard.summaryDuoduoCLI
-        case .claudeCLI:
-            return L10n.Onboard.summaryClaudeCLI
         case .claudeAccess:
             return L10n.Onboard.summaryClaudeAccess
         case .daemon:
@@ -78,10 +71,7 @@ struct OnboardingSnapshot {
         if !duoduoInstalled {
             requirements.append(.duoduoCLI)
         }
-        if !claudeInstalled {
-            requirements.append(.claudeCLI)
-        }
-        if claudeInstalled && !claudeAuthenticated {
+        if !claudeAuthenticated {
             requirements.append(.claudeAccess)
         }
         if !daemonConfigured {
@@ -91,7 +81,7 @@ struct OnboardingSnapshot {
     }
 
     var hasCompletedCoreOnboarding: Bool {
-        duoduoInstalled && claudeInstalled && claudeAuthenticated
+        duoduoInstalled && claudeAuthenticated
     }
 }
 
@@ -148,12 +138,12 @@ enum OnboardingEvent {
     case daemonWorkDirChanged(String)
     case showSecretToggled
     case installDuoduoRequested
-    case installClaudeRequested
     case verifyClaudeStatusRequested
     case saveProviderRequested
     case oauthLoginRequested
     case startDaemonRequested
     case detectionFinished(OnboardingSnapshot, status: String?)
+    case installFinished(OnboardingSnapshot, installed: OnboardingRequirement)
     case operationFailed(String)
 }
 
@@ -161,7 +151,6 @@ enum OnboardingCommand: Equatable {
     case hydrateSettings
     case detect(status: String)
     case installDuoduo
-    case installClaude
     case verifyClaudeStatus
     case saveProviderConfig(envVars: [String: String], successStatus: String)
     case performOAuthLogin
@@ -231,11 +220,6 @@ enum OnboardingReducer {
             beginBusy(state: &state, message: L10n.Onboard.statusInstallingDuoduo)
             return .installDuoduo
 
-        case .installClaudeRequested:
-            guard !state.isBusy else { return nil }
-            beginBusy(state: &state, message: L10n.Onboard.statusInstallingClaude)
-            return .installClaude
-
         case .verifyClaudeStatusRequested:
             guard !state.isBusy else { return nil }
             beginBusy(state: &state, message: L10n.Onboard.statusReadingAuth)
@@ -278,6 +262,19 @@ enum OnboardingReducer {
                 state.statusMessage = L10n.Onboard.statusNext(requirement.title)
             }
             return snapshot.unmetRequirements.isEmpty ? .markCompletion(daemonConfig: daemonConfig(from: state)) : nil
+
+        case .installFinished(let snapshot, let installed):
+            // Stay on `.ready` so the current row keeps showing "installing"
+            // instead of flipping back to "detecting" after each auto-install.
+            if snapshot.unmetRequirements.contains(installed) {
+                state.snapshot = snapshot
+                state.isBusy = false
+                state.step = .ready
+                state.currentRequirement = installed
+                state.errorMessage = L10n.Onboard.errInstallNotDetected(installed.title)
+                return nil
+            }
+            return reduce(state: &state, event: .detectionFinished(snapshot, status: nil))
 
         case .operationFailed(let message):
             state.isBusy = false
@@ -371,6 +368,14 @@ final class OnboardingStore {
         Task { await run(command) }
     }
 
+    private func finishAfterInstall(installed: OnboardingRequirement) async {
+        if let appStore {
+            await appStore.refreshRuntime()
+        }
+        let snapshot = await dependencies.detect(appStore, nil, nil, nil)
+        send(.installFinished(snapshot, installed: installed))
+    }
+
     func run(_ command: OnboardingCommand) async {
         switch command {
         case .hydrateSettings:
@@ -391,15 +396,7 @@ final class OnboardingStore {
         case .installDuoduo:
             do {
                 _ = try await dependencies.installDuoduo()
-                send(.refreshRequested)
-            } catch {
-                send(.operationFailed(error.localizedDescription))
-            }
-
-        case .installClaude:
-            do {
-                try await dependencies.installClaude()
-                send(.refreshRequested)
+                await finishAfterInstall(installed: .duoduoCLI)
             } catch {
                 send(.operationFailed(error.localizedDescription))
             }
@@ -408,7 +405,7 @@ final class OnboardingStore {
             do {
                 let status = try await dependencies.authStatus()
                 if status.loggedIn {
-                    let snapshot = await dependencies.detect(appStore, true, nil, status)
+                    let snapshot = await dependencies.detect(appStore, nil, nil, status)
                     send(.detectionFinished(snapshot, status: L10n.Onboard.statusLlmVerified))
                 } else {
                     send(.operationFailed(L10n.Onboard.errAuthNotVerified))
@@ -420,9 +417,21 @@ final class OnboardingStore {
         case .saveProviderConfig(let envVars, let successStatus):
             do {
                 try dependencies.mergeProviderEnv(envVars)
+                let token = (envVars["ANTHROPIC_AUTH_TOKEN"] ?? envVars["ANTHROPIC_API_KEY"] ?? "")
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                if !token.isEmpty {
+                    let snapshot = await dependencies.detect(
+                        appStore,
+                        nil,
+                        nil,
+                        ClaudeAuthStatus(loggedIn: true, authMethod: "api-key", apiProvider: nil)
+                    )
+                    send(.detectionFinished(snapshot, status: successStatus))
+                    return
+                }
                 let status = try await dependencies.authStatus()
                 if status.loggedIn {
-                    let snapshot = await dependencies.detect(appStore, true, nil, status)
+                    let snapshot = await dependencies.detect(appStore, nil, nil, status)
                     send(.detectionFinished(snapshot, status: successStatus))
                 } else {
                     send(.operationFailed(L10n.Onboard.errConfigSavedButAuthFailed))
@@ -436,7 +445,7 @@ final class OnboardingStore {
                 try await dependencies.login()
                 let authStatus = try await dependencies.authStatus()
                 if authStatus.loggedIn {
-                    let snapshot = await dependencies.detect(appStore, true, nil, authStatus)
+                    let snapshot = await dependencies.detect(appStore, nil, nil, authStatus)
                     send(.detectionFinished(snapshot, status: L10n.Onboard.statusLoginSuccess))
                 } else {
                     send(.operationFailed(L10n.Onboard.errBrowserLoginIncomplete))

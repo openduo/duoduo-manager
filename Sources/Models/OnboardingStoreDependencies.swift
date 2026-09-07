@@ -9,7 +9,6 @@ struct OnboardingStoreDependencies {
         _ knownClaudeAuthStatus: ClaudeAuthStatus?
     ) async -> OnboardingSnapshot
     var installDuoduo: () async throws -> String
-    var installClaude: () async throws -> Void
     var authStatus: () async throws -> ClaudeAuthStatus
     var login: () async throws -> Void
     var mergeProviderEnv: (_ env: [String: String]) throws -> Void
@@ -28,9 +27,6 @@ struct OnboardingStoreDependencies {
         },
         installDuoduo: {
             try await NodeRuntime.installDuoduo()
-        },
-        installClaude: {
-            try await ClaudeCLIService.install()
         },
         authStatus: {
             try await ClaudeCLIService.authStatus()

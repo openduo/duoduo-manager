@@ -11,8 +11,6 @@ final class OnboardingService {
         let duoduoInstalled = NodeRuntime.isDuoduoInstalled
         let runtimeStatus = appStore?.runtime.status
         let duoduoVersion = runtimeStatus?.version.nilIfEmpty
-        var claudeInstalled = knownClaudeInstalled ?? false
-        var claudeVersion = knownClaudeVersion
         var claudeAuthenticated = knownClaudeAuthStatus?.loggedIn ?? false
         var claudeAuthMethod = knownClaudeAuthStatus?.authMethod
         var claudeAPIProvider = knownClaudeAuthStatus?.apiProvider
@@ -21,36 +19,22 @@ final class OnboardingService {
         let daemonConfig = appStore?.runtime.daemonConfig ?? .load()
         let daemonConfigured = OnboardingCompletionMarker.hasRequiredConfiguration(daemonConfig: daemonConfig)
 
-        if knownClaudeInstalled == nil || knownClaudeVersion == nil || knownClaudeAuthStatus == nil {
-            do {
-                if let knownClaudeInstalled {
-                    claudeInstalled = knownClaudeInstalled
-                } else {
-                    claudeInstalled = try await ClaudeCLIService.isInstalled()
+        if !claudeAuthenticated, let env = try? ClaudeSettingsStore().currentEnv() {
+            let token = (env["ANTHROPIC_AUTH_TOKEN"] ?? env["ANTHROPIC_API_KEY"] ?? "")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            if !token.isEmpty {
+                claudeAuthenticated = true
+                if claudeAuthMethod == nil {
+                    claudeAuthMethod = "api-key"
                 }
-                if claudeInstalled {
-                    if let knownClaudeVersion {
-                        claudeVersion = knownClaudeVersion
-                    } else {
-                        claudeVersion = try await ClaudeCLIService.version()
-                    }
-                    if knownClaudeAuthStatus == nil {
-                        let auth = try await ClaudeCLIService.authStatus()
-                        claudeAuthenticated = auth.loggedIn
-                        claudeAuthMethod = auth.authMethod
-                        claudeAPIProvider = auth.apiProvider
-                    }
-                }
-            } catch { }
-        } else if let knownClaudeAuthStatus {
-            claudeAuthenticated = knownClaudeAuthStatus.loggedIn
-            claudeAuthMethod = knownClaudeAuthStatus.authMethod
-            claudeAPIProvider = knownClaudeAuthStatus.apiProvider
-            claudeInstalled = knownClaudeInstalled ?? true
-            if claudeVersion == nil, claudeInstalled {
-                do {
-                    claudeVersion = try await ClaudeCLIService.version()
-                } catch { }
+            }
+        }
+
+        if !claudeAuthenticated, knownClaudeAuthStatus == nil {
+            if let status = try? await ClaudeCLIService.authStatus() {
+                claudeAuthenticated = status.loggedIn
+                claudeAuthMethod = status.authMethod
+                claudeAPIProvider = status.apiProvider
             }
         }
 
@@ -64,8 +48,8 @@ final class OnboardingService {
         return OnboardingSnapshot(
             duoduoInstalled: duoduoInstalled,
             duoduoVersion: duoduoVersion,
-            claudeInstalled: claudeInstalled,
-            claudeVersion: claudeVersion,
+            claudeInstalled: duoduoInstalled,
+            claudeVersion: knownClaudeVersion,
             claudeAuthenticated: claudeAuthenticated,
             claudeAuthMethod: claudeAuthMethod,
             claudeAPIProvider: claudeAPIProvider,

@@ -176,21 +176,20 @@ struct OnboardingView: View {
             switch requirement {
             case .duoduoCLI:
                 return installedLabel(store.state.snapshot.duoduoVersion)
-            case .claudeCLI:
-                return installedLabel(store.state.snapshot.claudeVersion)
             case .claudeAccess:
                 return L10n.Onboard.connected
             case .daemon:
                 return daemonCompletionLabel
             }
         case .current:
+            if requirement == store.state.currentRequirement, let error = store.state.errorMessage {
+                return error
+            }
             if store.state.step == .detecting {
                 return L10n.Onboard.detecting
             }
             switch requirement {
             case .duoduoCLI:
-                return L10n.Onboard.installing
-            case .claudeCLI:
                 return L10n.Onboard.installing
             case .claudeAccess:
                 return L10n.Onboard.needToken
@@ -332,7 +331,7 @@ struct OnboardingView: View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(spacing: 0) {
                 completionMetricRow("Duoduo", installedLabel(store.state.snapshot.duoduoVersion))
-                completionMetricRow("Claude SDK", installedLabel(store.state.snapshot.claudeVersion))
+                completionMetricRow("Claude SDK", L10n.Onboard.connected)
                 completionMetricRow(L10n.Onboard.metricModel, L10n.Onboard.connected)
                 completionMetricRow("Daemon", daemonCompletionLabel, showsDivider: false)
             }
@@ -384,11 +383,10 @@ struct OnboardingView: View {
 
     private func autoAdvanceIfNeeded() {
         guard store.state.step == .ready, !store.state.isBusy else { return }
+        guard store.state.errorMessage == nil else { return }
         switch store.state.currentRequirement {
         case .duoduoCLI:
             store.send(.installDuoduoRequested)
-        case .claudeCLI:
-            store.send(.installClaudeRequested)
         default:
             break
         }
@@ -498,11 +496,13 @@ private struct TaskRow: View {
             case .daemon:
                 daemonSetup
             default:
-                ProgressView(value: 0.66)
-                    .tint(highlightTint)
-                    .padding(.top, 10)
-                    .frame(maxWidth: 320)
-                    .transition(.opacity.combined(with: .scale(scale: 0.98, anchor: .leading)))
+                if isBusy {
+                    ProgressView(value: 0.66)
+                        .tint(highlightTint)
+                        .padding(.top, 10)
+                        .frame(maxWidth: 320)
+                        .transition(.opacity.combined(with: .scale(scale: 0.98, anchor: .leading)))
+                }
             }
 
         case .upcoming:
