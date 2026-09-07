@@ -84,7 +84,7 @@ final class OnboardingStoreTests: XCTestCase {
         XCTAssertEqual(store.state.statusMessage, "detecting")
     }
 
-    func testInstallDuoduoSuccessTriggersRefreshDetection() async {
+    func testInstallDuoduoSuccessAdvancesWithoutDetectingStep() async {
         let dependencies = OnboardingStoreDependencies(
             currentEnv: { [:] },
             detect: { _, _, _, _ in
@@ -114,7 +114,35 @@ final class OnboardingStoreTests: XCTestCase {
         await waitFor { store.state.snapshot.duoduoInstalled }
 
         XCTAssertEqual(store.state.currentRequirement, .claudeCLI)
-        XCTAssertEqual(store.state.statusMessage, L10n.Onboard.statusRedetecting)
+        XCTAssertEqual(store.state.step, .ready)
+        XCTAssertNotEqual(store.state.step, .detecting)
+        XCTAssertEqual(store.state.statusMessage, L10n.Onboard.statusNext(OnboardingRequirement.claudeCLI.title))
+    }
+
+    func testInstallDuoduoDoesNotLoopWhenStillMissing() async {
+        let dependencies = OnboardingStoreDependencies(
+            currentEnv: { [:] },
+            detect: { _, _, _, _ in .empty },
+            installDuoduo: { "installed" },
+            installClaude: {},
+            authStatus: { ClaudeAuthStatus(loggedIn: false, authMethod: nil, apiProvider: nil) },
+            login: {},
+            mergeProviderEnv: { _ in }
+        )
+        let store = OnboardingStore(dependencies: dependencies)
+        store.state.step = .ready
+        store.state.currentRequirement = .duoduoCLI
+        store.state.isBusy = true
+
+        await store.run(.installDuoduo)
+
+        XCTAssertEqual(store.state.currentRequirement, .duoduoCLI)
+        XCTAssertEqual(store.state.step, .ready)
+        XCTAssertFalse(store.state.isBusy)
+        XCTAssertEqual(
+            store.state.errorMessage,
+            L10n.Onboard.errInstallNotDetected(OnboardingRequirement.duoduoCLI.title)
+        )
     }
 
     func testInstallClaudeFailureSurfacesLocalizedError() async {

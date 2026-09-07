@@ -169,4 +169,51 @@ final class OnboardingReducerTests: XCTestCase {
         XCTAssertTrue(state.isBusy)
         XCTAssertEqual(state.statusMessage, L10n.Onboard.statusStartingDaemon)
     }
+
+    func testInstallFinishedAdvancesWithoutReturningToDetecting() {
+        var state = OnboardingState()
+        state.step = .ready
+        state.isBusy = true
+        state.currentRequirement = .duoduoCLI
+        let snapshot = OnboardingSnapshot(
+            duoduoInstalled: true,
+            duoduoVersion: "0.5.0",
+            claudeInstalled: false,
+            claudeVersion: nil,
+            claudeAuthenticated: false,
+            claudeAuthMethod: nil,
+            claudeAPIProvider: nil,
+            daemonHealthy: false,
+            daemonPID: nil
+        )
+
+        let command = OnboardingReducer.reduce(
+            state: &state,
+            event: .installFinished(snapshot, installed: .duoduoCLI)
+        )
+
+        XCTAssertNil(command)
+        XCTAssertEqual(state.step, .ready)
+        XCTAssertEqual(state.currentRequirement, .claudeCLI)
+        XCTAssertFalse(state.isBusy)
+        XCTAssertNil(state.errorMessage)
+    }
+
+    func testInstallFinishedStopsWhenRequirementStillUnmet() {
+        var state = OnboardingState()
+        state.step = .ready
+        state.isBusy = true
+        state.currentRequirement = .duoduoCLI
+
+        let command = OnboardingReducer.reduce(
+            state: &state,
+            event: .installFinished(.empty, installed: .duoduoCLI)
+        )
+
+        XCTAssertNil(command)
+        XCTAssertEqual(state.step, .ready)
+        XCTAssertEqual(state.currentRequirement, .duoduoCLI)
+        XCTAssertFalse(state.isBusy)
+        XCTAssertEqual(state.errorMessage, L10n.Onboard.errInstallNotDetected(OnboardingRequirement.duoduoCLI.title))
+    }
 }

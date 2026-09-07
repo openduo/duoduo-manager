@@ -184,6 +184,9 @@ struct OnboardingView: View {
                 return daemonCompletionLabel
             }
         case .current:
+            if requirement == store.state.currentRequirement, let error = store.state.errorMessage {
+                return error
+            }
             if store.state.step == .detecting {
                 return L10n.Onboard.detecting
             }
@@ -384,6 +387,7 @@ struct OnboardingView: View {
 
     private func autoAdvanceIfNeeded() {
         guard store.state.step == .ready, !store.state.isBusy else { return }
+        guard store.state.errorMessage == nil else { return }
         switch store.state.currentRequirement {
         case .duoduoCLI:
             store.send(.installDuoduoRequested)
@@ -498,11 +502,13 @@ private struct TaskRow: View {
             case .daemon:
                 daemonSetup
             default:
-                ProgressView(value: 0.66)
-                    .tint(highlightTint)
-                    .padding(.top, 10)
-                    .frame(maxWidth: 320)
-                    .transition(.opacity.combined(with: .scale(scale: 0.98, anchor: .leading)))
+                if isBusy {
+                    ProgressView(value: 0.66)
+                        .tint(highlightTint)
+                        .padding(.top, 10)
+                        .frame(maxWidth: 320)
+                        .transition(.opacity.combined(with: .scale(scale: 0.98, anchor: .leading)))
+                }
             }
 
         case .upcoming:

@@ -182,6 +182,7 @@
 "onboard.error.configSavedButAuthFailed" = "Config saved, but `claude auth status` still not passing. Check Base URL, Token or model config.";
 "onboard.error.browserLoginIncomplete" = "Browser login not completed. Please try again.";
 "onboard.error.daemonNotHealthy" = "Daemon did not reach healthy state.";
+"onboard.error.installNotDetected %@" = "%@ is still not available after install.";
 "onboard.shellPath.title" = "Agent shell access";
 "onboard.shellPath.summary" = "Add ~/.duoduo-manager/bin to your login-shell PATH so agent subprocesses can resolve `duoduo`. This updates your shell profile.";
 "onboard.shellPath.summaryFailed" = "Duoduo could not update your shell profile automatically. Add ~/.duoduo-manager/bin to your login-shell PATH yourself if you need agent subprocesses to find `duoduo`.";

@@ -261,6 +261,9 @@ enum L10n {
         static let errConfigSavedButAuthFailed = String(localized: "onboard.error.configSavedButAuthFailed", bundle: bundle)
         static let errBrowserLoginIncomplete = String(localized: "onboard.error.browserLoginIncomplete", bundle: bundle)
         static let errDaemonNotHealthy = String(localized: "onboard.error.daemonNotHealthy", bundle: bundle)
+        static func errInstallNotDetected(_ title: String) -> String {
+            String(localized: "onboard.error.installNotDetected \(title)", bundle: bundle)
+        }
 
         // Agent shell PATH (post-completion enhancement)
         enum ShellPath {

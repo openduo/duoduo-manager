@@ -182,6 +182,7 @@
 "onboard.error.configSavedButAuthFailed" = "配置已写入，但 `claude auth status` 仍未通过。请检查 Base URL、Token 或模型配置。";
 "onboard.error.browserLoginIncomplete" = "浏览器登录未完成，请重试。";
 "onboard.error.daemonNotHealthy" = "daemon 未进入 healthy 状态。";
+"onboard.error.installNotDetected %@" = "安装完成后仍未检测到%@。";
 "onboard.shellPath.title" = "Agent shell 访问";
 "onboard.shellPath.summary" = "把 ~/.duoduo-manager/bin 加入登录 shell 的 PATH，让 agent 子进程能找到 `duoduo`。会更新你的 shell profile。";
 "onboard.shellPath.summaryFailed" = "Duoduo 没能自动更新你的 shell profile。如果你需要让 agent 子进程找到 `duoduo`，请自行把 ~/.duoduo-manager/bin 加入登录 shell 的 PATH。";

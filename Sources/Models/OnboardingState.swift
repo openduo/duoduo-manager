@@ -154,6 +154,7 @@ enum OnboardingEvent {
     case oauthLoginRequested
     case startDaemonRequested
     case detectionFinished(OnboardingSnapshot, status: String?)
+    case installFinished(OnboardingSnapshot, installed: OnboardingRequirement)
     case operationFailed(String)
 }
 
@@ -279,6 +280,19 @@ enum OnboardingReducer {
             }
             return snapshot.unmetRequirements.isEmpty ? .markCompletion(daemonConfig: daemonConfig(from: state)) : nil
 
+        case .installFinished(let snapshot, let installed):
+            // Stay on `.ready` so the current row keeps showing "installing"
+            // instead of flipping back to "detecting" after each auto-install.
+            if snapshot.unmetRequirements.contains(installed) {
+                state.snapshot = snapshot
+                state.isBusy = false
+                state.step = .ready
+                state.currentRequirement = installed
+                state.errorMessage = L10n.Onboard.errInstallNotDetected(installed.title)
+                return nil
+            }
+            return reduce(state: &state, event: .detectionFinished(snapshot, status: nil))
+
         case .operationFailed(let message):
             state.isBusy = false
             state.errorMessage = message
@@ -371,6 +385,14 @@ final class OnboardingStore {
         Task { await run(command) }
     }
 
+    private func finishAfterInstall(installed: OnboardingRequirement) async {
+        if let appStore {
+            await appStore.refreshRuntime()
+        }
+        let snapshot = await dependencies.detect(appStore, nil, nil, nil)
+        send(.installFinished(snapshot, installed: installed))
+    }
+
     func run(_ command: OnboardingCommand) async {
         switch command {
         case .hydrateSettings:
@@ -391,7 +413,7 @@ final class OnboardingStore {
         case .installDuoduo:
             do {
                 _ = try await dependencies.installDuoduo()
-                send(.refreshRequested)
+                await finishAfterInstall(installed: .duoduoCLI)
             } catch {
                 send(.operationFailed(error.localizedDescription))
             }
@@ -399,7 +421,7 @@ final class OnboardingStore {
         case .installClaude:
             do {
                 try await dependencies.installClaude()
-                send(.refreshRequested)
+                await finishAfterInstall(installed: .claudeCLI)
             } catch {
                 send(.operationFailed(error.localizedDescription))
             }
