@@ -6,14 +6,26 @@
 "status.configure" = "Configure";
 "status.updateAll" = "Update all";
 "status.updatingAll" = "Updating...";
+"status.actions" = "Actions";
 "status.install" = "Install";
 "status.clear" = "Clear";
 "status.quit" = "Quit";
 
+/* Autostart */
+"autostart.enable" = "Enable autostart";
+"autostart.disable" = "Disable autostart";
+"autostart.enabling" = "Enabling autostart...";
+"autostart.disabling" = "Disabling autostart...";
+"autostart.enabled" = "Daemon will start on login";
+"autostart.disabled" = "Daemon will not start on login";
+
 /* Skills */
 "skills.title" = "Skills";
-"skills.installing" = "Installing...";
+"skills.install" = "Install Skills";
+"skills.installing" = "Installing Skills...";
 "skills.installPath" = "~/.claude/skills";
+"skills.installSuccess" = "Skills installed to ~/.claude/skills";
+"skills.installFailed" = "Failed to install Skills";
 
 /* Config */
 "config.save" = "Save";

@@ -12,6 +12,9 @@ protocol DaemonServicing: Sendable {
         installedVersion: String?
     ) async throws -> String
     func newDaemonToken(force: Bool) async throws -> String
+    func isAutostartEnabled() -> Bool
+    func enableAutostart() async throws -> String
+    func disableAutostart() async throws -> String
 }
 
 protocol ChannelServicing: Sendable {

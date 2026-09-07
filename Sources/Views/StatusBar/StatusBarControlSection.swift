@@ -1,5 +1,71 @@
 import SwiftUI
 
+struct StatusOperationsMenu: View {
+    let title: String
+    let installSkillsTitle: String
+    let autostartTitle: String
+    let autostartEnabled: Bool
+    let isDisabled: Bool
+    let onInstallSkills: () -> Void
+    let onToggleAutostart: () -> Void
+
+    @State private var isExpanded = false
+
+    var body: some View {
+        Button {
+            isExpanded.toggle()
+        } label: {
+            HStack(spacing: 4) {
+                Text(title)
+                    .font(.system(size: 11, weight: .medium))
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 8, weight: .bold))
+            }
+            .foregroundStyle(ConsolePalette.accent)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 5)
+            .background(ConsolePalette.accent.opacity(0.12))
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+        }
+        .buttonStyle(.plain)
+        .popover(isPresented: $isExpanded, arrowEdge: .bottom) {
+            VStack(alignment: .leading, spacing: 0) {
+                operationsRow(icon: "sparkles", title: installSkillsTitle, action: onInstallSkills)
+                operationsRow(
+                    icon: autostartEnabled ? "poweroff" : "power",
+                    title: autostartTitle,
+                    action: onToggleAutostart
+                )
+            }
+            .fixedSize()
+            .padding(.vertical, 4)
+            .background(ConsolePalette.background)
+        }
+    }
+
+    private func operationsRow(icon: String, title: String, action: @escaping () -> Void) -> some View {
+        Button {
+            isExpanded = false
+            action()
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.system(size: 11))
+                    .foregroundStyle(ConsolePalette.secondaryText)
+                    .frame(width: 16)
+                Text(title)
+                    .font(.system(size: 12, design: .monospaced))
+                    .foregroundStyle(ConsolePalette.primaryText)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(isDisabled)
+    }
+}
+
 struct StatusServiceCard: View {
     let icon: String
     let name: String

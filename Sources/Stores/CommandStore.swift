@@ -3,6 +3,7 @@ import Foundation
 enum CommandOperation: Equatable {
     case upgradeAll
     case installSkills
+    case autostart
 }
 
 @MainActor

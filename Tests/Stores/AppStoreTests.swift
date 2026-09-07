@@ -431,6 +431,49 @@ final class AppStoreTests: XCTestCase {
         XCTAssertNil(store.command.errorMessage)
     }
 
+    func testSetDaemonAutostartEnableDispatchesToCLI() async {
+        let recorder = RecordingDaemonService(daemonURL: "http://127.0.0.1:20233")
+        let store = makeStore(daemonService: recorder)
+
+        store.setDaemonAutostart(enabled: true)
+        XCTAssertEqual(store.command.activeOperation, .autostart)
+        await fulfillment(of: [loadingFinishedExpectation(for: store)], timeout: 2)
+
+        XCTAssertEqual(recorder.autostartCalls, [true])
+        XCTAssertEqual(store.command.lastOutput, L10n.Autostart.enabled)
+        XCTAssertTrue(store.runtime.isAutostartEnabled)
+        XCTAssertNil(store.command.errorMessage)
+        XCTAssertNil(store.command.activeOperation)
+    }
+
+    func testSetDaemonAutostartDisableDispatchesToCLI() async {
+        let recorder = RecordingDaemonService(daemonURL: "http://127.0.0.1:20233")
+        let store = makeStore(daemonService: recorder)
+
+        store.setDaemonAutostart(enabled: false)
+        await fulfillment(of: [loadingFinishedExpectation(for: store)], timeout: 2)
+
+        XCTAssertEqual(recorder.autostartCalls, [false])
+        XCTAssertEqual(store.command.lastOutput, L10n.Autostart.disabled)
+        XCTAssertFalse(store.runtime.isAutostartEnabled)
+        XCTAssertNil(store.command.errorMessage)
+    }
+
+    func testSetDaemonAutostartSurfacesFailure() async {
+        struct Boom: LocalizedError {
+            var errorDescription: String? { "launchctl failed" }
+        }
+        let recorder = RecordingDaemonService(daemonURL: "http://127.0.0.1:20233")
+        recorder.autostartError = Boom()
+        let store = makeStore(daemonService: recorder)
+
+        store.setDaemonAutostart(enabled: true)
+        await fulfillment(of: [loadingFinishedExpectation(for: store)], timeout: 2)
+
+        XCTAssertEqual(recorder.autostartCalls, [true])
+        XCTAssertEqual(store.command.errorMessage, "launchctl failed")
+    }
+
     func testInstallSkillsDispatchesToSkillService() async {
         let skills = RecordingSkillService(output: "[skills] refreshed openduo/duoduo → ~/.claude/skills\n")
         let store = makeStore(skillService: skills)
@@ -440,7 +483,7 @@ final class AppStoreTests: XCTestCase {
         await fulfillment(of: [loadingFinishedExpectation(for: store)], timeout: 2)
 
         XCTAssertEqual(skills.refreshCount, 1)
-        XCTAssertEqual(store.command.lastOutput, "[skills] refreshed openduo/duoduo → ~/.claude/skills\n")
+        XCTAssertEqual(store.command.lastOutput, L10n.Skills.installSuccess)
         XCTAssertNil(store.command.errorMessage)
         XCTAssertNil(store.command.activeOperation)
     }
@@ -456,7 +499,21 @@ final class AppStoreTests: XCTestCase {
         await fulfillment(of: [loadingFinishedExpectation(for: store)], timeout: 2)
 
         XCTAssertEqual(skills.refreshCount, 1)
-        XCTAssertEqual(store.command.errorMessage, "npx failed")
+        XCTAssertEqual(store.command.errorMessage, L10n.Skills.installFailed)
+    }
+
+    func testRefreshRuntimeCopiesAutostartFromLaunchAgentPlist() async {
+        let store = makeStore(
+            daemonService: FakeDaemonService(
+                daemonURL: "http://127.0.0.1:20233",
+                autostartEnabled: true
+            )
+        )
+        XCTAssertFalse(store.runtime.isAutostartEnabled)
+
+        await store.refreshRuntime()
+
+        XCTAssertTrue(store.runtime.isAutostartEnabled)
     }
 
     func testRefreshRuntimeUpdatesDaemonStatusAndChannels() async {
@@ -672,7 +729,12 @@ private final class RecordingUpgradeService: UpgradeServicing, @unchecked Sendab
 private final class RecordingDaemonService: DaemonServicing, @unchecked Sendable {
     let daemonURL: String
     var newTokenResult = ""
+    var enableAutostartResult = "autostart enabled"
+    var disableAutostartResult = "autostart disabled"
+    var autostartError: Error?
+    var autostartEnabled = false
     private(set) var newTokenCalls: [Bool] = []
+    private(set) var autostartCalls: [Bool] = []
 
     init(daemonURL: String) {
         self.daemonURL = daemonURL
@@ -690,5 +752,18 @@ private final class RecordingDaemonService: DaemonServicing, @unchecked Sendable
     func newDaemonToken(force: Bool) async throws -> String {
         newTokenCalls.append(force)
         return newTokenResult
+    }
+    func isAutostartEnabled() -> Bool { autostartEnabled }
+    func enableAutostart() async throws -> String {
+        autostartCalls.append(true)
+        if let autostartError { throw autostartError }
+        autostartEnabled = true
+        return enableAutostartResult
+    }
+    func disableAutostart() async throws -> String {
+        autostartCalls.append(false)
+        if let autostartError { throw autostartError }
+        autostartEnabled = false
+        return disableAutostartResult
     }
 }

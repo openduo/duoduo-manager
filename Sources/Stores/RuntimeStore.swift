@@ -8,18 +8,21 @@ final class RuntimeStore {
     var daemonConfig: DaemonConfig
     var feishuConfig: FeishuConfig
     var isSettingUp: Bool
+    var isAutostartEnabled: Bool
 
     init(
         status: DaemonStatus = .empty,
         channels: [ChannelInfo] = [],
         daemonConfig: DaemonConfig = .load(),
         feishuConfig: FeishuConfig = .load(),
-        isSettingUp: Bool = false
+        isSettingUp: Bool = false,
+        isAutostartEnabled: Bool = false
     ) {
         self.status = status
         self.channels = channels
         self.daemonConfig = daemonConfig
         self.feishuConfig = feishuConfig
         self.isSettingUp = isSettingUp
+        self.isAutostartEnabled = isAutostartEnabled
     }
 }

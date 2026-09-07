@@ -92,6 +92,7 @@
 		F97089A9A67B81FF81F9BB4C /* DashboardPresentationMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D50E480BA7922E6B4768AAD /* DashboardPresentationMapper.swift */; };
 		FA953AF57994D9DB7B81424A /* StatusBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 905C0CACFCF03BAA771CC96E /* StatusBarView.swift */; };
 		FEE338AA20046B115C56C6C5 /* DaemonConfigRemoteAccessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1280F8B308E84DC23B96C1C5 /* DaemonConfigRemoteAccessTests.swift */; };
+		FFCD45A96F6456416F5B922D /* DaemonServiceAutostartTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34783CE341F17B98A5BFC0DD /* DaemonServiceAutostartTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -120,6 +121,7 @@
 		2929BD4A52F7AEC4F969FB9B /* DashboardTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardTheme.swift; sourceTree = "<group>"; };
 		2AFE377434F91AB5220C4E12 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		33AEA42E718AE2B948BAB6FB /* StatusBarTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarTheme.swift; sourceTree = "<group>"; };
+		34783CE341F17B98A5BFC0DD /* DaemonServiceAutostartTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonServiceAutostartTests.swift; sourceTree = "<group>"; };
 		383647EF2C49D5F7595B6F3E /* SessionsContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionsContentView.swift; sourceTree = "<group>"; };
 		389CB96D37729402A1A97FFF /* DaemonServiceRestartReasonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonServiceRestartReasonTests.swift; sourceTree = "<group>"; };
 		3BEA40D33E29FED5A01BEB28 /* EventStreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventStreamView.swift; sourceTree = "<group>"; };
@@ -408,6 +410,7 @@
 		C98CDD1ABB9CB55690671B97 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				34783CE341F17B98A5BFC0DD /* DaemonServiceAutostartTests.swift */,
 				389CB96D37729402A1A97FFF /* DaemonServiceRestartReasonTests.swift */,
 				8064F089733E58BAC77B5177 /* DuoduoCompatTests.swift */,
 				57487CEBE75A5F2A3A38E3B6 /* OnboardingCompletionMarkerTests.swift */,
@@ -654,6 +657,7 @@
 				ACCD474DEE8340DC403DE614 /* AppStoreVisibilityTests.swift in Sources */,
 				F6DCEA3DDBDCCB645A131B97 /* ConfigStoreTests.swift in Sources */,
 				FEE338AA20046B115C56C6C5 /* DaemonConfigRemoteAccessTests.swift in Sources */,
+				FFCD45A96F6456416F5B922D /* DaemonServiceAutostartTests.swift in Sources */,
 				4222185AF35FDA82754D0AB3 /* DaemonServiceRestartReasonTests.swift in Sources */,
 				24A56450A55E7D5764F74855 /* DashboardModelsTests.swift in Sources */,
 				AD05E125ED2B830AEE70A269 /* DashboardPresentationMapperTests.swift in Sources */,

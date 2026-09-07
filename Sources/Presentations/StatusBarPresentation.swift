@@ -4,11 +4,18 @@ struct StatusBarPresentationBundle {
     let header: StatusHeaderPresentation
     let topology: StatusTopologyPresentation
     let daemonCard: StatusServiceCardPresentation
-    let skillsCard: StatusInstallCardPresentation
+    let operations: StatusOperationsPresentation
     let stream: StatusRuntimeStreamPresentation
     let execution: StatusExecutionPresentation
     let footer: StatusFooterPresentation
-    let controlHint: String
+}
+
+struct StatusOperationsPresentation {
+    let title: String
+    let installSkillsTitle: String
+    let autostartTitle: String
+    let autostartEnabled: Bool
+    let isDisabled: Bool
 }
 
 struct StatusHeaderPresentation {
