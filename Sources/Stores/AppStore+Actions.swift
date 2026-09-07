@@ -132,6 +132,22 @@ extension AppStore {
         executeCommand { try await self.channelService.installChannel(packageName) }
     }
 
+    /// Login autostart via `duoduo daemon enable-autostart` /
+    /// `disable-autostart`. Manager does not write the LaunchAgent.
+    func setDaemonAutostart(enabled: Bool) {
+        executeCommand(
+            activeOperation: .autostart,
+            initialOutput: enabled ? L10n.Autostart.enabling : L10n.Autostart.disabling
+        ) {
+            if enabled {
+                _ = try await self.daemonService.enableAutostart()
+                return L10n.Autostart.enabled
+            }
+            _ = try await self.daemonService.disableAutostart()
+            return L10n.Autostart.disabled
+        }
+    }
+
     /// Manual install / refresh of the bundled `openduo/duoduo` skills into
     /// `~/.claude/skills`. Same command the upgrade flow runs after a daemon
     /// update; exposed here so an operator can recover without waiting for

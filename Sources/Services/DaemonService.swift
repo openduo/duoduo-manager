@@ -66,6 +66,71 @@ final class DaemonService: Sendable {
         return output
     }
 
+    // MARK: - Autostart
+    //
+    // Login autostart is owned by the CLI (`duoduo daemon enable-autostart` /
+    // `disable-autostart`). Those commands flip `RunAtLoad` in the CLI-owned
+    // LaunchAgent at `~/Library/LaunchAgents/ai.openduo.daemon.plist`. Manager
+    // reads that key to decide which menu item to show; it never writes the
+    // plist. Presence of the file is not enough — `duoduo daemon start` also
+    // creates it with `RunAtLoad` false.
+
+    static var launchAgentPlistURL: URL {
+        FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/LaunchAgents/ai.openduo.daemon.plist")
+    }
+
+    func isAutostartEnabled() -> Bool {
+        Self.isAutostartEnabled(at: Self.launchAgentPlistURL)
+    }
+
+    static func isAutostartEnabled(at plistURL: URL) -> Bool {
+        guard let data = try? Data(contentsOf: plistURL),
+              let plist = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any]
+        else { return false }
+        if let runAtLoad = plist["RunAtLoad"] as? Bool {
+            return runAtLoad
+        }
+        if let number = plist["RunAtLoad"] as? NSNumber {
+            return number.boolValue
+        }
+        return false
+    }
+
+    func enableAutostart() async throws -> String {
+        try await runAutostartCommand("enable-autostart", wantEnabled: true)
+    }
+
+    func disableAutostart() async throws -> String {
+        try await runAutostartCommand("disable-autostart", wantEnabled: false)
+    }
+
+    private func runAutostartCommand(_ verb: String, wantEnabled: Bool) async throws -> String {
+        guard NodeRuntime.isDuoduoInstalled else {
+            return "duoduo not installed"
+        }
+        // The CLI may exit non-zero after writing RunAtLoad (it also reloads
+        // the LaunchAgent). Login autostart is only that key — ignore the rest.
+        var cliError: Error?
+        do {
+            _ = try await ShellService.run(
+                NodeRuntime.duoduoPath,
+                arguments: ["daemon", verb],
+                environment: daemonEnv,
+                workingDirectory: NodeRuntime.duoduoPackageDir
+            )
+        } catch {
+            cliError = error
+        }
+        if isAutostartEnabled() == wantEnabled {
+            return ""
+        }
+        throw cliError ?? ShellError.executionFailed(
+            "RunAtLoad did not change",
+            exitCode: 1
+        )
+    }
+
     // MARK: - Remote Access Token
     //
     // The opt-in remote listener is bearer-authenticated with a token the

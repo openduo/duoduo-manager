@@ -9,6 +9,9 @@ struct FakeDaemonService: DaemonServicing {
     var stopResult = ""
     var restartResult = ""
     var newTokenResult = ""
+    var enableAutostartResult = ""
+    var disableAutostartResult = ""
+    var autostartEnabled = false
 
     func getStatus() async throws -> DaemonStatus { status }
     func getVersion() async throws -> String { version }
@@ -20,6 +23,9 @@ struct FakeDaemonService: DaemonServicing {
         installedVersion: String?
     ) async throws -> String { restartResult }
     func newDaemonToken(force: Bool) async throws -> String { newTokenResult }
+    func isAutostartEnabled() -> Bool { autostartEnabled }
+    func enableAutostart() async throws -> String { enableAutostartResult }
+    func disableAutostart() async throws -> String { disableAutostartResult }
 }
 
 struct FakeChannelService: ChannelServicing {

@@ -3,9 +3,11 @@ import SwiftUI
 struct StatusOperationsMenu: View {
     let title: String
     let installSkillsTitle: String
-    let isInstalling: Bool
+    let autostartTitle: String
+    let autostartEnabled: Bool
     let isDisabled: Bool
     let onInstallSkills: () -> Void
+    let onToggleAutostart: () -> Void
 
     @State private var isExpanded = false
 
@@ -14,12 +16,6 @@ struct StatusOperationsMenu: View {
             isExpanded.toggle()
         } label: {
             HStack(spacing: 4) {
-                if isInstalling {
-                    ProgressView()
-                        .controlSize(.small)
-                        .tint(ConsolePalette.accent)
-                        .frame(width: 10, height: 10)
-                }
                 Text(title)
                     .font(.system(size: 11, weight: .medium))
                 Image(systemName: "chevron.down")
@@ -34,30 +30,39 @@ struct StatusOperationsMenu: View {
         .buttonStyle(.plain)
         .popover(isPresented: $isExpanded, arrowEdge: .bottom) {
             VStack(alignment: .leading, spacing: 0) {
-                Button {
-                    isExpanded = false
-                    onInstallSkills()
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "sparkles")
-                            .font(.system(size: 11))
-                            .foregroundStyle(ConsolePalette.secondaryText)
-                            .frame(width: 16)
-                        Text(installSkillsTitle)
-                            .font(.system(size: 12, design: .monospaced))
-                            .foregroundStyle(ConsolePalette.primaryText)
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .disabled(isDisabled)
+                operationsRow(icon: "sparkles", title: installSkillsTitle, action: onInstallSkills)
+                operationsRow(
+                    icon: autostartEnabled ? "poweroff" : "power",
+                    title: autostartTitle,
+                    action: onToggleAutostart
+                )
             }
             .fixedSize()
             .padding(.vertical, 4)
             .background(ConsolePalette.background)
         }
+    }
+
+    private func operationsRow(icon: String, title: String, action: @escaping () -> Void) -> some View {
+        Button {
+            isExpanded = false
+            action()
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.system(size: 11))
+                    .foregroundStyle(ConsolePalette.secondaryText)
+                    .frame(width: 16)
+                Text(title)
+                    .font(.system(size: 12, design: .monospaced))
+                    .foregroundStyle(ConsolePalette.primaryText)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(isDisabled)
     }
 }
 

@@ -134,23 +134,43 @@ final class StatusBarPresentationMapperTests: XCTestCase {
         let presentation = StatusBarPresentationMapper(store: store).make(expandedEventIDs: [])
         XCTAssertEqual(presentation.operations.title, L10n.Status.actions)
         XCTAssertEqual(presentation.operations.installSkillsTitle, L10n.Skills.install)
-        XCTAssertFalse(presentation.operations.isInstalling)
+        XCTAssertEqual(presentation.operations.autostartTitle, L10n.Autostart.enable)
+        XCTAssertFalse(presentation.operations.autostartEnabled)
         XCTAssertFalse(presentation.operations.isDisabled)
     }
 
-    func testOperationsMenuShowsInstallingState() {
+    func testOperationsMenuShowsDisableWhenAutostartEnabled() {
         let store = AppStore(
-            runtime: RuntimeStore(),
+            runtime: RuntimeStore(isAutostartEnabled: true),
             dashboard: DashboardStore(),
             updates: UpdateStore(),
-            command: CommandStore(isLoading: true, activeOperation: .installSkills),
+            command: CommandStore(),
             dependencies: TestFactory.dependencies()
         )
 
         let presentation = StatusBarPresentationMapper(store: store).make(expandedEventIDs: [])
-        XCTAssertEqual(presentation.operations.title, L10n.Skills.installing)
-        XCTAssertEqual(presentation.operations.installSkillsTitle, L10n.Skills.installing)
-        XCTAssertTrue(presentation.operations.isInstalling)
+        XCTAssertEqual(presentation.operations.autostartTitle, L10n.Autostart.disable)
+        XCTAssertTrue(presentation.operations.autostartEnabled)
+    }
+
+    func testOperationsMenuKeepsActionsTitleWhileBusy() {
+        let store = AppStore(
+            runtime: RuntimeStore(),
+            dashboard: DashboardStore(),
+            updates: UpdateStore(),
+            command: CommandStore(
+                isLoading: true,
+                activeOperation: .autostart,
+                lastOutput: L10n.Autostart.enabling
+            ),
+            dependencies: TestFactory.dependencies()
+        )
+
+        let presentation = StatusBarPresentationMapper(store: store).make(expandedEventIDs: [])
+        XCTAssertEqual(presentation.operations.title, L10n.Status.actions)
+        XCTAssertEqual(presentation.operations.installSkillsTitle, L10n.Skills.install)
         XCTAssertTrue(presentation.operations.isDisabled)
+        XCTAssertEqual(presentation.footer.statusMessage, L10n.Autostart.enabling)
+        XCTAssertFalse(presentation.footer.statusIsError)
     }
 }

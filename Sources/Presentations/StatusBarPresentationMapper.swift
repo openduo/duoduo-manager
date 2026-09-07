@@ -65,11 +65,11 @@ struct StatusBarPresentationMapper {
     }
 
     private var operations: StatusOperationsPresentation {
-        let installing = store.command.activeOperation == .installSkills
-        return StatusOperationsPresentation(
-            title: installing ? L10n.Skills.installing : L10n.Status.actions,
-            installSkillsTitle: installing ? L10n.Skills.installing : L10n.Skills.install,
-            isInstalling: installing,
+        StatusOperationsPresentation(
+            title: L10n.Status.actions,
+            installSkillsTitle: L10n.Skills.install,
+            autostartTitle: store.runtime.isAutostartEnabled ? L10n.Autostart.disable : L10n.Autostart.enable,
+            autostartEnabled: store.runtime.isAutostartEnabled,
             isDisabled: store.command.isLoading
         )
     }

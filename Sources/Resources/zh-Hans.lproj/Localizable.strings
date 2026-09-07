@@ -11,6 +11,14 @@
 "status.clear" = "清除";
 "status.quit" = "退出";
 
+/* Autostart */
+"autostart.enable" = "开启自动启动";
+"autostart.disable" = "关闭自动启动";
+"autostart.enabling" = "正在开启自动启动...";
+"autostart.disabling" = "正在关闭自动启动...";
+"autostart.enabled" = "登录时将自动启动 daemon";
+"autostart.disabled" = "登录时不再自动启动 daemon";
+
 /* Skills */
 "skills.title" = "Skills";
 "skills.install" = "安装 Skills";

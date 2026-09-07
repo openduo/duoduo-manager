@@ -13,7 +13,8 @@ struct StatusBarPresentationBundle {
 struct StatusOperationsPresentation {
     let title: String
     let installSkillsTitle: String
-    let isInstalling: Bool
+    let autostartTitle: String
+    let autostartEnabled: Bool
     let isDisabled: Bool
 }
 
