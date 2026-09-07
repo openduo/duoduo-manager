@@ -10,6 +10,11 @@
 "status.clear" = "Clear";
 "status.quit" = "Quit";
 
+/* Skills */
+"skills.title" = "Skills";
+"skills.installing" = "Installing...";
+"skills.installPath" = "~/.claude/skills";
+
 /* Config */
 "config.save" = "Save";
 "config.saved" = "Saved";

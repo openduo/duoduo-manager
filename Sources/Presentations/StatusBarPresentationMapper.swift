@@ -40,6 +40,7 @@ struct StatusBarPresentationMapper {
                 isRunning: store.runtime.status.isRunning,
                 isLoading: store.command.isLoading
             ),
+            skillsCard: skillsCard,
             stream: StatusRuntimeStreamPresentation(
                 hint: streamHint(recentEvents: recentEvents),
                 recentEvents: recentEvents,
@@ -82,7 +83,21 @@ struct StatusBarPresentationMapper {
             iconName: channelControlIcon(for: entry.id),
             name: entry.displayName,
             packageName: entry.packageName,
-            isLoading: store.command.isLoading
+            isLoading: store.command.isLoading,
+            isBusy: false,
+            actionTitle: L10n.Status.install
+        )
+    }
+
+    private var skillsCard: StatusInstallCardPresentation {
+        let installing = store.command.activeOperation == .installSkills
+        return StatusInstallCardPresentation(
+            iconName: "sparkles",
+            name: L10n.Skills.title,
+            packageName: L10n.Skills.installPath,
+            isLoading: store.command.isLoading,
+            isBusy: installing,
+            actionTitle: installing ? L10n.Skills.installing : L10n.Status.install
         )
     }
 

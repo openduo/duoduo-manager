@@ -199,6 +199,8 @@ struct StatusBarView: View {
                     channelInstallCard(entry)
                 }
             }
+
+            skillsInstallCard
         }
     }
 
@@ -266,15 +268,8 @@ struct StatusBarView: View {
     }
 
     private func channelInstallCard(_ entry: ChannelEntry) -> some View {
-        let presentation = statusBarMapper.installCard(for: entry)
-
-        return StatusInstallCard(
-            iconName: presentation.iconName,
-            name: presentation.name,
-            packageName: presentation.packageName,
-            isLoading: presentation.isLoading,
-            runtimeHint: nil,
-            runtimeHintTint: nil,
+        StatusInstallCard(
+            presentation: statusBarMapper.installCard(for: entry),
             onConfig: entry.id == "feishu" ? {
                 toggleConfig(.feishu)
             } : nil,
@@ -284,6 +279,13 @@ struct StatusBarView: View {
             expandedContent: entry.id == "feishu" && expandedConfigTarget == .feishu
                 ? AnyView(feishuInlineConfig)
                 : nil
+        )
+    }
+
+    private var skillsInstallCard: some View {
+        StatusInstallCard(
+            presentation: statusBarPresentation.skillsCard,
+            onInstall: { store.installSkills() }
         )
     }
 

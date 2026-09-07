@@ -105,8 +105,12 @@ struct FakeUpgradeService: UpgradeServicing {
 
 struct FakeSkillService: SkillServicing {
     var output = ""
+    var error: Error?
 
-    func refreshSkills() async -> String { output }
+    func refreshSkills() async throws -> String {
+        if let error { throw error }
+        return output
+    }
 }
 
 struct FakeRuntimeEnvironment: RuntimeEnvironmentProviding {

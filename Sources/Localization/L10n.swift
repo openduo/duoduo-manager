@@ -168,6 +168,14 @@ enum L10n {
         }
     }
 
+    // MARK: - Skills
+
+    enum Skills {
+        static let title = String(localized: "skills.title", bundle: bundle)
+        static let installing = String(localized: "skills.installing", bundle: bundle)
+        static let installPath = String(localized: "skills.installPath", bundle: bundle)
+    }
+
     // MARK: - Setup
 
     enum Setup {

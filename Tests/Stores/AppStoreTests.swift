@@ -377,6 +377,88 @@ final class AppStoreTests: XCTestCase {
         XCTAssertFalse(store.runtime.isSettingUp)
     }
 
+    func testEnsureDuoduoInstalledIfNeededAlsoRefreshesSkills() async {
+        let skills = RecordingSkillService(output: "\n[skills] refreshed openduo/duoduo → ~/.claude/skills\n")
+        let runtimeEnvironment = MutableRuntimeEnvironment(
+            isDuoduoInstalled: false,
+            hasBundledNode: true,
+            hasSystemNode: true,
+            installResult: "installed"
+        )
+        var dependencies = TestFactory.dependencies(runtimeEnvironment: runtimeEnvironment)
+        dependencies.makeSkillService = { skills }
+        let store = AppStore(
+            runtime: RuntimeStore(daemonConfig: DaemonConfig(), feishuConfig: FeishuConfig()),
+            dashboard: DashboardStore(),
+            updates: UpdateStore(),
+            command: CommandStore(),
+            dependencies: dependencies
+        )
+
+        await store.ensureDuoduoInstalledIfNeeded()
+
+        XCTAssertEqual(skills.refreshCount, 1)
+        XCTAssertTrue(store.command.lastOutput.contains("~/.claude/skills"))
+        XCTAssertNil(store.command.errorMessage)
+    }
+
+    func testEnsureDuoduoInstalledIfNeededSkillFailureIsNonFatal() async {
+        struct Boom: LocalizedError {
+            var errorDescription: String? { "npx failed" }
+        }
+        let skills = RecordingSkillService(error: Boom())
+        let runtimeEnvironment = MutableRuntimeEnvironment(
+            isDuoduoInstalled: false,
+            hasBundledNode: true,
+            hasSystemNode: true,
+            installResult: "installed"
+        )
+        var dependencies = TestFactory.dependencies(runtimeEnvironment: runtimeEnvironment)
+        dependencies.makeSkillService = { skills }
+        let store = AppStore(
+            runtime: RuntimeStore(daemonConfig: DaemonConfig(), feishuConfig: FeishuConfig()),
+            dashboard: DashboardStore(),
+            updates: UpdateStore(),
+            command: CommandStore(),
+            dependencies: dependencies
+        )
+
+        await store.ensureDuoduoInstalledIfNeeded()
+
+        XCTAssertEqual(skills.refreshCount, 1)
+        XCTAssertTrue(store.command.lastOutput.contains(L10n.Setup.installSuccess))
+        XCTAssertTrue(store.command.lastOutput.contains("[skills] refresh failed (non-fatal): npx failed"))
+        XCTAssertNil(store.command.errorMessage)
+    }
+
+    func testInstallSkillsDispatchesToSkillService() async {
+        let skills = RecordingSkillService(output: "[skills] refreshed openduo/duoduo → ~/.claude/skills\n")
+        let store = makeStore(skillService: skills)
+
+        store.installSkills()
+        XCTAssertEqual(store.command.activeOperation, .installSkills)
+        await fulfillment(of: [loadingFinishedExpectation(for: store)], timeout: 2)
+
+        XCTAssertEqual(skills.refreshCount, 1)
+        XCTAssertEqual(store.command.lastOutput, "[skills] refreshed openduo/duoduo → ~/.claude/skills\n")
+        XCTAssertNil(store.command.errorMessage)
+        XCTAssertNil(store.command.activeOperation)
+    }
+
+    func testInstallSkillsSurfacesFailure() async {
+        struct Boom: LocalizedError {
+            var errorDescription: String? { "npx failed" }
+        }
+        let skills = RecordingSkillService(error: Boom())
+        let store = makeStore(skillService: skills)
+
+        store.installSkills()
+        await fulfillment(of: [loadingFinishedExpectation(for: store)], timeout: 2)
+
+        XCTAssertEqual(skills.refreshCount, 1)
+        XCTAssertEqual(store.command.errorMessage, "npx failed")
+    }
+
     func testRefreshRuntimeUpdatesDaemonStatusAndChannels() async {
         let runtime = RuntimeStore(
             daemonConfig: DaemonConfig(workDir: "", daemonHost: "127.0.0.1", port: "20233", logLevel: "info", permissionMode: "default"),
@@ -465,7 +547,8 @@ final class AppStoreTests: XCTestCase {
             systemConfigResponse: SystemConfig(network: nil, sessions: nil, cadence: nil, transfer: nil, logging: nil, sdk: nil, paths: nil, subconscious: nil)
         ),
         upgradeService: any UpgradeServicing = FakeUpgradeService(),
-        sessionService: any SessionServicing = FakeSessionService(daemonURL: "http://127.0.0.1:20233")
+        sessionService: any SessionServicing = FakeSessionService(daemonURL: "http://127.0.0.1:20233"),
+        skillService: any SkillServicing = FakeSkillService()
     ) -> AppStore {
         let dependencies = AppStoreDependencies(
             versionService: FakeVersionService(),
@@ -475,7 +558,7 @@ final class AppStoreTests: XCTestCase {
             makeChannelService: { _ in channelService },
             makeDashboardRPCService: { _ in dashboardService },
             makeSessionService: { _ in sessionService },
-            makeSkillService: { FakeSkillService() }
+            makeSkillService: { skillService }
         )
         return AppStore(
             runtime: RuntimeStore(daemonConfig: DaemonConfig(), feishuConfig: FeishuConfig()),
@@ -541,6 +624,23 @@ private final class RecordingChannelService: ChannelServicing, @unchecked Sendab
     func upgradeChannel(_ channelType: String) async throws -> String { "" }
     func installChannel(_ packageName: String) async throws -> String { "" }
     func syncChannel(_ packageName: String) async throws -> String { "" }
+}
+
+private final class RecordingSkillService: SkillServicing, @unchecked Sendable {
+    var output: String
+    var error: Error?
+    private(set) var refreshCount = 0
+
+    init(output: String = "", error: Error? = nil) {
+        self.output = output
+        self.error = error
+    }
+
+    func refreshSkills() async throws -> String {
+        refreshCount += 1
+        if let error { throw error }
+        return output
+    }
 }
 
 private final class RecordingUpgradeService: UpgradeServicing, @unchecked Sendable {

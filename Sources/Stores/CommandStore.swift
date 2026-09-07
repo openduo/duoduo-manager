@@ -2,6 +2,7 @@ import Foundation
 
 enum CommandOperation: Equatable {
     case upgradeAll
+    case installSkills
 }
 
 @MainActor
