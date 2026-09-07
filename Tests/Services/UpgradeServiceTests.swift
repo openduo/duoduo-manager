@@ -120,7 +120,9 @@ final class UpgradeServiceTests: XCTestCase {
     }
 
     func testSkillsRefreshFailureDoesNotAbort() async throws {
-        struct Boom: Error {}
+        struct Boom: LocalizedError {
+            var errorDescription: String? { "boom" }
+        }
         let recorder = CommandRecorder(results: [.success("cli upgraded\n")])
         let service = UpgradeService(runCommand: recorder.runner)
 
@@ -134,8 +136,9 @@ final class UpgradeServiceTests: XCTestCase {
             refreshSkills: { throw Boom() }
         )
 
-        // Throwing refreshSkills is swallowed; daemon upgrade result survives.
-        XCTAssertEqual(output, "cli upgraded\n")
+        // Throwing refreshSkills is swallowed; daemon upgrade result survives
+        // with a non-fatal note so the operator can see the skill miss.
+        XCTAssertEqual(output, "cli upgraded\n\n[skills] refresh failed (non-fatal): boom\n")
     }
 }
 

@@ -10,6 +10,11 @@
 "status.clear" = "清除";
 "status.quit" = "退出";
 
+/* Skills */
+"skills.title" = "Skills";
+"skills.installing" = "安装中...";
+"skills.installPath" = "~/.claude/skills";
+
 /* Config */
 "config.save" = "保存";
 "config.saved" = "已保存";

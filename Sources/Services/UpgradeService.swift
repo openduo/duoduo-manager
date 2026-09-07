@@ -106,8 +106,13 @@ struct UpgradeService: Sendable {
         // lockstep with the CLI. Skills are read by new sessions only, so no
         // daemon restart is needed. Failures are non-fatal (see #11).
         if daemonNeedsUpdate {
-            if let skillsOutput = try? await refreshSkills(), !skillsOutput.isEmpty {
-                output += skillsOutput
+            do {
+                let skillsOutput = try await refreshSkills()
+                if !skillsOutput.isEmpty {
+                    output += skillsOutput
+                }
+            } catch {
+                output += "\n[skills] refresh failed (non-fatal): \(error.localizedDescription)\n"
             }
         }
 

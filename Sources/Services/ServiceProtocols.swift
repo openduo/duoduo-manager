@@ -59,7 +59,7 @@ protocol UpgradeServicing: Sendable {
 }
 
 protocol SkillServicing: Sendable {
-    func refreshSkills() async -> String
+    func refreshSkills() async throws -> String
 }
 
 protocol RuntimeEnvironmentProviding: Sendable {

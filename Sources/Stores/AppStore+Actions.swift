@@ -57,6 +57,14 @@ extension AppStore {
             let output = try await runtimeEnvironment.installDuoduo()
             if runtimeEnvironment.isDuoduoInstalled {
                 command.lastOutput = L10n.Setup.installSuccess
+                do {
+                    let skillsOutput = try await skillService.refreshSkills()
+                    if !skillsOutput.isEmpty {
+                        command.lastOutput += skillsOutput
+                    }
+                } catch {
+                    command.lastOutput += "\n[skills] refresh failed (non-fatal): \(error.localizedDescription)\n"
+                }
             } else {
                 command.lastOutput = L10n.Setup.installFailed + "\n" + output
                 command.errorMessage = L10n.Setup.installFailed
@@ -124,6 +132,19 @@ extension AppStore {
         executeCommand { try await self.channelService.installChannel(packageName) }
     }
 
+    /// Manual install / refresh of the bundled `openduo/duoduo` skills into
+    /// `~/.claude/skills`. Same command the upgrade flow runs after a daemon
+    /// update; exposed here so an operator can recover without waiting for
+    /// the next CLI bump.
+    func installSkills() {
+        executeCommand(
+            activeOperation: .installSkills,
+            initialOutput: L10n.Skills.installing
+        ) {
+            try await self.skillService.refreshSkills()
+        }
+    }
+
     func upgradeAll() {
         executeCommand(
             activeOperation: .upgradeAll,
@@ -136,7 +157,7 @@ extension AppStore {
                 stopChannel: { type in try await self.channelService.stopChannel(type) },
                 syncChannel: { pkg in try await self.channelService.syncChannel(pkg) },
                 startChannel: { type in try await self.channelService.startChannel(type, extraEnv: [:]) },
-                refreshSkills: { await self.skillService.refreshSkills() }
+                refreshSkills: { try await self.skillService.refreshSkills() }
             )
             return output.isEmpty ? L10n.Upgrade.allUpToDate : output
         }

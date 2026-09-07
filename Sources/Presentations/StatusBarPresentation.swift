@@ -4,6 +4,7 @@ struct StatusBarPresentationBundle {
     let header: StatusHeaderPresentation
     let topology: StatusTopologyPresentation
     let daemonCard: StatusServiceCardPresentation
+    let skillsCard: StatusInstallCardPresentation
     let stream: StatusRuntimeStreamPresentation
     let execution: StatusExecutionPresentation
     let footer: StatusFooterPresentation
@@ -47,6 +48,8 @@ struct StatusInstallCardPresentation {
     let name: String
     let packageName: String
     let isLoading: Bool
+    let isBusy: Bool
+    let actionTitle: String
 }
 
 struct StatusRuntimeStreamPresentation {

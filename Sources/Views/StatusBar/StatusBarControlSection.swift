@@ -126,11 +126,34 @@ struct StatusInstallCard: View {
     let name: String
     let packageName: String
     let isLoading: Bool
+    var isBusy: Bool = false
+    var actionTitle: String = L10n.Status.install
     let runtimeHint: String?
     let runtimeHintTint: Color?
     let onConfig: (() -> Void)?
     let onInstall: () -> Void
     let expandedContent: AnyView?
+
+    init(
+        presentation: StatusInstallCardPresentation,
+        runtimeHint: String? = nil,
+        runtimeHintTint: Color? = nil,
+        onConfig: (() -> Void)? = nil,
+        onInstall: @escaping () -> Void,
+        expandedContent: AnyView? = nil
+    ) {
+        iconName = presentation.iconName
+        name = presentation.name
+        packageName = presentation.packageName
+        isLoading = presentation.isLoading
+        isBusy = presentation.isBusy
+        actionTitle = presentation.actionTitle
+        self.runtimeHint = runtimeHint
+        self.runtimeHintTint = runtimeHintTint
+        self.onConfig = onConfig
+        self.onInstall = onInstall
+        self.expandedContent = expandedContent
+    }
 
     var body: some View {
         VStack(spacing: 8) {
@@ -168,10 +191,11 @@ struct StatusInstallCard: View {
                 }
 
                 StatusSmallActionButton(
-                    title: "install",
+                    title: actionTitle,
                     systemImage: "arrow.down.circle.fill",
                     tint: ConsolePalette.accent,
                     isDisabled: isLoading,
+                    isLoading: isBusy,
                     action: onInstall
                 )
             }
