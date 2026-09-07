@@ -20,7 +20,6 @@ final class OnboardingStoreTests: XCTestCase {
                 )
             },
             installDuoduo: { "" },
-            installClaude: {},
             authStatus: { ClaudeAuthStatus(loggedIn: false, authMethod: nil, apiProvider: nil) },
             login: {},
             mergeProviderEnv: { _ in }
@@ -70,7 +69,6 @@ final class OnboardingStoreTests: XCTestCase {
                 )
             },
             installDuoduo: { "" },
-            installClaude: {},
             authStatus: { ClaudeAuthStatus(loggedIn: false, authMethod: nil, apiProvider: nil) },
             login: {},
             mergeProviderEnv: { _ in }
@@ -80,7 +78,7 @@ final class OnboardingStoreTests: XCTestCase {
         await store.run(.detect(status: "detecting"))
 
         XCTAssertEqual(store.state.snapshot.duoduoVersion, "0.5.0")
-        XCTAssertEqual(store.state.currentRequirement, .claudeCLI)
+        XCTAssertEqual(store.state.currentRequirement, .claudeAccess)
         XCTAssertEqual(store.state.statusMessage, "detecting")
     }
 
@@ -103,7 +101,6 @@ final class OnboardingStoreTests: XCTestCase {
             installDuoduo: {
                 return "installed"
             },
-            installClaude: {},
             authStatus: { ClaudeAuthStatus(loggedIn: false, authMethod: nil, apiProvider: nil) },
             login: {},
             mergeProviderEnv: { _ in }
@@ -113,10 +110,10 @@ final class OnboardingStoreTests: XCTestCase {
         await store.run(.installDuoduo)
         await waitFor { store.state.snapshot.duoduoInstalled }
 
-        XCTAssertEqual(store.state.currentRequirement, .claudeCLI)
+        XCTAssertEqual(store.state.currentRequirement, .claudeAccess)
         XCTAssertEqual(store.state.step, .ready)
         XCTAssertNotEqual(store.state.step, .detecting)
-        XCTAssertEqual(store.state.statusMessage, L10n.Onboard.statusNext(OnboardingRequirement.claudeCLI.title))
+        XCTAssertEqual(store.state.statusMessage, L10n.Onboard.statusNext(OnboardingRequirement.claudeAccess.title))
     }
 
     func testInstallDuoduoDoesNotLoopWhenStillMissing() async {
@@ -124,7 +121,6 @@ final class OnboardingStoreTests: XCTestCase {
             currentEnv: { [:] },
             detect: { _, _, _, _ in .empty },
             installDuoduo: { "installed" },
-            installClaude: {},
             authStatus: { ClaudeAuthStatus(loggedIn: false, authMethod: nil, apiProvider: nil) },
             login: {},
             mergeProviderEnv: { _ in }
@@ -145,32 +141,10 @@ final class OnboardingStoreTests: XCTestCase {
         )
     }
 
-    func testInstallClaudeFailureSurfacesLocalizedError() async {
-        struct InstallError: LocalizedError {
-            var errorDescription: String? { "claude install failed" }
-        }
-        let dependencies = OnboardingStoreDependencies(
-            currentEnv: { [:] },
-            detect: { _, _, _, _ in .empty },
-            installDuoduo: { "" },
-            installClaude: { throw InstallError() },
-            authStatus: { ClaudeAuthStatus(loggedIn: false, authMethod: nil, apiProvider: nil) },
-            login: {},
-            mergeProviderEnv: { _ in }
-        )
-        let store = OnboardingStore(dependencies: dependencies)
-
-        await store.run(.installClaude)
-
-        XCTAssertEqual(store.state.errorMessage, "claude install failed")
-        XCTAssertFalse(store.state.isBusy)
-    }
-
     func testVerifyClaudeStatusLoggedInCompletesFlow() async {
         let dependencies = OnboardingStoreDependencies(
             currentEnv: { [:] },
-            detect: { _, knownClaudeInstalled, _, knownClaudeAuthStatus in
-                XCTAssertEqual(knownClaudeInstalled, true)
+            detect: { _, _, _, knownClaudeAuthStatus in
                 XCTAssertEqual(knownClaudeAuthStatus?.loggedIn, true)
                 return OnboardingSnapshot(
                     duoduoInstalled: true,
@@ -185,7 +159,6 @@ final class OnboardingStoreTests: XCTestCase {
                 )
             },
             installDuoduo: { "" },
-            installClaude: {},
             authStatus: { ClaudeAuthStatus(loggedIn: true, authMethod: "api-key", apiProvider: "official") },
             login: {},
             mergeProviderEnv: { _ in }
@@ -208,16 +181,15 @@ final class OnboardingStoreTests: XCTestCase {
             currentEnv: { [:] },
             detect: { _, _, _, _ in XCTFail("detect should not run when auth fails"); return .empty },
             installDuoduo: { "" },
-            installClaude: {},
             authStatus: { ClaudeAuthStatus(loggedIn: false, authMethod: nil, apiProvider: nil) },
             login: {},
             mergeProviderEnv: { env in recorder.mergedEnv = env }
         )
         let store = OnboardingStore(dependencies: dependencies)
 
-        await store.run(.saveProviderConfig(envVars: ["ANTHROPIC_AUTH_TOKEN": "secret"], successStatus: "saved"))
+        await store.run(.saveProviderConfig(envVars: [:], successStatus: "saved"))
 
-        XCTAssertEqual(recorder.mergedEnv["ANTHROPIC_AUTH_TOKEN"], "secret")
+        XCTAssertTrue(recorder.mergedEnv.isEmpty)
         XCTAssertEqual(store.state.errorMessage, L10n.Onboard.errConfigSavedButAuthFailed)
         XCTAssertNotEqual(store.state.step, .complete)
     }
@@ -230,7 +202,6 @@ final class OnboardingStoreTests: XCTestCase {
             currentEnv: { [:] },
             detect: { _, _, _, _ in .empty },
             installDuoduo: { "" },
-            installClaude: {},
             authStatus: { ClaudeAuthStatus(loggedIn: false, authMethod: nil, apiProvider: nil) },
             login: { throw ExpectedError() },
             mergeProviderEnv: { _ in }
@@ -294,7 +265,6 @@ final class OnboardingStoreTests: XCTestCase {
                 )
             },
             installDuoduo: { "" },
-            installClaude: {},
             authStatus: { ClaudeAuthStatus(loggedIn: true, authMethod: nil, apiProvider: nil) },
             login: {},
             mergeProviderEnv: { _ in }

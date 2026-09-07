@@ -176,8 +176,6 @@ struct OnboardingView: View {
             switch requirement {
             case .duoduoCLI:
                 return installedLabel(store.state.snapshot.duoduoVersion)
-            case .claudeCLI:
-                return installedLabel(store.state.snapshot.claudeVersion)
             case .claudeAccess:
                 return L10n.Onboard.connected
             case .daemon:
@@ -192,8 +190,6 @@ struct OnboardingView: View {
             }
             switch requirement {
             case .duoduoCLI:
-                return L10n.Onboard.installing
-            case .claudeCLI:
                 return L10n.Onboard.installing
             case .claudeAccess:
                 return L10n.Onboard.needToken
@@ -335,7 +331,7 @@ struct OnboardingView: View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(spacing: 0) {
                 completionMetricRow("Duoduo", installedLabel(store.state.snapshot.duoduoVersion))
-                completionMetricRow("Claude SDK", installedLabel(store.state.snapshot.claudeVersion))
+                completionMetricRow("Claude SDK", L10n.Onboard.connected)
                 completionMetricRow(L10n.Onboard.metricModel, L10n.Onboard.connected)
                 completionMetricRow("Daemon", daemonCompletionLabel, showsDivider: false)
             }
@@ -391,8 +387,6 @@ struct OnboardingView: View {
         switch store.state.currentRequirement {
         case .duoduoCLI:
             store.send(.installDuoduoRequested)
-        case .claudeCLI:
-            store.send(.installClaudeRequested)
         default:
             break
         }

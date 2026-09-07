@@ -221,13 +221,11 @@ enum L10n {
 
         // Requirement titles
         static let reqDuoduoCLI = String(localized: "onboard.req.duoduoCLI", bundle: bundle)
-        static let reqClaudeCLI = String(localized: "onboard.req.claudeCLI", bundle: bundle)
         static let reqClaudeAccess = String(localized: "onboard.req.claudeAccess", bundle: bundle)
         static let reqDaemon = String(localized: "onboard.req.daemon", bundle: bundle)
 
         // Requirement summaries
         static let summaryDuoduoCLI = String(localized: "onboard.summary.duoduoCLI", bundle: bundle)
-        static let summaryClaudeCLI = String(localized: "onboard.summary.claudeCLI", bundle: bundle)
         static let summaryClaudeAccess = String(localized: "onboard.summary.claudeAccess", bundle: bundle)
         static let summaryDaemon = String(localized: "onboard.summary.daemon", bundle: bundle)
 
@@ -238,7 +236,6 @@ enum L10n {
             String(localized: "onboard.status.editing \(title)", bundle: bundle)
         }
         static let statusInstallingDuoduo = String(localized: "onboard.status.installingDuoduo", bundle: bundle)
-        static let statusInstallingClaude = String(localized: "onboard.status.installingClaude", bundle: bundle)
         static let statusReadingAuth = String(localized: "onboard.status.readingAuth", bundle: bundle)
         static let statusWritingSettings = String(localized: "onboard.status.writingSettings", bundle: bundle)
         static let statusProviderSaved = String(localized: "onboard.status.providerSaved", bundle: bundle)

@@ -194,7 +194,7 @@ final class OnboardingReducerTests: XCTestCase {
 
         XCTAssertNil(command)
         XCTAssertEqual(state.step, .ready)
-        XCTAssertEqual(state.currentRequirement, .claudeCLI)
+        XCTAssertEqual(state.currentRequirement, .claudeAccess)
         XCTAssertFalse(state.isBusy)
         XCTAssertNil(state.errorMessage)
     }

@@ -60,14 +60,6 @@ struct ClaudeCLIService: Sendable {
         }
     }
 
-    static func install() async throws {
-        _ = try await ShellService.run(
-            "npm",
-            arguments: ["install", "-g", "@anthropic-ai/claude-code"],
-            environment: NodeRuntime.environment
-        )
-    }
-
     static func login(useConsole: Bool = false) async throws {
         var args = ["auth", "login"]
         if useConsole {
