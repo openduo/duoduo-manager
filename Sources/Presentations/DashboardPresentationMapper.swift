@@ -34,7 +34,7 @@ enum DashboardPresentationMapper {
                 DashboardSidebarGroupPresentation(
                     id: key,
                     key: key,
-                    label: SharedPresentationFormatting.shortSessionKey(key, sessions: store.dashboard.sessions),
+                    label: SharedPresentationFormatting.sessionSidebarLabel(key, sessions: store.dashboard.sessions),
                     count: filtered.count,
                     eventTypes: order.map {
                         DashboardEventTypePresentation(

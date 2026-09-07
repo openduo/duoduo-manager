@@ -30,6 +30,7 @@ final class DashboardPresentationMapperTests: XCTestCase {
         let presentation = DashboardPresentationMapper.make(store: store)
 
         XCTAssertEqual(presentation.sidebarGroups.map(\.key), ["session:b", "session:a"])
+        XCTAssertEqual(presentation.sidebarGroups.map(\.label), ["session:Beta", "session:Alpha"])
         XCTAssertEqual(presentation.sidebarGroups.first?.count, 2)
         XCTAssertEqual(presentation.sidebarGroups.first?.eventTypes.map(\.type), ["agent.tool_use", "agent.tool_result"])
         XCTAssertEqual(presentation.systemEvents.map(\.id), ["4"])
@@ -48,5 +49,31 @@ final class DashboardPresentationMapperTests: XCTestCase {
 
         XCTAssertEqual(presentation.bottomStats.healthText, SharedPresentationFormatting.dashboardHealthText(dashboard.health))
         XCTAssertEqual(presentation.bottomStats.healthColor.description, DashboardTheme.red.description)
+    }
+
+    func testSidebarLabelIncludesSessionRuntime() {
+        let dashboard = DashboardStore(
+            sessions: [
+                SessionInfo(
+                    session_key: "feishu:oc_1",
+                    status: "active",
+                    health: "ok",
+                    last_event_at: nil,
+                    created_at: nil,
+                    last_error: nil,
+                    cwd: nil,
+                    display_name: "Ada",
+                    runtime: "grok"
+                )
+            ],
+            events: [
+                SpineEvent(id: "1", type: "agent.result", session_key: "feishu:oc_1", ts: "2026-01-01T00:00:00Z", payload: nil)
+            ]
+        )
+        let store = AppStore(runtime: RuntimeStore(), dashboard: dashboard, updates: UpdateStore(), command: CommandStore(), dependencies: .live)
+
+        let presentation = DashboardPresentationMapper.make(store: store)
+
+        XCTAssertEqual(presentation.sidebarGroups.first?.label, "feishu:Ada · grok")
     }
 }

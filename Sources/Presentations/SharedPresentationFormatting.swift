@@ -40,6 +40,14 @@ enum SharedPresentationFormatting {
         return String(key.suffix(16))
     }
 
+    static func sessionSidebarLabel(_ key: String, sessions: [SessionInfo]) -> String {
+        let base = shortSessionKey(key, sessions: sessions)
+        guard let runtime = normalizedRuntime(sessions.first(where: { $0.session_key == key })?.runtime) else {
+            return base
+        }
+        return "\(base) · \(runtime)"
+    }
+
     static func systemHealthSummary(_ health: HealthInfo?) -> String {
         let gateway = health?.gateway ?? "unknown"
         let meta = health?.meta_session ?? "unknown"
@@ -54,9 +62,16 @@ enum SharedPresentationFormatting {
 
     static func sessionDetail(_ session: SessionInfo) -> String {
         var parts: [String] = []
+        if let runtime = normalizedRuntime(session.runtime) { parts.append(runtime) }
         if let last = session.last_event_at { parts.append(DashboardTheme.timeAgo(last)) }
         if let health = session.health { parts.append(health) }
         return parts.isEmpty ? "idle" : parts.joined(separator: " · ")
+    }
+
+    static func normalizedRuntime(_ value: String?) -> String? {
+        guard let value else { return nil }
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
     }
 
     static func jobDetail(_ job: JobInfo, running: Bool) -> String {
