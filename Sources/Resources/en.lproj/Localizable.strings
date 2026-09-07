@@ -6,14 +6,18 @@
 "status.configure" = "Configure";
 "status.updateAll" = "Update all";
 "status.updatingAll" = "Updating...";
+"status.actions" = "Actions";
 "status.install" = "Install";
 "status.clear" = "Clear";
 "status.quit" = "Quit";
 
 /* Skills */
 "skills.title" = "Skills";
-"skills.installing" = "Installing...";
+"skills.install" = "Install Skills";
+"skills.installing" = "Installing Skills...";
 "skills.installPath" = "~/.claude/skills";
+"skills.installSuccess" = "Skills installed to ~/.claude/skills";
+"skills.installFailed" = "Failed to install Skills";
 
 /* Config */
 "config.save" = "Save";

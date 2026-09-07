@@ -40,7 +40,7 @@ struct StatusBarPresentationMapper {
                 isRunning: store.runtime.status.isRunning,
                 isLoading: store.command.isLoading
             ),
-            skillsCard: skillsCard,
+            operations: operations,
             stream: StatusRuntimeStreamPresentation(
                 hint: streamHint(recentEvents: recentEvents),
                 recentEvents: recentEvents,
@@ -61,7 +61,16 @@ struct StatusBarPresentationMapper {
                 statusMessage: footerStatusMessage,
                 statusIsError: footerStatusIsError
             ),
-            controlHint: showRuntimeUpdate ? "updates ready" : (store.command.isLoading ? "commands in flight" : "direct operations")
+        )
+    }
+
+    private var operations: StatusOperationsPresentation {
+        let installing = store.command.activeOperation == .installSkills
+        return StatusOperationsPresentation(
+            title: installing ? L10n.Skills.installing : L10n.Status.actions,
+            installSkillsTitle: installing ? L10n.Skills.installing : L10n.Skills.install,
+            isInstalling: installing,
+            isDisabled: store.command.isLoading
         )
     }
 
@@ -86,18 +95,6 @@ struct StatusBarPresentationMapper {
             isLoading: store.command.isLoading,
             isBusy: false,
             actionTitle: L10n.Status.install
-        )
-    }
-
-    private var skillsCard: StatusInstallCardPresentation {
-        let installing = store.command.activeOperation == .installSkills
-        return StatusInstallCardPresentation(
-            iconName: "sparkles",
-            name: L10n.Skills.title,
-            packageName: L10n.Skills.installPath,
-            isLoading: store.command.isLoading,
-            isBusy: installing,
-            actionTitle: installing ? L10n.Skills.installing : L10n.Status.install
         )
     }
 

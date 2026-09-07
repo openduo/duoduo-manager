@@ -32,6 +32,7 @@ enum L10n {
         static let install = String(localized: "status.install", bundle: bundle)
         static let updateAll = String(localized: "status.updateAll", bundle: bundle)
         static let updatingAll = String(localized: "status.updatingAll", bundle: bundle)
+        static let actions = String(localized: "status.actions", bundle: bundle)
         static let clear = String(localized: "status.clear", bundle: bundle)
         static let quit = String(localized: "status.quit", bundle: bundle)
     }
@@ -172,8 +173,11 @@ enum L10n {
 
     enum Skills {
         static let title = String(localized: "skills.title", bundle: bundle)
+        static let install = String(localized: "skills.install", bundle: bundle)
         static let installing = String(localized: "skills.installing", bundle: bundle)
         static let installPath = String(localized: "skills.installPath", bundle: bundle)
+        static let installSuccess = String(localized: "skills.installSuccess", bundle: bundle)
+        static let installFailed = String(localized: "skills.installFailed", bundle: bundle)
     }
 
     // MARK: - Setup

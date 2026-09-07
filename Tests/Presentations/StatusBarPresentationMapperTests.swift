@@ -122,7 +122,7 @@ final class StatusBarPresentationMapperTests: XCTestCase {
         XCTAssertEqual(SharedPresentationFormatting.sessionDetail(withoutRuntime), "idle")
     }
 
-    func testSkillsCardTargetsGlobalClaudeDirectory() {
+    func testOperationsMenuDefaultsToActions() {
         let store = AppStore(
             runtime: RuntimeStore(),
             dashboard: DashboardStore(),
@@ -132,13 +132,13 @@ final class StatusBarPresentationMapperTests: XCTestCase {
         )
 
         let presentation = StatusBarPresentationMapper(store: store).make(expandedEventIDs: [])
-        XCTAssertEqual(presentation.skillsCard.name, L10n.Skills.title)
-        XCTAssertEqual(presentation.skillsCard.packageName, L10n.Skills.installPath)
-        XCTAssertEqual(presentation.skillsCard.actionTitle, L10n.Status.install)
-        XCTAssertFalse(presentation.skillsCard.isBusy)
+        XCTAssertEqual(presentation.operations.title, L10n.Status.actions)
+        XCTAssertEqual(presentation.operations.installSkillsTitle, L10n.Skills.install)
+        XCTAssertFalse(presentation.operations.isInstalling)
+        XCTAssertFalse(presentation.operations.isDisabled)
     }
 
-    func testSkillsCardShowsInstallingState() {
+    func testOperationsMenuShowsInstallingState() {
         let store = AppStore(
             runtime: RuntimeStore(),
             dashboard: DashboardStore(),
@@ -148,9 +148,9 @@ final class StatusBarPresentationMapperTests: XCTestCase {
         )
 
         let presentation = StatusBarPresentationMapper(store: store).make(expandedEventIDs: [])
-        XCTAssertTrue(presentation.skillsCard.isBusy)
-        XCTAssertTrue(presentation.skillsCard.isLoading)
-        XCTAssertEqual(presentation.skillsCard.actionTitle, L10n.Skills.installing)
-        XCTAssertEqual(presentation.skillsCard.packageName, L10n.Skills.installPath)
+        XCTAssertEqual(presentation.operations.title, L10n.Skills.installing)
+        XCTAssertEqual(presentation.operations.installSkillsTitle, L10n.Skills.installing)
+        XCTAssertTrue(presentation.operations.isInstalling)
+        XCTAssertTrue(presentation.operations.isDisabled)
     }
 }

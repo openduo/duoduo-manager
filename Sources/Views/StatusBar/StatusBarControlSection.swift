@@ -1,5 +1,66 @@
 import SwiftUI
 
+struct StatusOperationsMenu: View {
+    let title: String
+    let installSkillsTitle: String
+    let isInstalling: Bool
+    let isDisabled: Bool
+    let onInstallSkills: () -> Void
+
+    @State private var isExpanded = false
+
+    var body: some View {
+        Button {
+            isExpanded.toggle()
+        } label: {
+            HStack(spacing: 4) {
+                if isInstalling {
+                    ProgressView()
+                        .controlSize(.small)
+                        .tint(ConsolePalette.accent)
+                        .frame(width: 10, height: 10)
+                }
+                Text(title)
+                    .font(.system(size: 11, weight: .medium))
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 8, weight: .bold))
+            }
+            .foregroundStyle(ConsolePalette.accent)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 5)
+            .background(ConsolePalette.accent.opacity(0.12))
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+        }
+        .buttonStyle(.plain)
+        .popover(isPresented: $isExpanded, arrowEdge: .bottom) {
+            VStack(alignment: .leading, spacing: 0) {
+                Button {
+                    isExpanded = false
+                    onInstallSkills()
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 11))
+                            .foregroundStyle(ConsolePalette.secondaryText)
+                            .frame(width: 16)
+                        Text(installSkillsTitle)
+                            .font(.system(size: 12, design: .monospaced))
+                            .foregroundStyle(ConsolePalette.primaryText)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .disabled(isDisabled)
+            }
+            .fixedSize()
+            .padding(.vertical, 4)
+            .background(ConsolePalette.background)
+        }
+    }
+}
+
 struct StatusServiceCard: View {
     let icon: String
     let name: String

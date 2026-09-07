@@ -141,7 +141,12 @@ extension AppStore {
             activeOperation: .installSkills,
             initialOutput: L10n.Skills.installing
         ) {
-            try await self.skillService.refreshSkills()
+            do {
+                _ = try await self.skillService.refreshSkills()
+                return L10n.Skills.installSuccess
+            } catch {
+                throw SkillInstallError()
+            }
         }
     }
 
@@ -230,4 +235,8 @@ extension AppStore {
             return output
         }
     }
+}
+
+private struct SkillInstallError: LocalizedError {
+    var errorDescription: String? { L10n.Skills.installFailed }
 }

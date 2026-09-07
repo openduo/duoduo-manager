@@ -86,10 +86,7 @@ struct StatusBarView: View {
             overviewColumn(
                 icon: "slider.horizontal.3",
                 title: "Control Plane",
-                hint: statusBarPresentation.header.showRuntimeUpdate ? nil : statusBarPresentation.controlHint,
-                trailing: statusBarPresentation.header.showRuntimeUpdate
-                    ? AnyView(controlPlaneUpdateButton)
-                    : nil
+                trailing: AnyView(controlPlaneTrailing)
             ) {
                 controlPanelContent
             }
@@ -142,6 +139,21 @@ struct StatusBarView: View {
             }
 
             content()
+        }
+    }
+
+    private var controlPlaneTrailing: some View {
+        HStack(spacing: 8) {
+            if statusBarPresentation.header.showRuntimeUpdate {
+                controlPlaneUpdateButton
+            }
+            StatusOperationsMenu(
+                title: statusBarPresentation.operations.title,
+                installSkillsTitle: statusBarPresentation.operations.installSkillsTitle,
+                isInstalling: statusBarPresentation.operations.isInstalling,
+                isDisabled: statusBarPresentation.operations.isDisabled,
+                onInstallSkills: { store.installSkills() }
+            )
         }
     }
 
@@ -199,8 +211,6 @@ struct StatusBarView: View {
                     channelInstallCard(entry)
                 }
             }
-
-            skillsInstallCard
         }
     }
 
@@ -279,13 +289,6 @@ struct StatusBarView: View {
             expandedContent: entry.id == "feishu" && expandedConfigTarget == .feishu
                 ? AnyView(feishuInlineConfig)
                 : nil
-        )
-    }
-
-    private var skillsInstallCard: some View {
-        StatusInstallCard(
-            presentation: statusBarPresentation.skillsCard,
-            onInstall: { store.installSkills() }
         )
     }
 

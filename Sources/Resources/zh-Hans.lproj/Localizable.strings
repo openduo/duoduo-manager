@@ -6,14 +6,18 @@
 "status.configure" = "配置";
 "status.updateAll" = "全部更新";
 "status.updatingAll" = "更新中...";
+"status.actions" = "操作";
 "status.install" = "安装";
 "status.clear" = "清除";
 "status.quit" = "退出";
 
 /* Skills */
 "skills.title" = "Skills";
-"skills.installing" = "安装中...";
+"skills.install" = "安装 Skills";
+"skills.installing" = "正在安装 Skills...";
 "skills.installPath" = "~/.claude/skills";
+"skills.installSuccess" = "Skills 已安装到 ~/.claude/skills";
+"skills.installFailed" = "Skills 安装失败";
 
 /* Config */
 "config.save" = "保存";

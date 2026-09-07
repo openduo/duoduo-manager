@@ -440,7 +440,7 @@ final class AppStoreTests: XCTestCase {
         await fulfillment(of: [loadingFinishedExpectation(for: store)], timeout: 2)
 
         XCTAssertEqual(skills.refreshCount, 1)
-        XCTAssertEqual(store.command.lastOutput, "[skills] refreshed openduo/duoduo → ~/.claude/skills\n")
+        XCTAssertEqual(store.command.lastOutput, L10n.Skills.installSuccess)
         XCTAssertNil(store.command.errorMessage)
         XCTAssertNil(store.command.activeOperation)
     }
@@ -456,7 +456,7 @@ final class AppStoreTests: XCTestCase {
         await fulfillment(of: [loadingFinishedExpectation(for: store)], timeout: 2)
 
         XCTAssertEqual(skills.refreshCount, 1)
-        XCTAssertEqual(store.command.errorMessage, "npx failed")
+        XCTAssertEqual(store.command.errorMessage, L10n.Skills.installFailed)
     }
 
     func testRefreshRuntimeUpdatesDaemonStatusAndChannels() async {
