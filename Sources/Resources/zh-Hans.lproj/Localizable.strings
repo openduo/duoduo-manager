@@ -127,6 +127,15 @@
 "upgrade.allUpToDate" = "所有组件已是最新版本";
 "upgrade.updatingHeader" = "正在更新组件：";
 "upgrade.updatingCount" = "正在更新 %d 个组件…";
+"upgrade.stoppingChannel %@" = "正在停止 %@…";
+"upgrade.updatingDaemon %@ %@" = "正在更新 duoduo %@ → %@…";
+"upgrade.updatingChannel %@ %@ %@" = "正在更新 %@ %@ → %@…";
+"upgrade.startingChannel %@" = "正在启动 %@…";
+"upgrade.refreshingSkills" = "正在刷新 Skills…";
+"upgrade.updated %@" = "已更新 %@";
+"upgrade.failedDuring %@ %@" = "失败于%@：%@";
+"upgrade.skillsFailed" = "Skills 刷新失败。";
+"upgrade.cardUpdating" = "更新中…";
 
 /* Setup */
 "setup.installingDuoduo" = "正在首次安装 duoduo...";
