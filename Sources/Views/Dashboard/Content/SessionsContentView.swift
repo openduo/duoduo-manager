@@ -155,7 +155,10 @@ struct SessionsContentView: View {
         }
 
         let displayName = s.display_name ?? s.session_key
-        let runtime = SharedPresentationFormatting.normalizedRuntime(active?.runtime ?? s.runtime)
+        let runtimeCaption = SharedPresentationFormatting.sessionRuntimeCaption(
+            runtime: active?.runtime ?? s.runtime,
+            model: active?.model ?? s.model
+        )
 
         return HStack(spacing: 0) {
             // Left accent bar
@@ -169,8 +172,8 @@ struct SessionsContentView: View {
                         .font(.system(size: 12, design: .monospaced))
                         .foregroundStyle(DashboardTheme.text)
                         .lineLimit(1)
-                    if let runtime {
-                        Text("[\(runtime)]")
+                    if let runtimeCaption {
+                        Text("[\(runtimeCaption)]")
                             .font(.system(size: 10, design: .monospaced))
                             .foregroundStyle(DashboardTheme.textTertiary)
                     }

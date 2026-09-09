@@ -122,6 +122,49 @@ final class StatusBarPresentationMapperTests: XCTestCase {
         XCTAssertEqual(SharedPresentationFormatting.sessionDetail(withoutRuntime), "idle")
     }
 
+    func testSessionDetailIncludesServedAndPendingModel() {
+        let served = SessionInfo(
+            session_key: "s1",
+            status: "active",
+            health: "ok",
+            last_event_at: nil,
+            created_at: nil,
+            last_error: nil,
+            cwd: nil,
+            display_name: "Ada",
+            runtime: "codex",
+            model: SessionModelInfo(served: "gpt-5.6-sol", pending: nil)
+        )
+        let switching = SessionInfo(
+            session_key: "s2",
+            status: "active",
+            health: "ok",
+            last_event_at: nil,
+            created_at: nil,
+            last_error: nil,
+            cwd: nil,
+            display_name: "Ada",
+            runtime: "codex",
+            model: SessionModelInfo(served: "gpt-5.6-sol", pending: "gpt-5.4")
+        )
+        let pendingOnly = SessionInfo(
+            session_key: "s3",
+            status: "idle",
+            health: nil,
+            last_event_at: nil,
+            created_at: nil,
+            last_error: nil,
+            cwd: nil,
+            display_name: "Ada",
+            runtime: "codex",
+            model: SessionModelInfo(served: nil, pending: "gpt-5.4")
+        )
+
+        XCTAssertEqual(SharedPresentationFormatting.sessionDetail(served), "codex · gpt-5.6-sol · ok")
+        XCTAssertEqual(SharedPresentationFormatting.sessionDetail(switching), "codex · gpt-5.6-sol → gpt-5.4 · ok")
+        XCTAssertEqual(SharedPresentationFormatting.sessionDetail(pendingOnly), "codex · → gpt-5.4")
+    }
+
     func testOperationsMenuDefaultsToActions() {
         let store = AppStore(
             runtime: RuntimeStore(),

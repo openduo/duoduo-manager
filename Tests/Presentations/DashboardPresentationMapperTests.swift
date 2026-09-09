@@ -76,4 +76,31 @@ final class DashboardPresentationMapperTests: XCTestCase {
 
         XCTAssertEqual(presentation.sidebarGroups.first?.label, "feishu:Ada · grok")
     }
+
+    func testSidebarLabelIncludesServedModel() {
+        let dashboard = DashboardStore(
+            sessions: [
+                SessionInfo(
+                    session_key: "feishu:oc_1",
+                    status: "active",
+                    health: "ok",
+                    last_event_at: nil,
+                    created_at: nil,
+                    last_error: nil,
+                    cwd: nil,
+                    display_name: "Ada",
+                    runtime: "codex",
+                    model: SessionModelInfo(served: "gpt-5.6-sol", pending: nil)
+                )
+            ],
+            events: [
+                SpineEvent(id: "1", type: "agent.result", session_key: "feishu:oc_1", ts: "2026-01-01T00:00:00Z", payload: nil)
+            ]
+        )
+        let store = AppStore(runtime: RuntimeStore(), dashboard: dashboard, updates: UpdateStore(), command: CommandStore(), dependencies: .live)
+
+        let presentation = DashboardPresentationMapper.make(store: store)
+
+        XCTAssertEqual(presentation.sidebarGroups.first?.label, "feishu:Ada · codex · gpt-5.6-sol")
+    }
 }

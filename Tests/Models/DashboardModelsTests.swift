@@ -82,7 +82,50 @@ final class DashboardModelsTests: XCTestCase {
         """#.utf8))
 
         XCTAssertEqual(session.runtime, "grok")
+        XCTAssertNil(session.model)
         XCTAssertEqual(SessionRegistryEntry.fromActive(session).runtime, "grok")
+        XCTAssertNil(SessionRegistryEntry.fromActive(session).model)
+    }
+
+    func testSessionInfoDecodesServedAndPendingModel() throws {
+        let session = try JSONDecoder().decode(SessionInfo.self, from: Data(#"""
+        {
+          "session_key": "feishu:oc_1",
+          "status": "active",
+          "health": "ok",
+          "last_event_at": null,
+          "created_at": null,
+          "last_error": null,
+          "cwd": "/tmp",
+          "display_name": "Ada",
+          "runtime": "codex",
+          "model": { "served": "gpt-5.6-sol", "pending": "gpt-5.4" }
+        }
+        """#.utf8))
+
+        XCTAssertEqual(session.model?.served, "gpt-5.6-sol")
+        XCTAssertEqual(session.model?.pending, "gpt-5.4")
+        XCTAssertEqual(SessionRegistryEntry.fromActive(session).model?.served, "gpt-5.6-sol")
+    }
+
+    func testSessionInfoDecodesNullModelFields() throws {
+        let session = try JSONDecoder().decode(SessionInfo.self, from: Data(#"""
+        {
+          "session_key": "feishu:oc_1",
+          "status": "idle",
+          "health": "ok",
+          "last_event_at": null,
+          "created_at": null,
+          "cwd": null,
+          "display_name": null,
+          "runtime": "claude",
+          "model": { "served": null, "pending": null }
+        }
+        """#.utf8))
+
+        XCTAssertNil(session.model?.served)
+        XCTAssertNil(session.model?.pending)
+        XCTAssertNil(SharedPresentationFormatting.sessionModelCaption(session.model))
     }
 
     func testSessionInfoDecodesWhenRuntimeIsAbsent() throws {
