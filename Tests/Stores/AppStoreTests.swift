@@ -153,7 +153,8 @@ final class AppStoreTests: XCTestCase {
                 source_channel_id: "feishu",
                 last_error: nil,
                 orphan: nil,
-                runtime: nil
+                runtime: nil,
+                model: nil
             )
         ]
         let store = AppStore(

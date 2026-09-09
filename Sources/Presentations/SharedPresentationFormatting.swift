@@ -41,11 +41,12 @@ enum SharedPresentationFormatting {
     }
 
     static func sessionSidebarLabel(_ key: String, sessions: [SessionInfo]) -> String {
+        let session = sessions.first(where: { $0.session_key == key })
         let base = shortSessionKey(key, sessions: sessions)
-        guard let runtime = normalizedRuntime(sessions.first(where: { $0.session_key == key })?.runtime) else {
+        guard let caption = sessionRuntimeCaption(runtime: session?.runtime, model: session?.model) else {
             return base
         }
-        return "\(base) · \(runtime)"
+        return "\(base) · \(caption)"
     }
 
     static func systemHealthSummary(_ health: HealthInfo?) -> String {
@@ -62,10 +63,44 @@ enum SharedPresentationFormatting {
 
     static func sessionDetail(_ session: SessionInfo) -> String {
         var parts: [String] = []
-        if let runtime = normalizedRuntime(session.runtime) { parts.append(runtime) }
+        if let caption = sessionRuntimeCaption(runtime: session.runtime, model: session.model) {
+            parts.append(caption)
+        }
         if let last = session.last_event_at { parts.append(DashboardTheme.timeAgo(last)) }
         if let health = session.health { parts.append(health) }
         return parts.isEmpty ? "idle" : parts.joined(separator: " · ")
+    }
+
+    /// Runtime plus served/pending model for a session row.
+    /// `served → pending` when a stored `/model` has not reached the runtime yet.
+    static func sessionRuntimeCaption(runtime: String?, model: SessionModelInfo?) -> String? {
+        let runtimePart = normalizedRuntime(runtime)
+        let modelPart = sessionModelCaption(model)
+        switch (runtimePart, modelPart) {
+        case let (runtime?, model?):
+            return "\(runtime) · \(model)"
+        case let (runtime?, nil):
+            return runtime
+        case let (nil, model?):
+            return model
+        default:
+            return nil
+        }
+    }
+
+    static func sessionModelCaption(_ model: SessionModelInfo?) -> String? {
+        let served = normalizedRuntime(model?.served)
+        let pending = normalizedRuntime(model?.pending)
+        switch (served, pending) {
+        case let (served?, pending?) where served != pending:
+            return "\(served) → \(pending)"
+        case let (served?, _):
+            return served
+        case let (nil, pending?):
+            return "→ \(pending)"
+        default:
+            return nil
+        }
     }
 
     static func normalizedRuntime(_ value: String?) -> String? {

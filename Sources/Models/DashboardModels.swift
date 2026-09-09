@@ -52,6 +52,9 @@ struct SessionInfo: Decodable, Sendable, Identifiable {
     let cwd: String?
     let display_name: String?
     let runtime: String?
+    /// `system.status` 0.8.1+: last served model and a stored `/model` that
+    /// has not reached the runtime yet. Absent on older daemons.
+    let model: SessionModelInfo?
 
     var lastErrorText: String? { last_error?.value }
 
@@ -64,7 +67,8 @@ struct SessionInfo: Decodable, Sendable, Identifiable {
         last_error: FlexibleString?,
         cwd: String?,
         display_name: String?,
-        runtime: String? = nil
+        runtime: String? = nil,
+        model: SessionModelInfo? = nil
     ) {
         self.session_key = session_key
         self.status = status
@@ -75,7 +79,14 @@ struct SessionInfo: Decodable, Sendable, Identifiable {
         self.cwd = cwd
         self.display_name = display_name
         self.runtime = runtime
+        self.model = model
     }
+}
+
+/// `system.status` sessions[].model (duoduo 0.8.1+, optional).
+struct SessionModelInfo: Decodable, Sendable {
+    let served: String?
+    let pending: String?
 }
 
 // MARK: - duoduo session list
@@ -92,6 +103,7 @@ struct SessionRegistryEntry: Decodable, Sendable, Identifiable {
     let last_error: FlexibleString?
     let orphan: Bool?
     let runtime: String?
+    let model: SessionModelInfo?
 
     var lastErrorText: String? { last_error?.value }
 
@@ -106,7 +118,8 @@ struct SessionRegistryEntry: Decodable, Sendable, Identifiable {
             source_channel_id: nil,
             last_error: session.last_error,
             orphan: nil,
-            runtime: session.runtime
+            runtime: session.runtime,
+            model: session.model
         )
     }
 }
