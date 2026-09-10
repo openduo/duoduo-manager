@@ -57,14 +57,21 @@ final class AppStoreTests: XCTestCase {
 
         store.upgradeAll()
         XCTAssertEqual(store.command.activeOperation, .upgradeAll)
-        XCTAssertTrue(store.command.lastOutput.contains("duoduo: v0.4.8 → v0.4.9"))
-        XCTAssertTrue(store.command.lastOutput.contains("v0.1.0 → v0.2.0"))
+        XCTAssertEqual(store.command.lastOutput, L10n.Status.updatingAll)
         await fulfillment(of: [loadingFinishedExpectation(for: store)], timeout: 2)
 
         XCTAssertEqual(upgradeService.recordedDaemonInstalledVersion, "0.4.8")
         XCTAssertEqual(upgradeService.recordedChannels.map(\.type), ["feishu"])
         XCTAssertEqual(upgradeService.recordedLatestVersions["daemon"], "0.4.9")
         XCTAssertEqual(store.command.lastOutput, "upgraded")
+        XCTAssertNil(store.command.upgradeTarget)
+    }
+
+    func testApplyUpgradeProgressUpdatesStripAndTarget() {
+        let store = makeStore()
+        store.applyUpgradeProgress("Updating duoduo 0.8.0 → 0.8.1…", target: .daemon)
+        XCTAssertEqual(store.command.lastOutput, "Updating duoduo 0.8.0 → 0.8.1…")
+        XCTAssertEqual(store.command.upgradeTarget, .daemon)
     }
 
     func testFetchDashboardStatusPopulatesUsageJobsAndHealth() async {
@@ -718,7 +725,8 @@ private final class RecordingUpgradeService: UpgradeServicing, @unchecked Sendab
         stopChannel: (String) async throws -> String,
         syncChannel: (String) async throws -> String,
         startChannel: (String) async throws -> String,
-        refreshSkills: () async throws -> String
+        refreshSkills: () async throws -> String,
+        onProgress: @escaping @Sendable (String, UpgradeTarget?) async -> Void
     ) async throws -> String {
         recordedDaemonInstalledVersion = daemonInstalledVersion
         recordedChannels = channels

@@ -57,7 +57,8 @@ protocol UpgradeServicing: Sendable {
         stopChannel: (String) async throws -> String,
         syncChannel: (String) async throws -> String,
         startChannel: (String) async throws -> String,
-        refreshSkills: () async throws -> String
+        refreshSkills: () async throws -> String,
+        onProgress: @escaping @Sendable (String, UpgradeTarget?) async -> Void
     ) async throws -> String
 }
 

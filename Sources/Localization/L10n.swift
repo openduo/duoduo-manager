@@ -195,6 +195,27 @@ enum L10n {
         static func updatingCount(_ count: Int) -> String {
             String(localized: "upgrade.updatingCount", defaultValue: "Updating \(count) component(s)…", bundle: bundle)
         }
+        static func stoppingChannel(_ name: String) -> String {
+            String(localized: "upgrade.stoppingChannel \(name)", bundle: bundle)
+        }
+        static func updatingDaemon(from: String, to: String) -> String {
+            String(localized: "upgrade.updatingDaemon \(from) \(to)", bundle: bundle)
+        }
+        static func updatingChannel(_ name: String, from: String, to: String) -> String {
+            String(localized: "upgrade.updatingChannel \(name) \(from) \(to)", bundle: bundle)
+        }
+        static func startingChannel(_ name: String) -> String {
+            String(localized: "upgrade.startingChannel \(name)", bundle: bundle)
+        }
+        static let refreshingSkills = String(localized: "upgrade.refreshingSkills", bundle: bundle)
+        static func updated(_ summary: String) -> String {
+            String(localized: "upgrade.updated \(summary)", bundle: bundle)
+        }
+        static func failedDuring(_ step: String, _ reason: String) -> String {
+            String(localized: "upgrade.failedDuring \(step) \(reason)", bundle: bundle)
+        }
+        static let skillsFailed = String(localized: "upgrade.skillsFailed", bundle: bundle)
+        static let cardUpdating = String(localized: "upgrade.cardUpdating", bundle: bundle)
     }
 
     // MARK: - Autostart

@@ -297,14 +297,22 @@ struct StatusBarView: View {
     }
 
     private func statusBarMessageStrip(_ message: String) -> some View {
-        HStack(spacing: 6) {
-            ODStateTick(tint: statusBarPresentation.footer.statusIsError ? OpenDuo.alert : OpenDuo.ok, size: 5)
+        let isBusy = store.command.isLoading
+        let isError = statusBarPresentation.footer.statusIsError
+        return HStack(spacing: 6) {
+            if isBusy {
+                ProgressView()
+                    .controlSize(.mini)
+                    .tint(OpenDuo.textSecondary)
+            } else {
+                ODStateTick(tint: isError ? OpenDuo.alert : OpenDuo.ok, size: 5)
+            }
             Text(message)
-                .lineLimit(1)
+                .lineLimit(2)
                 .truncationMode(.tail)
         }
         .font(.odMono(10))
-        .foregroundStyle(statusBarPresentation.footer.statusIsError ? OpenDuo.alert : OpenDuo.textSecondary)
+        .foregroundStyle(isError ? OpenDuo.alert : OpenDuo.textSecondary)
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
         .frame(maxWidth: .infinity, alignment: .leading)

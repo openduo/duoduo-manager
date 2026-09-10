@@ -1,13 +1,13 @@
 import Foundation
 
 extension AppStore {
-    func scheduleCommandFeedbackAutoClear() {
+    func scheduleCommandFeedbackAutoClear(after: Duration = .seconds(4)) {
         let outputSnapshot = command.lastOutput
         let errorSnapshot = command.errorMessage
 
         clearCommandFeedbackTask?.cancel()
         clearCommandFeedbackTask = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(4))
+            try? await Task.sleep(for: after)
             guard let self, !Task.isCancelled else { return }
             if self.command.lastOutput == outputSnapshot, self.command.errorMessage == errorSnapshot {
                 self.clearOutput()
@@ -169,7 +169,8 @@ extension AppStore {
     func upgradeAll() {
         executeCommand(
             activeOperation: .upgradeAll,
-            initialOutput: upgradeAllProgressMessage()
+            initialOutput: L10n.Status.updatingAll,
+            feedbackClearAfter: .seconds(10)
         ) {
             let output = try await self.upgradeService.upgradeAll(
                 daemonInstalledVersion: self.runtime.status.version,
@@ -178,37 +179,18 @@ extension AppStore {
                 stopChannel: { type in try await self.channelService.stopChannel(type) },
                 syncChannel: { pkg in try await self.channelService.syncChannel(pkg) },
                 startChannel: { type in try await self.channelService.startChannel(type, extraEnv: [:]) },
-                refreshSkills: { try await self.skillService.refreshSkills() }
+                refreshSkills: { try await self.skillService.refreshSkills() },
+                onProgress: { message, target in
+                    await self.applyUpgradeProgress(message, target: target)
+                }
             )
             return output.isEmpty ? L10n.Upgrade.allUpToDate : output
         }
     }
 
-    private func upgradeAllProgressMessage() -> String {
-        var lines: [String] = []
-
-        if let latest = updates.latestVersions["daemon"],
-           !latest.isEmpty,
-           !runtime.status.version.isEmpty,
-           runtime.status.version.compare(latest, options: .numeric) == .orderedAscending
-        {
-            lines.append("duoduo: v\(runtime.status.version) → v\(latest)")
-            // Skills describe the CLI surface, so they refresh alongside it
-            // (see #11). Counted as part of the same component move.
-            lines.append("skills: → v\(latest) (with CLI)")
-        }
-
-        for channel in runtime.channels {
-            guard let latest = updates.latestVersions[channel.type],
-                  !latest.isEmpty,
-                  !channel.version.isEmpty,
-                  channel.version.compare(latest, options: .numeric) == .orderedAscending
-            else { continue }
-            lines.append("\(channel.displayName): v\(channel.version) → v\(latest)")
-        }
-
-        guard !lines.isEmpty else { return L10n.Upgrade.allUpToDate }
-        return ([L10n.Upgrade.updatingCount(lines.count)] + lines).joined(separator: "\n")
+    func applyUpgradeProgress(_ message: String, target: UpgradeTarget?) {
+        command.lastOutput = message
+        command.upgradeTarget = target
     }
 
     func showConfigRequired() {
@@ -222,6 +204,7 @@ extension AppStore {
         command.activeOperation = nil
         command.lastOutput = ""
         command.errorMessage = nil
+        command.upgradeTarget = nil
     }
 
     func fetchConfig() async {

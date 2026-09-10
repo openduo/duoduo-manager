@@ -127,6 +127,15 @@
 "upgrade.allUpToDate" = "All components are up to date";
 "upgrade.updatingHeader" = "Updating components:";
 "upgrade.updatingCount" = "Updating %d component(s)…";
+"upgrade.stoppingChannel %@" = "Stopping %@…";
+"upgrade.updatingDaemon %@ %@" = "Updating duoduo %@ → %@…";
+"upgrade.updatingChannel %@ %@ %@" = "Updating %@ %@ → %@…";
+"upgrade.startingChannel %@" = "Starting %@…";
+"upgrade.refreshingSkills" = "Refreshing Skills…";
+"upgrade.updated %@" = "Updated %@";
+"upgrade.failedDuring %@ %@" = "Failed while %@: %@";
+"upgrade.skillsFailed" = "Skills refresh failed.";
+"upgrade.cardUpdating" = "updating…";
 
 /* Setup */
 "setup.installingDuoduo" = "Installing duoduo for the first time...";
