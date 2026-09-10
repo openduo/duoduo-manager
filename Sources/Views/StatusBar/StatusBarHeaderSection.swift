@@ -17,33 +17,34 @@ struct StatusHeaderBar: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
-            appGlyph
+            ODSignalDot(isLive: runtimeLive)
 
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 5) {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     Text("duoduo manager")
-                        .font(.system(size: 16, weight: .semibold, design: .monospaced))
-                        .foregroundStyle(ConsolePalette.primaryText)
-                        .lineLimit(1)
+                    ODBrandStop()
 
                     if showAppUpdate {
                         Button(action: onAppUpdate) {
-                            StatusBadge(title: L10n.Status.appUpdate(appVersion), tint: ConsolePalette.warning, showsIndicator: false)
+                            Text(L10n.Status.appUpdate(appVersion))
+                                .font(.odMono(10))
+                                .foregroundStyle(OpenDuo.attention)
                         }
                         .buttonStyle(.plain)
                     } else {
                         Text("v\(currentVersion)")
-                            .font(.system(size: 10, design: .monospaced))
-                            .foregroundStyle(ConsolePalette.secondaryText)
+                            .font(.odMono(10))
+                            .foregroundStyle(OpenDuo.textSecondary)
                     }
-
                 }
+                .font(.odDisplay(15))
+                .foregroundStyle(OpenDuo.textStrong)
 
-                HStack(spacing: 10) {
-                    headerMetric("cost", costValue, valueTint: Color(red: 0.82, green: 0.74, blue: 0.58))
-                    headerMetric("tok", tokenValue, valueTint: Color(red: 0.61, green: 0.77, blue: 0.90))
-                    headerMetric("cache", cacheValue, valueTint: Color(red: 0.59, green: 0.80, blue: 0.71))
-                    headerMetric("tools", toolsValue, valueTint: Color(red: 0.73, green: 0.67, blue: 0.88))
+                HStack(spacing: 12) {
+                    headerMetric("cost", costValue)
+                    headerMetric("tok", tokenValue)
+                    headerMetric("cache", cacheValue)
+                    headerMetric("tools", toolsValue)
                 }
             }
 
@@ -51,47 +52,28 @@ struct StatusHeaderBar: View {
 
             Button(action: onRefresh) {
                 Image(systemName: "arrow.clockwise")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(ConsolePalette.primaryText)
-                    .frame(width: 30, height: 30)
-                    .background(ConsolePalette.panelRaised)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .font(.system(size: 11, weight: .medium))
             }
-            .buttonStyle(.plain)
+            .buttonStyle(ODIconButtonStyle())
             .disabled(isLoading)
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 14)
         .padding(.vertical, 10)
-        .background(ConsolePalette.panel)
-    }
-
-    private var appGlyph: some View {
-        Group {
-            if let url = Bundle.main.url(forResource: "AppIcon", withExtension: "icns"),
-               let nsImage = NSImage(contentsOf: url) {
-                Image(nsImage: nsImage)
-                    .resizable()
-                    .interpolation(.high)
-                    .scaledToFit()
-                    .frame(width: 38, height: 38)
-                    .clipShape(RoundedRectangle(cornerRadius: 9))
-            }
+        .background(OpenDuo.surfacePanel)
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(OpenDuo.borderHairline).frame(height: 1)
         }
-        .overlay(
-            RoundedRectangle(cornerRadius: 9)
-                .stroke(ConsolePalette.divider, lineWidth: 1)
-        )
     }
 
-    private func headerMetric(_ title: String, _ value: String, valueTint: Color) -> some View {
+    private func headerMetric(_ title: String, _ value: String) -> some View {
         HStack(spacing: 4) {
             Text(title)
-                .foregroundStyle(ConsolePalette.mutedText)
+                .foregroundStyle(OpenDuo.textMuted)
             Text(value)
-                .foregroundStyle(valueTint)
-                .fontWeight(.semibold)
+                .foregroundStyle(OpenDuo.textPrimary)
+                .fontWeight(.medium)
                 .lineLimit(1)
         }
-        .font(.system(size: 10, design: .monospaced))
+        .font(.odMono(10))
     }
 }

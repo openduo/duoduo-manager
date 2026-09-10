@@ -35,6 +35,23 @@ enum L10n {
         static let actions = String(localized: "status.actions", bundle: bundle)
         static let clear = String(localized: "status.clear", bundle: bundle)
         static let quit = String(localized: "status.quit", bundle: bundle)
+
+        // Section labels. Instrument-style dashboard labels; zh-Hans ships
+        // the English source text by product decision, not by omission.
+        static let controlPlane = String(localized: "status.controlPlane", bundle: bundle)
+        static let topology = String(localized: "status.topology", bundle: bundle)
+        static let subconscious = String(localized: "status.subconscious", bundle: bundle)
+        static let runtimeStream = String(localized: "status.runtimeStream", bundle: bundle)
+        static let executionBoard = String(localized: "status.executionBoard", bundle: bundle)
+
+        // Latest-event eyebrows in the runtime stream hero.
+        static let eyebrowCurrentTool = String(localized: "status.eyebrow.currentTool", bundle: bundle)
+        static let eyebrowLatestResult = String(localized: "status.eyebrow.latestResult", bundle: bundle)
+        static let eyebrowErrorSignal = String(localized: "status.eyebrow.errorSignal", bundle: bundle)
+        static let eyebrowAgentOutput = String(localized: "status.eyebrow.agentOutput", bundle: bundle)
+        static let eyebrowChannelFlow = String(localized: "status.eyebrow.channelFlow", bundle: bundle)
+        static let eyebrowRouteDelivery = String(localized: "status.eyebrow.routeDelivery", bundle: bundle)
+        static let eyebrowLatestEvent = String(localized: "status.eyebrow.latestEvent", bundle: bundle)
     }
 
     // MARK: - Config
@@ -143,6 +160,17 @@ enum L10n {
         static let clearAlias = String(localized: "dashboard.clearAlias", bundle: bundle)
         static let notifySessionTitle = String(localized: "dashboard.notifySessionTitle", bundle: bundle)
         static let send = String(localized: "dashboard.send", bundle: bundle)
+
+        // Page titles and event-row actions. System nouns (jobs, config,
+        // JSON) stay in English in zh-Hans by product decision.
+        static let jobsTitle = String(localized: "dashboard.jobsTitle", bundle: bundle)
+        static let configTitle = String(localized: "dashboard.configTitle", bundle: bundle)
+        static let live = String(localized: "dashboard.live", bundle: bundle)
+        static let subconsciousTitle = String(localized: "dashboard.subconsciousTitle", bundle: bundle)
+        static let copyEventId = String(localized: "dashboard.copyEventId", bundle: bundle)
+        static let copyRawJson = String(localized: "dashboard.copyRawJson", bundle: bundle)
+        static let expandJson = String(localized: "dashboard.expandJson", bundle: bundle)
+        static let collapseJson = String(localized: "dashboard.collapseJson", bundle: bundle)
     }
 
     // MARK: - Error (with interpolation)

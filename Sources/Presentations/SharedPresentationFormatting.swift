@@ -66,7 +66,7 @@ enum SharedPresentationFormatting {
         if let caption = sessionRuntimeCaption(runtime: session.runtime, model: session.model) {
             parts.append(caption)
         }
-        if let last = session.last_event_at { parts.append(DashboardTheme.timeAgo(last)) }
+        if let last = session.last_event_at { parts.append(timeAgo(last)) }
         if let health = session.health { parts.append(health) }
         return parts.isEmpty ? "idle" : parts.joined(separator: " · ")
     }
@@ -111,14 +111,74 @@ enum SharedPresentationFormatting {
 
     static func jobDetail(_ job: JobInfo, running: Bool) -> String {
         if running, let last = job.state?.last_run_at {
-            return DashboardTheme.timeAgo(last)
+            return timeAgo(last)
         }
         if let cron = job.frontmatter?.cron, !cron.isEmpty {
             return cron
         }
         if let last = job.state?.last_run_at {
-            return DashboardTheme.timeAgo(last)
+            return timeAgo(last)
         }
         return "idle"
     }
+
+    // MARK: - Number / time formatting
+
+    static func formatCost(_ n: Double) -> String {
+        if n >= 1000 { return "$\((n / 1000).formatted(.number.precision(.fractionLength(1))))k" }
+        return "$\(n.formatted(.number.precision(.fractionLength(2))))"
+    }
+
+    static func formatTokens(_ n: Int) -> String {
+        if n >= 1_000_000 { return "\(Double(n / 1_000_000).formatted(.number.precision(.fractionLength(1))))M" }
+        if n >= 1000 { return "\(Double(n / 1000).formatted(.number.precision(.fractionLength(0))))k" }
+        return "\(n)"
+    }
+
+    static func formatTools(_ n: Int) -> String {
+        if n >= 1000 { return "\(Double(n / 1000).formatted(.number.precision(.fractionLength(1))))k" }
+        return "\(n)"
+    }
+
+    static func formatDuration(_ ms: Double?) -> String {
+        guard let ms, ms.isFinite else { return String(describing: ms) }
+        if ms < 1000 { return "\(Int(ms))ms" }
+        let s = ms / 1000
+        if s < 60 { return "\(s == s.rounded() ? String(Int(s)) : String(format: "%.1f", s))s (\(Int(ms).formatted())ms)" }
+        let m = s / 60
+        if m < 60 { return "\(m == m.rounded() ? String(Int(m)) : String(format: "%.1f", m))min (\(Int(ms).formatted())ms)" }
+        let h = m / 60
+        return "\(h == h.rounded() ? String(Int(h)) : String(format: "%.1f", h))h (\(Int(ms).formatted())ms)"
+    }
+
+    static func formatTime(_ date: Date) -> String {
+        timeFormatter.string(from: date)
+    }
+
+    static func parseISO8601(_ s: String) -> Date {
+        (try? Date(s, strategy: .iso8601)) ?? Date()
+    }
+
+    static func timeAgo(_ s: String) -> String {
+        let seconds = Int(Date.now.timeIntervalSince(parseISO8601(s)))
+        if seconds < 60 { return "\(seconds)s" }
+        if seconds < 3600 { return "\(seconds / 60)m" }
+        if seconds < 86400 { return "\(seconds / 3600)h" }
+        return "\(seconds / 86400)d"
+    }
+
+    static func prettyJSON<T: Encodable>(_ value: T) -> String {
+        guard let data = try? JSONEncoder().encode(value),
+              let obj = try? JSONSerialization.jsonObject(with: data),
+              let pretty = try? JSONSerialization.data(withJSONObject: obj, options: [.prettyPrinted, .sortedKeys]),
+              let str = String(data: pretty, encoding: .utf8)
+        else { return "{}" }
+        return str
+    }
+
+    private static let timeFormatter: DateFormatter = {
+        let df = DateFormatter()
+        df.dateFormat = "HH:mm:ss.SS"
+        return df
+    }()
 }

@@ -1,5 +1,12 @@
 import SwiftUI
 
+private enum StatusCardLayout {
+    static let iconButton: CGFloat = 22
+    static let actionGap: CGFloat = 10
+    /// Matches two icon buttons with the row gap, so Install/Start lines up with Stop+Restart.
+    static let pairActionsWidth: CGFloat = iconButton * 2 + actionGap
+}
+
 struct StatusOperationsMenu: View {
     let title: String
     let installSkillsTitle: String
@@ -9,59 +16,27 @@ struct StatusOperationsMenu: View {
     let onInstallSkills: () -> Void
     let onToggleAutostart: () -> Void
 
-    @State private var isExpanded = false
-
     var body: some View {
-        Button {
-            isExpanded.toggle()
+        Menu {
+            Button(action: onInstallSkills) {
+                Label(installSkillsTitle, systemImage: "sparkles")
+            }
+            Button(action: onToggleAutostart) {
+                Label(autostartTitle, systemImage: autostartEnabled ? "poweroff" : "power")
+            }
         } label: {
-            HStack(spacing: 4) {
+            HStack(spacing: 5) {
                 Text(title)
-                    .font(.system(size: 11, weight: .medium))
+                    .font(.system(size: 10, weight: .medium))
+                    .lineLimit(1)
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 8, weight: .bold))
+                    .font(.system(size: 7, weight: .bold))
             }
-            .foregroundStyle(ConsolePalette.accent)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 5)
-            .background(ConsolePalette.accent.opacity(0.12))
-            .clipShape(RoundedRectangle(cornerRadius: 6))
         }
-        .buttonStyle(.plain)
-        .popover(isPresented: $isExpanded, arrowEdge: .bottom) {
-            VStack(alignment: .leading, spacing: 0) {
-                operationsRow(icon: "sparkles", title: installSkillsTitle, action: onInstallSkills)
-                operationsRow(
-                    icon: autostartEnabled ? "poweroff" : "power",
-                    title: autostartTitle,
-                    action: onToggleAutostart
-                )
-            }
-            .fixedSize()
-            .padding(.vertical, 4)
-            .background(ConsolePalette.background)
-        }
-    }
-
-    private func operationsRow(icon: String, title: String, action: @escaping () -> Void) -> some View {
-        Button {
-            isExpanded = false
-            action()
-        } label: {
-            HStack(spacing: 8) {
-                Image(systemName: icon)
-                    .font(.system(size: 11))
-                    .foregroundStyle(ConsolePalette.secondaryText)
-                    .frame(width: 16)
-                Text(title)
-                    .font(.system(size: 12, design: .monospaced))
-                    .foregroundStyle(ConsolePalette.primaryText)
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
+        .menuStyle(.borderlessButton)
+        .menuIndicator(.hidden)
+        .buttonStyle(ODOutlineButtonStyle(tint: OpenDuo.textAccentSoft))
+        .fixedSize(horizontal: true, vertical: false)
         .disabled(isDisabled)
     }
 }
@@ -81,32 +56,32 @@ struct StatusServiceCard: View {
     let onStop: () -> Void
     let onRestart: () -> Void
     let onStart: () -> Void
+    /// Whether this card's start button is the scene's cyan primary. Only
+    /// the daemon start earns the fill; channel starts are outline actions,
+    /// so a stopped daemon + stopped channel never shows two cyan fills.
+    /// An expanded inline config also stands the start button down — its
+    /// Save button is the primary while editing.
+    var isPrimaryStartAction: Bool = true
     let expandedContent: AnyView?
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 0) {
             HStack(spacing: 10) {
                 Image(systemName: icon)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(ConsolePalette.secondaryText)
-                    .frame(width: 32, height: 32)
-                    .background(ConsolePalette.panel)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(ConsolePalette.divider, lineWidth: 1)
-                    )
+                    .font(.system(size: 13, weight: .regular))
+                    .foregroundStyle(OpenDuo.textSecondary)
+                    .frame(width: 30, height: 30)
+                    .odInset()
 
                 Text(name)
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(ConsolePalette.primaryText)
-
-                Spacer(minLength: 0)
+                    .foregroundStyle(OpenDuo.textStrong)
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
                 if let onConfig {
                     StatusIconButton(
                         systemImage: "gearshape",
-                        tint: ConsolePalette.secondaryText,
+                        tint: OpenDuo.textSecondary,
                         isDisabled: isLoading,
                         action: onConfig
                     )
@@ -115,75 +90,89 @@ struct StatusServiceCard: View {
                 if isRunning {
                     StatusIconButton(
                         systemImage: "stop.fill",
-                        tint: ConsolePalette.critical,
+                        tint: OpenDuo.textSecondary,
                         isDisabled: isLoading,
                         action: onStop
                     )
                     StatusIconButton(
                         systemImage: "arrow.clockwise",
-                        tint: ConsolePalette.warning,
+                        tint: OpenDuo.textSecondary,
                         isDisabled: isLoading,
                         action: onRestart
                     )
+                } else if isPrimaryStartAction && expandedContent == nil {
+                    Button(action: onStart) {
+                        Image(systemName: "play.fill")
+                            .font(.system(size: 9, weight: .semibold))
+                    }
+                    .buttonStyle(ODPrimaryButtonStyle(compact: true))
+                    .frame(width: StatusCardLayout.pairActionsWidth, height: StatusCardLayout.iconButton)
+                    .disabled(isLoading)
                 } else {
-                    StatusIconButton(
-                        systemImage: "play.fill",
-                        tint: ConsolePalette.signal,
-                        isDisabled: isLoading,
-                        action: onStart
-                    )
+                    Button(action: onStart) {
+                        Image(systemName: "play.fill")
+                            .font(.system(size: 9, weight: .semibold))
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                    .buttonStyle(ODOutlineButtonStyle(tint: OpenDuo.ok))
+                    .frame(width: StatusCardLayout.pairActionsWidth, height: StatusCardLayout.iconButton)
+                    .disabled(isLoading)
                 }
             }
+            .padding(10)
 
-            HStack(spacing: 0) {
-                if !version.isEmpty {
-                    Text("v\(version)")
-                        .foregroundStyle(hasUpdate ? ConsolePalette.warning : ConsolePalette.secondaryText)
-
-                    if hasUpdate && !latestVersion.isEmpty {
-                        Text(" → v\(latestVersion)")
-                            .foregroundStyle(ConsolePalette.warning)
-                    }
-
-                    if !pid.isEmpty {
-                        Text(" · ")
-                            .foregroundStyle(ConsolePalette.mutedText)
-                    }
-                }
-
-                if !pid.isEmpty {
-                    Text("PID \(pid)")
-                        .foregroundStyle(ConsolePalette.secondaryText)
-                }
-
-                Spacer()
-
-                Circle()
-                    .fill(isRunning ? ConsolePalette.signal : ConsolePalette.mutedText)
-                    .frame(width: 6, height: 6)
-
-                Text(isRunning ? L10n.Status.running : L10n.Status.stopped)
-                    .padding(.leading, 6)
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundStyle(isRunning ? ConsolePalette.signal : ConsolePalette.secondaryText)
-
-                if let runtimeHint, !runtimeHint.isEmpty {
-                    Text(" · ")
-                        .foregroundStyle(ConsolePalette.mutedText)
-
-                    Text(runtimeHint)
-                        .foregroundStyle(runtimeHintTint ?? ConsolePalette.warning)
-                }
-            }
-            .font(.system(size: 10, design: .monospaced))
+            metaLine
+                .padding(.horizontal, 10)
+                .padding(.bottom, 10)
 
             if let expandedContent {
-                Divider().overlay(ConsolePalette.divider)
+                odHRule()
                 expandedContent
             }
         }
-        .padding(12)
-        .cardPanel()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .odPanel(surface: OpenDuo.surfaceInset, border: OpenDuo.borderSubtle)
+    }
+
+    private var metaLine: some View {
+        HStack(spacing: 0) {
+            if !version.isEmpty {
+                Text("v\(version)")
+                    .foregroundStyle(hasUpdate ? OpenDuo.attention : OpenDuo.textSecondary)
+
+                if hasUpdate && !latestVersion.isEmpty {
+                    Text(" → v\(latestVersion)")
+                        .foregroundStyle(OpenDuo.attention)
+                }
+
+                if !pid.isEmpty {
+                    Text(" · ")
+                        .foregroundStyle(OpenDuo.textMuted)
+                }
+            }
+
+            if !pid.isEmpty {
+                Text("PID \(pid)")
+                    .foregroundStyle(OpenDuo.textSecondary)
+            }
+
+            Spacer()
+
+            ODSignalDot(tint: OpenDuo.ok, isLive: isRunning)
+
+            Text(isRunning ? L10n.Status.running : L10n.Status.stopped)
+                .padding(.leading, 6)
+                .foregroundStyle(isRunning ? OpenDuo.ok : OpenDuo.textSecondary)
+
+            if let runtimeHint, !runtimeHint.isEmpty {
+                Text(" · ")
+                    .foregroundStyle(OpenDuo.textMuted)
+
+                Text(runtimeHint)
+                    .foregroundStyle(runtimeHintTint ?? OpenDuo.attention)
+            }
+        }
+        .font(.odMono(10))
     }
 }
 
@@ -222,70 +211,74 @@ struct StatusInstallCard: View {
     }
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 0) {
             HStack(spacing: 10) {
                 Image(systemName: iconName)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(ConsolePalette.secondaryText)
-                    .frame(width: 32, height: 32)
-                    .background(ConsolePalette.panel)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(ConsolePalette.divider, lineWidth: 1)
-                    )
+                    .font(.system(size: 13, weight: .regular))
+                    .foregroundStyle(OpenDuo.textSecondary)
+                    .frame(width: 30, height: 30)
+                    .odInset()
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(name)
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(ConsolePalette.primaryText)
+                        .foregroundStyle(OpenDuo.textStrong)
 
                     Text(packageName)
-                        .font(.system(size: 10, design: .monospaced))
-                        .foregroundStyle(ConsolePalette.secondaryText)
+                        .font(.odMono(10))
+                        .foregroundStyle(OpenDuo.textSecondary)
+                        .lineLimit(2)
                 }
-
-                Spacer()
+                .frame(maxWidth: .infinity, alignment: .leading)
 
                 if let onConfig {
                     StatusIconButton(
                         systemImage: "gearshape",
-                        tint: ConsolePalette.secondaryText,
+                        tint: OpenDuo.textSecondary,
                         isDisabled: isLoading,
                         action: onConfig
                     )
                 }
 
-                StatusSmallActionButton(
-                    title: actionTitle,
-                    systemImage: "arrow.down.circle.fill",
-                    tint: ConsolePalette.accent,
-                    isDisabled: isLoading,
-                    isLoading: isBusy,
-                    action: onInstall
-                )
+                Button(action: onInstall) {
+                    HStack(spacing: 3) {
+                        if isBusy {
+                            ProgressView()
+                                .controlSize(.mini)
+                                .tint(OpenDuo.ok)
+                        } else {
+                            Image(systemName: "arrow.down")
+                                .font(.system(size: 9, weight: .semibold))
+                        }
+                        Text(actionTitle)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+                .buttonStyle(ODOutlineButtonStyle(tint: OpenDuo.ok))
+                .frame(width: StatusCardLayout.pairActionsWidth, height: StatusCardLayout.iconButton)
+                .disabled(isLoading)
             }
+            .padding(10)
 
             if let runtimeHint, !runtimeHint.isEmpty {
                 HStack(spacing: 6) {
-                    Image(systemName: "arrow.clockwise")
-                        .font(.system(size: 8, weight: .semibold))
-                        .foregroundStyle(runtimeHintTint ?? ConsolePalette.warning)
-
                     Text(runtimeHint)
-                        .font(.system(size: 10, weight: .medium, design: .monospaced))
-                        .foregroundStyle(runtimeHintTint ?? ConsolePalette.warning)
-
+                        .font(.odMono(10))
+                        .foregroundStyle(runtimeHintTint ?? OpenDuo.attention)
                     Spacer()
                 }
+                .padding(.horizontal, 10)
+                .padding(.bottom, 10)
             }
 
             if let expandedContent {
-                Divider().overlay(ConsolePalette.divider)
+                odHRule()
                 expandedContent
             }
         }
-        .padding(12)
-        .cardPanel()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .odPanel(surface: OpenDuo.surfaceInset, border: OpenDuo.borderSubtle)
     }
 }

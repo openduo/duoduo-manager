@@ -36,13 +36,15 @@ final class OnboardingWindowController: NSObject, NSWindowDelegate {
             w.title = ""
             w.titlebarAppearsTransparent = true
             w.titleVisibility = .hidden
+            w.titlebarSeparatorStyle = .none
+            w.appearance = OpenDuo.nsAppearance
+            w.backgroundColor = OpenDuo.nsPage
             w.contentViewController = NSHostingController(rootView: view)
             w.setContentSize(NSSize(width: preferredWidth, height: minHeight))
             w.minSize = NSSize(width: preferredWidth, height: minHeight)
             w.delegate = self
             w.isReleasedWhenClosed = false
             w.isMovableByWindowBackground = true
-            w.backgroundColor = .clear
             w.center()
             window = w
         }

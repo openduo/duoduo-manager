@@ -17,9 +17,7 @@ struct StatusBarView: View {
     let panelWidth: CGFloat = 520
     let panelHeight: CGFloat = 680
     let panelInset: CGFloat = 12
-    let overviewSpacing: CGFloat = 12
     let panelContentInset: CGFloat = 10
-    let overviewDividerWidth: CGFloat = 1
 
     init(store: AppStore, openDashboard: (() -> Void)? = nil, openReader: (() -> Void)? = nil, openOnboard: (() -> Void)? = nil) {
         self.store = store
@@ -48,20 +46,19 @@ struct StatusBarView: View {
                 onRefresh: { store.refreshVisibleContentWithFeedback() }
             )
 
-            Divider().overlay(ConsolePalette.divider)
+            odHRule()
 
-            ScrollView {
+            ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 12) {
                     overviewRow
                     subconsciousPanel
                     streamPanel
                     executionPanel
-                    transientOutputPanel
                 }
                 .padding(panelInset)
             }
 
-            Divider().overlay(ConsolePalette.divider)
+            odHRule()
 
             if let message = statusBarPresentation.footer.statusMessage, !message.isEmpty {
                 statusBarMessageStrip(message)
@@ -78,68 +75,54 @@ struct StatusBarView: View {
             )
         }
         .frame(width: panelWidth, height: panelHeight)
-        .background(ConsolePalette.background)
+        .background(OpenDuo.page)
+        .odChrome()
     }
 
     private var overviewRow: some View {
-        HStack(alignment: .top, spacing: 0) {
+        OverviewSplit(leadingRatio: 0.54) {
             overviewColumn(
-                icon: "slider.horizontal.3",
-                title: "Control Plane",
+                title: L10n.Status.controlPlane,
                 trailing: AnyView(controlPlaneTrailing)
             ) {
                 controlPanelContent
             }
-                .frame(width: overviewControlWidth)
 
-            Rectangle()
-                .fill(ConsolePalette.divider)
-                .frame(width: 1)
-                .padding(.horizontal, overviewSpacing)
+            odVRule()
+                .frame(maxHeight: .infinity)
 
             overviewColumn(
-                icon: "point.3.connected.trianglepath.dotted",
-                title: "Topology"
+                title: L10n.Status.topology
             ) {
                 topologySummaryContent
             }
-                .frame(width: overviewTopologyWidth)
         }
-        .consolePanel()
+        .frame(maxWidth: .infinity)
+        .odPanel()
     }
 
     @ViewBuilder
     private func overviewColumn<Content: View>(
-        icon: String,
         title: String,
-        hint: String? = nil,
         trailing: AnyView? = nil,
         @ViewBuilder content: () -> Content
     ) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Image(systemName: icon)
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(ConsolePalette.secondaryText)
-                    .frame(width: 16)
-
-                Text(title)
-                    .font(.system(size: 13, weight: .semibold, design: .monospaced))
-                    .foregroundStyle(ConsolePalette.primaryText)
-
-                Spacer()
-
+            HStack(alignment: .center, spacing: 8) {
+                ODKicker(text: title, tint: OpenDuo.textKicker)
+                Spacer(minLength: 8)
                 if let trailing {
                     trailing
-                } else if let hint, !hint.isEmpty {
-                    Text(hint)
-                        .font(.system(size: 10, design: .monospaced))
-                        .foregroundStyle(ConsolePalette.secondaryText)
+                        .layoutPriority(1)
+                        .fixedSize(horizontal: true, vertical: false)
                 }
             }
 
             content()
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .padding(panelContentInset)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
     private var controlPlaneTrailing: some View {
@@ -163,45 +146,41 @@ struct StatusBarView: View {
 
     private var controlPlaneUpdateButton: some View {
         let isUpdatingAll = store.command.activeOperation == .upgradeAll
-        return StatusSmallActionButton(
-            title: isUpdatingAll ? L10n.Status.updatingAll : L10n.Status.updateAll,
-            systemImage: "arrow.up.circle.fill",
-            tint: ConsolePalette.warning,
-            isDisabled: store.command.isLoading,
-            isLoading: isUpdatingAll,
-            action: { store.upgradeAll() }
-        )
+        return Button(action: { store.upgradeAll() }) {
+            HStack(spacing: 4) {
+                if isUpdatingAll {
+                    ProgressView()
+                        .controlSize(.small)
+                        .tint(OpenDuo.attention)
+                        .frame(width: 10, height: 10)
+                } else {
+                    Image(systemName: "arrow.up")
+                        .font(.system(size: 9, weight: .semibold))
+                }
+                Text(isUpdatingAll ? L10n.Status.updatingAll : L10n.Status.updateAll)
+                    .font(.system(size: 10, weight: .medium))
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
+            }
+        }
+        .buttonStyle(ODOutlineButtonStyle(tint: OpenDuo.attention))
+        .fixedSize(horizontal: true, vertical: false)
+        .disabled(store.command.isLoading)
     }
 
     private var topologySummaryContent: some View {
         VStack(spacing: 10) {
-            StatusTopologyMetric(icon: "dot.radiowaves.left.and.right", title: "daemon endpoint", value: statusBarPresentation.topology.endpoint)
-            StatusTopologyMetric(icon: "network", title: "runtime host", value: statusBarPresentation.topology.runtimeHost)
-            StatusTopologyMetric(icon: "cross.case", title: "system", value: statusBarPresentation.topology.system, tint: statusBarPresentation.topology.systemTint)
-            StatusTopologyMetric(icon: "gauge.with.dots.needle.33percent", title: "load", value: statusBarPresentation.topology.load, tint: statusBarPresentation.topology.loadTint)
+            StatusTopologyMetric(title: "daemon endpoint", value: statusBarPresentation.topology.endpoint)
+            StatusTopologyMetric(title: "runtime host", value: statusBarPresentation.topology.runtimeHost)
+            StatusTopologyMetric(title: "system", value: statusBarPresentation.topology.system, tint: statusBarPresentation.topology.systemTint)
+            StatusTopologyMetric(title: "load", value: statusBarPresentation.topology.load, tint: statusBarPresentation.topology.loadTint)
         }
     }
 
     private var subconsciousPanel: some View {
-        StatusPanelSection(icon: "brain.head.profile", title: "Subconscious") {
+        StatusPanelSection(title: L10n.Status.subconscious) {
             StatusSubconsciousList(rows: statusBarPresentation.topology.subconsciousRows)
         }
-    }
-
-    private var overviewAvailableWidth: CGFloat {
-        panelWidth
-            - (panelInset * 2)
-            - (panelContentInset * 2)
-            - (overviewSpacing * 2)
-            - overviewDividerWidth
-    }
-
-    private var overviewControlWidth: CGFloat {
-        floor(overviewAvailableWidth * 0.6)
-    }
-
-    private var overviewTopologyWidth: CGFloat {
-        ceil(overviewAvailableWidth * 0.4)
     }
 
     private var controlPanelContent: some View {
@@ -216,6 +195,7 @@ struct StatusBarView: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var daemonControlCard: some View {
@@ -275,6 +255,7 @@ struct StatusBarView: View {
                     store.startChannel(channel.type)
                 }
             },
+            isPrimaryStartAction: false,
             expandedContent: channel.type == "feishu" && expandedConfigTarget == .feishu
                 ? AnyView(feishuInlineConfig)
                 : nil
@@ -315,10 +296,6 @@ struct StatusBarView: View {
         )
     }
 
-    private var transientOutputPanel: some View {
-        EmptyView()
-    }
-
     private func statusBarMessageStrip(_ message: String) -> some View {
         let isBusy = store.command.isLoading
         let isError = statusBarPresentation.footer.statusIsError
@@ -326,16 +303,16 @@ struct StatusBarView: View {
             if isBusy {
                 ProgressView()
                     .controlSize(.mini)
+                    .tint(OpenDuo.textSecondary)
             } else {
-                Image(systemName: isError ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
-                    .font(.system(size: 10, weight: .semibold))
+                ODStateTick(tint: isError ? OpenDuo.alert : OpenDuo.ok, size: 5)
             }
             Text(message)
                 .lineLimit(2)
                 .truncationMode(.tail)
         }
-        .font(.system(size: 10, design: .monospaced))
-        .foregroundStyle(isError ? ConsolePalette.critical : ConsolePalette.secondaryText)
+        .font(.odMono(10))
+        .foregroundStyle(isError ? OpenDuo.alert : OpenDuo.textSecondary)
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -358,6 +335,46 @@ struct StatusBarView: View {
             mode: .inline,
             onSave: saveFeishuDraft,
             onCancel: { cancelConfig(.feishu) }
+        )
+    }
+}
+
+/// Two flexible columns plus a gutter, sharing the proposed width so the
+/// overview plate matches the full-width panels below it.
+private struct OverviewSplit: Layout {
+    var leadingRatio: CGFloat
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        guard subviews.count == 3 else {
+            return CGSize(width: proposal.width ?? 0, height: proposal.height ?? 0)
+        }
+        let width = proposal.width ?? 0
+        let gutter = subviews[1].sizeThatFits(.unspecified).width
+        let inner = max(width - gutter, 0)
+        let leading = (inner * leadingRatio).rounded(.towardZero)
+        let trailing = inner - leading
+        let leadingHeight = subviews[0].sizeThatFits(ProposedViewSize(width: leading, height: proposal.height)).height
+        let trailingHeight = subviews[2].sizeThatFits(ProposedViewSize(width: trailing, height: proposal.height)).height
+        return CGSize(width: width, height: max(leadingHeight, trailingHeight))
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        guard subviews.count == 3 else { return }
+        let gutter = subviews[1].sizeThatFits(.unspecified).width
+        let inner = max(bounds.width - gutter, 0)
+        let leading = (inner * leadingRatio).rounded(.towardZero)
+        let trailing = inner - leading
+        subviews[0].place(
+            at: bounds.origin,
+            proposal: ProposedViewSize(width: leading, height: bounds.height)
+        )
+        subviews[1].place(
+            at: CGPoint(x: bounds.minX + leading, y: bounds.minY),
+            proposal: ProposedViewSize(width: gutter, height: bounds.height)
+        )
+        subviews[2].place(
+            at: CGPoint(x: bounds.minX + leading + gutter, y: bounds.minY),
+            proposal: ProposedViewSize(width: trailing, height: bounds.height)
         )
     }
 }

@@ -56,15 +56,10 @@ struct SessionsContentView: View {
         VStack(spacing: 0) {
             // Header
             HStack(spacing: 0) {
-                Text("> ")
-                    .font(.system(size: 12, design: .monospaced))
-                    .foregroundStyle(DashboardTheme.accent)
-                Text(L10n.Dashboard.sessionsTitle)
-                    .font(.system(size: 12, design: .monospaced))
-                    .foregroundStyle(DashboardTheme.text)
+                ODKicker(text: L10n.Dashboard.sessionsTitle, tint: OpenDuo.textKicker)
                 Text("  [\(allSessions.count)]")
-                    .font(.system(size: 11, design: .monospaced))
-                    .foregroundStyle(DashboardTheme.textTertiary)
+                    .font(.odMono(10))
+                    .foregroundStyle(OpenDuo.textFaint)
                 Spacer()
             }
             .padding(.horizontal, 16)
@@ -72,15 +67,15 @@ struct SessionsContentView: View {
             .padding(.bottom, 8)
 
             Rectangle()
-                .fill(DashboardTheme.border)
+                .fill(OpenDuo.borderHairline)
                 .frame(height: 1)
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     if allSessions.isEmpty {
                         Text(L10n.Dashboard.noSessions)
-                            .font(.system(size: 12, design: .monospaced))
-                            .foregroundStyle(DashboardTheme.textTertiary)
+                            .font(.odMono(11))
+                            .foregroundStyle(OpenDuo.textMuted)
                             .padding(40)
                     } else {
                         if !workSessions.isEmpty {
@@ -136,22 +131,20 @@ struct SessionsContentView: View {
     }
 
     private func groupLabel(_ title: String) -> some View {
-        Text("# \(title)")
-            .font(.system(size: 10, design: .monospaced))
-            .foregroundStyle(DashboardTheme.textTertiary)
+        ODKicker(text: title, tint: OpenDuo.textKickerNeutral)
             .padding(.top, 12)
-            .padding(.bottom, 4)
+            .padding(.bottom, 6)
     }
 
     private func sessionRow(_ s: SessionRegistryEntry) -> some View {
         let active = activeByKey[s.session_key]
         let status = active?.status ?? (s.orphan == true ? "orphan" : "registered")
         let color: Color = switch status {
-        case "active": DashboardTheme.emerald
-        case "error":  DashboardTheme.red
-        case "ended":  DashboardTheme.textTertiary
-        case "orphan": DashboardTheme.amber
-        default:       DashboardTheme.blue
+        case "active": OpenDuo.ok
+        case "error":  OpenDuo.alert
+        case "ended":  OpenDuo.textMuted
+        case "orphan": OpenDuo.attention
+        default:       OpenDuo.cyan200
         }
 
         let displayName = s.display_name ?? s.session_key
@@ -161,57 +154,56 @@ struct SessionsContentView: View {
         )
 
         return HStack(spacing: 0) {
-            // Left accent bar
-            Rectangle()
-                .fill(color)
-                .frame(width: 2)
+            // Square state marker — the row's only colour
+            ODStateTick(tint: color, size: 7)
+                .padding(.trailing, 10)
 
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
                     Text(displayName)
-                        .font(.system(size: 12, design: .monospaced))
-                        .foregroundStyle(DashboardTheme.text)
+                        .font(.odMono(12, weight: .medium))
+                        .foregroundStyle(OpenDuo.textPrimary)
                         .lineLimit(1)
                     if let runtimeCaption {
                         Text("[\(runtimeCaption)]")
-                            .font(.system(size: 10, design: .monospaced))
-                            .foregroundStyle(DashboardTheme.textTertiary)
+                            .font(.odMono(9))
+                            .foregroundStyle(OpenDuo.textFaint)
                     }
                     if s.display_name != nil {
                         Text(s.session_key)
-                            .font(.system(size: 9, design: .monospaced))
-                            .foregroundStyle(DashboardTheme.textTertiary)
+                            .font(.odMono(9))
+                            .foregroundStyle(OpenDuo.textFaint)
                             .lineLimit(1)
                     }
                 }
 
                 HStack(spacing: 8) {
-                    Text("[\(status)]")
-                        .font(.system(size: 10, design: .monospaced))
+                    Text(status)
+                        .font(.odMono(9))
                         .foregroundStyle(color)
 
                     if let health = active?.health {
                         Text("health:\(health)")
-                            .font(.system(size: 10, design: .monospaced))
-                            .foregroundStyle(DashboardTheme.textTertiary)
+                            .font(.odMono(9))
+                            .foregroundStyle(OpenDuo.textMuted)
                     }
 
                     if let lastEvent = s.last_event_at {
-                        Text("last:\(DashboardTheme.timeAgo(lastEvent))")
-                            .font(.system(size: 10, design: .monospaced))
-                            .foregroundStyle(DashboardTheme.textTertiary)
+                        Text("last:\(SharedPresentationFormatting.timeAgo(lastEvent))")
+                            .font(.odMono(9))
+                            .foregroundStyle(OpenDuo.textMuted)
                     }
 
                     if let kind = s.kind {
                         Text("kind:\(kind)")
-                            .font(.system(size: 10, design: .monospaced))
-                            .foregroundStyle(DashboardTheme.textTertiary)
+                            .font(.odMono(9))
+                            .foregroundStyle(OpenDuo.textMuted)
                     }
 
                     if let cwd = s.cwd {
                         Text("cwd:\(cwd)")
-                            .font(.system(size: 10, design: .monospaced))
-                            .foregroundStyle(DashboardTheme.textTertiary)
+                            .font(.odMono(9))
+                            .foregroundStyle(OpenDuo.textMuted)
                             .lineLimit(1)
                             .truncationMode(.middle)
                     }
@@ -219,14 +211,12 @@ struct SessionsContentView: View {
 
                 if let lastError = s.lastErrorText {
                     Text("err: \(lastError)")
-                        .font(.system(size: 10, design: .monospaced))
-                        .foregroundStyle(DashboardTheme.red)
+                        .font(.odMono(9))
+                        .foregroundStyle(OpenDuo.alert)
                         .lineLimit(1)
                         .truncationMode(.tail)
                 }
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
 
             Spacer()
 
@@ -236,6 +226,7 @@ struct SessionsContentView: View {
                     aliasName = s.display_name ?? ""
                 } label: {
                     Image(systemName: "tag")
+                        .font(.system(size: 10))
                 }
                 .help(L10n.Dashboard.alias)
 
@@ -244,6 +235,7 @@ struct SessionsContentView: View {
                     notifyMessage = ""
                 } label: {
                     Image(systemName: "paperplane")
+                        .font(.system(size: 10))
                 }
                 .help(L10n.Dashboard.notify)
 
@@ -251,86 +243,90 @@ struct SessionsContentView: View {
                     archiveTarget = s
                 } label: {
                     Image(systemName: "archivebox")
+                        .font(.system(size: 10))
                 }
                 .help(L10n.Dashboard.archive)
             }
-            .buttonStyle(.borderless)
-            .controlSize(.small)
-            .foregroundStyle(DashboardTheme.textSecondary)
+            .buttonStyle(ODIconButtonStyle())
             .padding(.trailing, 10)
         }
-        .background(DashboardTheme.cardBackground)
-        .padding(.bottom, 2)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(OpenDuo.borderHairline).frame(height: 1).padding(.horizontal, 12)
+        }
+        .background(OpenDuo.surface)
     }
 
     private func sessionAliasSheet(_ target: SessionRegistryEntry) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(L10n.Dashboard.sessionAliasTitle)
-                .font(.system(size: 12, weight: .semibold, design: .monospaced))
-                .foregroundStyle(DashboardTheme.text)
+            ODKicker(text: L10n.Dashboard.sessionAliasTitle, tint: OpenDuo.textKicker)
             Text(target.session_key)
-                .font(.system(size: 10, design: .monospaced))
-                .foregroundStyle(DashboardTheme.textTertiary)
+                .font(.odMono(9))
+                .foregroundStyle(OpenDuo.textMuted)
                 .lineLimit(2)
                 .textSelection(.enabled)
             TextField(L10n.Dashboard.displayNamePlaceholder, text: $aliasName)
-                .textFieldStyle(.roundedBorder)
+                .textFieldStyle(.plain)
+                .font(.odMono(12))
+                .foregroundStyle(OpenDuo.textPrimary)
+                .odField(horizontal: 10, vertical: 7)
             HStack {
                 Button(L10n.Dashboard.clearAlias) {
                     store.aliasSession(target.session_key, name: nil)
                     aliasTarget = nil
                 }
+                .buttonStyle(ODOutlineButtonStyle())
                 Spacer()
                 Button(L10n.Config.cancel) {
                     aliasTarget = nil
                 }
+                .buttonStyle(ODOutlineButtonStyle())
                 Button(L10n.Config.save) {
                     store.aliasSession(target.session_key, name: aliasName)
                     aliasTarget = nil
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(ODPrimaryButtonStyle())
             }
         }
         .padding(16)
         .frame(width: 420)
-        .background(DashboardTheme.background)
+        .background(OpenDuo.page)
+        .odChrome()
     }
 
     private func sessionNotifySheet(_ target: SessionRegistryEntry) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(L10n.Dashboard.notifySessionTitle)
-                .font(.system(size: 12, weight: .semibold, design: .monospaced))
-                .foregroundStyle(DashboardTheme.text)
+            ODKicker(text: L10n.Dashboard.notifySessionTitle, tint: OpenDuo.textKicker)
             Text(target.display_name ?? target.session_key)
-                .font(.system(size: 10, design: .monospaced))
-                .foregroundStyle(DashboardTheme.textTertiary)
+                .font(.odMono(9))
+                .foregroundStyle(OpenDuo.textMuted)
                 .lineLimit(2)
                 .textSelection(.enabled)
             TextEditor(text: $notifyMessage)
-                .font(.system(size: 12, design: .monospaced))
+                .font(.odMono(11))
+                .foregroundStyle(OpenDuo.textPrimary)
                 .frame(height: 120)
                 .scrollContentBackground(.hidden)
-                .background(DashboardTheme.cardBackground)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 6)
-                        .stroke(DashboardTheme.border, lineWidth: 1)
-                }
+                .odField(horizontal: 0, vertical: 0)
             HStack {
                 Spacer()
                 Button(L10n.Config.cancel) {
                     notifyTarget = nil
                 }
+                .buttonStyle(ODOutlineButtonStyle())
                 Button(L10n.Dashboard.send) {
                     store.notifySession(target.session_key, message: notifyMessage)
                     notifyTarget = nil
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(ODPrimaryButtonStyle())
                 .disabled(notifyMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }
         .padding(16)
         .frame(width: 460)
-        .background(DashboardTheme.background)
+        .background(OpenDuo.page)
+        .odChrome()
     }
 
 }

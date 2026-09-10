@@ -8,15 +8,10 @@ struct JobsContentView: View {
         VStack(spacing: 0) {
             // Header
             HStack(spacing: 0) {
-                Text("> ")
-                    .font(.system(size: 12, design: .monospaced))
-                    .foregroundStyle(DashboardTheme.accent)
-                Text("jobs")
-                    .font(.system(size: 12, design: .monospaced))
-                    .foregroundStyle(DashboardTheme.text)
+                ODKicker(text: L10n.Dashboard.jobsTitle, tint: OpenDuo.textKicker)
                 Text("  [\(jobs.count)]")
-                    .font(.system(size: 11, design: .monospaced))
-                    .foregroundStyle(DashboardTheme.textTertiary)
+                    .font(.odMono(10))
+                    .foregroundStyle(OpenDuo.textFaint)
                 Spacer()
             }
             .padding(.horizontal, 16)
@@ -24,15 +19,15 @@ struct JobsContentView: View {
             .padding(.bottom, 8)
 
             Rectangle()
-                .fill(DashboardTheme.border)
+                .fill(OpenDuo.borderHairline)
                 .frame(height: 1)
 
             ScrollView {
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 0) {
                     if jobs.isEmpty {
                         Text("no jobs configured")
-                            .font(.system(size: 12, design: .monospaced))
-                            .foregroundStyle(DashboardTheme.textTertiary)
+                            .font(.odMono(11))
+                            .foregroundStyle(OpenDuo.textMuted)
                             .padding(40)
                     } else {
                         ForEach(jobs) { job in
@@ -54,65 +49,67 @@ struct JobsContentView: View {
         let isKeepalive = cron == "keepalive"
         let result = j.state?.last_result ?? "idle"
         let runtime = j.frontmatter?.runtime ?? "claude"
-        let color: Color = running ? DashboardTheme.emerald :
-            (result == "failure" ? DashboardTheme.red :
-             result == "success" ? DashboardTheme.blue : DashboardTheme.textTertiary)
+        let color: Color = running ? OpenDuo.ok :
+            (result == "failure" ? OpenDuo.alert :
+             result == "success" ? OpenDuo.ok : OpenDuo.textMuted)
 
         return HStack(spacing: 0) {
-            // Left accent bar
-            Rectangle()
-                .fill(color)
-                .frame(width: 2)
+            // Square state marker — the row's only colour
+            ODStateTick(tint: color, size: 7)
+                .padding(.trailing, 10)
 
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 8) {
                     Text(j.id)
-                        .font(.system(size: 12, design: .monospaced))
-                        .foregroundStyle(DashboardTheme.text)
+                        .font(.odMono(12, weight: .medium))
+                        .foregroundStyle(OpenDuo.textPrimary)
                     if isOnce {
                         Text("[once]")
-                            .font(.system(size: 10, design: .monospaced))
-                            .foregroundStyle(DashboardTheme.accent)
+                            .font(.odMono(9))
+                            .foregroundStyle(OpenDuo.cyan300)
                     } else if isKeepalive {
                         Text("[keepalive]")
-                            .font(.system(size: 10, design: .monospaced))
-                            .foregroundStyle(DashboardTheme.fuchsia)
+                            .font(.odMono(9))
+                            .foregroundStyle(OpenDuo.cyan200)
                     }
                     Text("[\(runtime)]")
-                        .font(.system(size: 10, design: .monospaced))
-                        .foregroundStyle(DashboardTheme.textTertiary)
+                        .font(.odMono(9))
+                        .foregroundStyle(OpenDuo.textMuted)
                 }
 
                 HStack(spacing: 0) {
                     if !cron.isEmpty {
                         Text("cron:\(cron)")
-                            .foregroundStyle(DashboardTheme.textTertiary)
-                        Text("  •  ")
-                            .foregroundStyle(DashboardTheme.border)
+                            .foregroundStyle(OpenDuo.textMuted)
+                        Text("  ·  ")
+                            .foregroundStyle(OpenDuo.textFaint)
                     }
-                    Text(running ? "[running]" : "[\(result)]")
+                    Text(running ? "running" : result)
                         .foregroundStyle(color)
                     if let lastRun = j.state?.last_run_at {
-                        Text("  •  last:\(DashboardTheme.timeAgo(lastRun))")
-                            .foregroundStyle(DashboardTheme.textTertiary)
+                        Text("  ·  last:\(SharedPresentationFormatting.timeAgo(lastRun))")
+                            .foregroundStyle(OpenDuo.textMuted)
                     }
                     if let count = j.state?.run_count {
-                        Text("  •  runs:\(count)")
-                            .foregroundStyle(DashboardTheme.textTertiary)
+                        Text("  ·  runs:\(count)")
+                            .foregroundStyle(OpenDuo.textMuted)
                     }
                     if let cwdRel = j.frontmatter?.cwd_rel {
-                        Text("  •  cwd:\(cwdRel)")
-                            .foregroundStyle(DashboardTheme.textTertiary)
+                        Text("  ·  cwd:\(cwdRel)")
+                            .foregroundStyle(OpenDuo.textMuted)
                     }
                 }
-                .font(.system(size: 10, design: .monospaced))
+                .font(.odMono(9))
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
 
             Spacer()
         }
-        .background(DashboardTheme.cardBackground)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(OpenDuo.borderHairline).frame(height: 1).padding(.horizontal, 12)
+        }
+        .background(OpenDuo.surface)
     }
 
 }

@@ -42,7 +42,7 @@ enum DashboardPresentationMapper {
                             type: $0,
                             shortName: shortTypeName($0),
                             count: counts[$0] ?? 0,
-                            color: DashboardTheme.color(forEventType: $0)
+                            color: OpenDuo.color(forEventType: $0)
                         )
                     }
                 )
@@ -56,20 +56,20 @@ enum DashboardPresentationMapper {
         let health = store.dashboard.health
         let isOk = health?.gateway == "ok" && (health?.meta_session == "ok" || health?.meta_session == "starting")
         let isErr = health?.gateway == "down" || health?.meta_session == "down"
-        let color = isOk ? DashboardTheme.emerald : isErr ? DashboardTheme.red : DashboardTheme.amber
+        let color = isOk ? OpenDuo.ok : isErr ? OpenDuo.alert : OpenDuo.attention
 
         return DashboardBottomStatsPresentation(
-            costText: DashboardTheme.formatCost(store.dashboard.totalCost),
-            tokenText: "tok:\(DashboardTheme.formatTokens(store.dashboard.totalTokens))",
+            costText: SharedPresentationFormatting.formatCost(store.dashboard.totalCost),
+            tokenText: "tok:\(SharedPresentationFormatting.formatTokens(store.dashboard.totalTokens))",
             cacheText: "cache:\(store.dashboard.cacheHitRate.map { "\($0)%" } ?? "--")",
-            toolText: "tools:\(DashboardTheme.formatTools(store.dashboard.totalTools))",
+            toolText: "tools:\(SharedPresentationFormatting.formatTools(store.dashboard.totalTools))",
             subconsciousItems: (store.dashboard.subconscious?.partitions ?? []).map { part in
                 DashboardSubconsciousItemPresentation(
                     id: part.id,
                     marker: part.done ? "✓" : ".",
                     name: part.name,
-                    markerColor: part.done ? DashboardTheme.emerald : DashboardTheme.amber,
-                    textColor: part.done ? DashboardTheme.textSecondary : DashboardTheme.textTertiary
+                    markerColor: part.done ? OpenDuo.ok : OpenDuo.attention,
+                    textColor: part.done ? OpenDuo.textSecondary : OpenDuo.textMuted
                 )
             },
             healthText: SharedPresentationFormatting.dashboardHealthText(health),

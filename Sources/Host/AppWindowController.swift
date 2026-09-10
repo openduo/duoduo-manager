@@ -18,6 +18,9 @@ final class AppWindowController: NSObject, NSWindowDelegate {
             )
             window.title = "Duoduo ATC"
             window.titlebarAppearsTransparent = true
+            window.titlebarSeparatorStyle = .none
+            window.appearance = OpenDuo.nsAppearance
+            window.backgroundColor = OpenDuo.nsPage
             window.contentViewController = NSHostingController(rootView: dashboardView)
             window.setContentSize(NSSize(width: 1100, height: 700))
             window.delegate = self

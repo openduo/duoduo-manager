@@ -1,5 +1,12 @@
 import SwiftUI
 
+struct SummaryRowData {
+    let title: String
+    let detail: String
+    let state: String
+    let tint: Color
+}
+
 struct StatusBarPresentationBundle {
     let header: StatusHeaderPresentation
     let topology: StatusTopologyPresentation

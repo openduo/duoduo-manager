@@ -16,6 +16,7 @@ final class AppStatusController: NSObject, NSPopoverDelegate {
 
         popover.behavior = .transient
         popover.animates = true
+        popover.appearance = OpenDuo.nsAppearance
         popover.delegate = self
 
         if let button = statusItem.button {

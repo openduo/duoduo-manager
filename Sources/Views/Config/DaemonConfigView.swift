@@ -12,7 +12,6 @@ struct DaemonConfigView: View {
     /// `force` rotates an existing one. Nil when remote access is gated off.
     var onNewDaemonToken: ((_ force: Bool) -> Void)? = nil
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.colorScheme) private var colorScheme
     @State private var didSave = false
 
     /// True when the running CLI is a unix-socket build, so the remote-access
@@ -28,7 +27,7 @@ struct DaemonConfigView: View {
         VStack(spacing: 0) {
             if mode == .panel {
                 titleBar
-                Divider().overlay(ConfigPalette.divider(for: mode))
+                Rectangle().fill(OpenDuo.borderHairline).frame(height: 1)
             }
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
@@ -42,33 +41,24 @@ struct DaemonConfigView: View {
                 .padding(.bottom, 16)
             }
             if mode == .inline {
-                Divider().overlay(ConfigPalette.divider(for: mode))
+                Rectangle().fill(OpenDuo.borderHairline).frame(height: 1)
                 inlineActions
             }
         }
         .frame(width: mode == .panel ? 420 : nil)
         .fixedSize(horizontal: false, vertical: mode == .panel)
-        .environment(\.colorScheme, mode == .inline ? .dark : colorScheme)
+        .background(mode == .panel ? OpenDuo.page : Color.clear)
+        .odChrome()
     }
 
     private var titleBar: some View {
         HStack(spacing: 8) {
-            Image(systemName: "gearshape.2.fill")
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(width: 24, height: 24)
-                .background(Color.accentColor)
-                .clipShape(RoundedRectangle(cornerRadius: 6))
-
-            Text(L10n.DaemonConfig.title)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(ConfigPalette.label(for: mode))
+            ODKicker(text: L10n.DaemonConfig.title, tint: OpenDuo.textSecondary)
 
             Spacer()
 
             Button(saveButtonTitle, action: saveConfig)
-                .buttonStyle(.borderedProminent)
-                .controlSize(.small)
+                .buttonStyle(ODPrimaryButtonStyle())
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
@@ -77,9 +67,8 @@ struct DaemonConfigView: View {
     private var workDirSection: some View {
         configRow(mode: mode, label: L10n.DaemonConfig.workDir, hint: L10n.DaemonConfig.workDirHint) {
             HStack(spacing: 6) {
-                TextField("", text: $config.workDir)
-                    .textFieldStyle(.roundedBorder)
-                    .font(.system(size: 12, design: .monospaced))
+                configTextField(text: $config.workDir)
+
                 Button(L10n.DaemonConfig.workDirSelect) {
                     let panel = NSOpenPanel()
                     panel.canChooseFiles = false
@@ -92,8 +81,7 @@ struct DaemonConfigView: View {
                         }
                     }
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
+                .buttonStyle(ODOutlineButtonStyle())
             }
         }
     }
@@ -102,18 +90,14 @@ struct DaemonConfigView: View {
         Group {
             configSectionLabel(L10n.DaemonConfig.network, mode: mode)
             configRow(mode: mode, label: L10n.DaemonConfig.daemonHost, hint: "ALADUO_DAEMON_HOST") {
-                TextField("127.0.0.1", text: $config.daemonHost)
-                    .textFieldStyle(.roundedBorder)
-                    .font(.system(size: 12, design: .monospaced))
+                configTextField(text: $config.daemonHost, placeholder: "127.0.0.1")
             }
             if supportsUnixSocket && config.isNonLoopbackHost {
                 remoteHostWarningRow
             }
             configRowDivider(mode: mode)
             configRow(mode: mode, label: L10n.DaemonConfig.listenPort, hint: "ALADUO_PORT") {
-                TextField("20233", text: $config.port)
-                    .textFieldStyle(.roundedBorder)
-                    .font(.system(size: 12, design: .monospaced))
+                configTextField(text: $config.port, placeholder: "20233")
             }
         }
     }
@@ -123,12 +107,11 @@ struct DaemonConfigView: View {
     /// builds so it never appears on the currently-released CLI (see #15).
     private var remoteHostWarningRow: some View {
         HStack(alignment: .top, spacing: 6) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundStyle(ConsolePalette.warning)
+            ODStateTick(tint: OpenDuo.attention, size: 5)
+                .padding(.top, 3)
             Text(L10n.DaemonConfig.remoteHostWarning)
                 .font(.system(size: 10))
-                .foregroundStyle(ConfigPalette.secondary(for: mode))
+                .foregroundStyle(OpenDuo.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, 14)
@@ -144,9 +127,7 @@ struct DaemonConfigView: View {
             configRowDivider(mode: mode)
             configSectionLabel(L10n.DaemonConfig.remoteAccess, mode: mode)
             configRow(mode: mode, label: L10n.DaemonConfig.remotePort, hint: L10n.DaemonConfig.remotePortHint) {
-                TextField(L10n.DaemonConfig.remotePortPlaceholder, text: $config.remotePort)
-                    .textFieldStyle(.roundedBorder)
-                    .font(.system(size: 12, design: .monospaced))
+                configTextField(text: $config.remotePort, placeholder: L10n.DaemonConfig.remotePortPlaceholder)
             }
             if config.hasRemotePortCollision {
                 remotePortCollisionRow
@@ -158,21 +139,19 @@ struct DaemonConfigView: View {
                         Button(L10n.DaemonConfig.daemonTokenNew) {
                             onNewDaemonToken(false)
                         }
-                        .buttonStyle(.bordered)
-                        .controlSize(.small)
+                        .buttonStyle(ODOutlineButtonStyle())
                         Button(L10n.DaemonConfig.daemonTokenRotate) {
                             onNewDaemonToken(true)
                         }
-                        .buttonStyle(.bordered)
-                        .controlSize(.small)
+                        .buttonStyle(ODOutlineButtonStyle())
                     }
                     Spacer()
                 }
             }
             configRowDivider(mode: mode)
             Text(L10n.DaemonConfig.remoteRequiresRestart)
-                .font(.system(size: 9, design: .monospaced))
-                .foregroundStyle(ConfigPalette.tertiary(for: mode))
+                .font(.odMono(9))
+                .foregroundStyle(OpenDuo.textMuted)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 6)
         }
@@ -180,12 +159,11 @@ struct DaemonConfigView: View {
 
     private var remotePortCollisionRow: some View {
         HStack(alignment: .top, spacing: 6) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundStyle(ConsolePalette.warning)
+            ODStateTick(tint: OpenDuo.attention, size: 5)
+                .padding(.top, 3)
             Text(L10n.DaemonConfig.remotePortCollision(config.port))
                 .font(.system(size: 10))
-                .foregroundStyle(ConfigPalette.secondary(for: mode))
+                .foregroundStyle(OpenDuo.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, 14)
@@ -196,23 +174,17 @@ struct DaemonConfigView: View {
         Group {
             configSectionLabel(L10n.DaemonConfig.general, mode: mode)
             configRow(mode: mode, label: L10n.DaemonConfig.logLevel, hint: "ALADUO_LOG_LEVEL") {
-                Picker("", selection: $config.logLevel) {
-                    Text("debug").tag("debug")
-                    Text("info").tag("info")
-                    Text("warn").tag("warn")
-                    Text("error").tag("error")
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
+                ODSegmentedPicker(
+                    selection: $config.logLevel,
+                    options: [("debug", "debug"), ("info", "info"), ("warn", "warn"), ("error", "error")]
+                )
             }
             configRowDivider(mode: mode)
             configRow(mode: mode, label: L10n.DaemonConfig.permissionMode, hint: "ALADUO_PERMISSION_MODE") {
-                Picker("", selection: $config.permissionMode) {
-                    Text("default").tag("default")
-                    Text("bypassPermissions").tag("bypassPermissions")
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
+                ODSegmentedPicker(
+                    selection: $config.permissionMode,
+                    options: [("default", "default"), ("bypassPermissions", "bypassPermissions")]
+                )
             }
         }
     }
@@ -224,12 +196,10 @@ struct DaemonConfigView: View {
             Button(L10n.Config.cancel) {
                 onCancel?()
             }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
+            .buttonStyle(ODOutlineButtonStyle())
 
             Button(saveButtonTitle, action: saveConfig)
-                .buttonStyle(.borderedProminent)
-                .controlSize(.small)
+                .buttonStyle(ODPrimaryButtonStyle())
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)

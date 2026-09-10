@@ -208,3 +208,24 @@
 "onboard.shellPath.stateNeedsManualAction" = "需手动处理";
 "onboard.shellPath.gateRequiresUpgrade %@" = "需要 duoduo ≥ %@，请先升级 duoduo。";
 "onboard.shellPath.gateRequiresInstall" = "请先完成 duoduo 安装。";
+
+"status.controlPlane" = "Control plane";
+"status.topology" = "Topology";
+"status.subconscious" = "Subconscious";
+"status.runtimeStream" = "Runtime stream";
+"status.executionBoard" = "Execution board";
+"status.eyebrow.currentTool" = "Current tool";
+"status.eyebrow.latestResult" = "Latest result";
+"status.eyebrow.errorSignal" = "Error signal";
+"status.eyebrow.agentOutput" = "Agent output";
+"status.eyebrow.channelFlow" = "Channel flow";
+"status.eyebrow.routeDelivery" = "Route delivery";
+"status.eyebrow.latestEvent" = "Latest event";
+"dashboard.jobsTitle" = "jobs";
+"dashboard.configTitle" = "runtime config";
+"dashboard.live" = "live";
+"dashboard.subconsciousTitle" = "Subconscious";
+"dashboard.copyEventId" = "Copy event ID";
+"dashboard.copyRawJson" = "Copy raw JSON";
+"dashboard.expandJson" = "Expand JSON";
+"dashboard.collapseJson" = "Collapse";
