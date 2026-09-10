@@ -1,5 +1,20 @@
 import Foundation
 
+enum UpgradeTarget: Equatable, Sendable {
+    case daemon
+    case channel(String)
+    case skills
+}
+
+struct UpgradeStepError: LocalizedError {
+    let step: String
+    let reason: String
+
+    var errorDescription: String? {
+        L10n.Upgrade.failedDuring(step, reason)
+    }
+}
+
 struct UpgradeService: Sendable {
     private let versionService = VersionService()
     private let runCommand: @Sendable (
@@ -55,11 +70,9 @@ struct UpgradeService: Sendable {
         stopChannel: (String) async throws -> String,
         syncChannel: (String) async throws -> String,
         startChannel: (String) async throws -> String,
-        refreshSkills: () async throws -> String
+        refreshSkills: () async throws -> String,
+        onProgress: @escaping @Sendable (String, UpgradeTarget?) async -> Void
     ) async throws -> String {
-        var output = ""
-
-        // 1. Determine what needs updating
         let daemonNeedsUpdate: Bool = {
             guard let latest = latestVersions["daemon"], !latest.isEmpty, !daemonInstalledVersion.isEmpty
             else { return false }
@@ -74,48 +87,91 @@ struct UpgradeService: Sendable {
 
         guard daemonNeedsUpdate || !channelsToUpdate.isEmpty else { return "" }
 
-        // 2. Stop channels that need update (before daemon restart)
+        var completed: [String] = []
+
         for ch in channelsToUpdate where ch.isRunning {
-            output += try await stopChannel(ch.type)
+            try await runStep(
+                L10n.Upgrade.stoppingChannel(ch.displayName),
+                target: .channel(ch.type),
+                onProgress: onProgress
+            ) {
+                _ = try await stopChannel(ch.type)
+            }
         }
 
-        // 3. Update the daemon if needed. `duoduo upgrade` restarts the
-        // daemon itself (health-checking the replacement before returning)
-        // and — on new enough CLIs — attributes that restart with a reason.
-        // Do NOT restart a second time: it would kill any in-flight turn
-        // again, and (per #13) without a reason, so a session that survives
-        // to read a reason sees the one before the restart that actually
-        // cut it off. The pre-attribution behavior of `duoduo upgrade`
-        // already covers this path.
-        if daemonNeedsUpdate {
-            output += try await upgradeDaemon()
+        if daemonNeedsUpdate, let latest = latestVersions["daemon"] {
+            try await runStep(
+                L10n.Upgrade.updatingDaemon(from: daemonInstalledVersion, to: latest),
+                target: .daemon,
+                onProgress: onProgress
+            ) {
+                _ = try await upgradeDaemon()
+            }
+            completed.append("duoduo \(daemonInstalledVersion) → \(latest)")
         }
 
-        // 4. Update + restart channels
         for ch in channelsToUpdate {
+            let latest = latestVersions[ch.type] ?? ""
             let pkg = ChannelRegistry.entry(for: ch.type, feishuConfig: FeishuConfig())?.packageName
                 ?? "@openduo/channel-\(ch.type)"
-            output += try await syncChannel(pkg)
+            try await runStep(
+                L10n.Upgrade.updatingChannel(ch.displayName, from: ch.version, to: latest),
+                target: .channel(ch.type),
+                onProgress: onProgress
+            ) {
+                _ = try await syncChannel(pkg)
+            }
+            completed.append("\(ch.displayName) \(ch.version) → \(latest)")
             if ch.isRunning {
-                output += try await startChannel(ch.type)
-            }
-        }
-
-        // 5. Refresh the bundled openduo/duoduo skills only when the daemon was
-        // updated — they describe the CLI behavior surface, so they move in
-        // lockstep with the CLI. Skills are read by new sessions only, so no
-        // daemon restart is needed. Failures are non-fatal (see #11).
-        if daemonNeedsUpdate {
-            do {
-                let skillsOutput = try await refreshSkills()
-                if !skillsOutput.isEmpty {
-                    output += skillsOutput
+                try await runStep(
+                    L10n.Upgrade.startingChannel(ch.displayName),
+                    target: .channel(ch.type),
+                    onProgress: onProgress
+                ) {
+                    _ = try await startChannel(ch.type)
                 }
-            } catch {
-                output += "\n[skills] refresh failed (non-fatal): \(error.localizedDescription)\n"
             }
         }
 
-        return output
+        var summary = L10n.Upgrade.updated(completed.joined(separator: ", "))
+        if daemonNeedsUpdate {
+            await onProgress(L10n.Upgrade.refreshingSkills, .skills)
+            do {
+                _ = try await refreshSkills()
+            } catch {
+                summary += " \(L10n.Upgrade.skillsFailed)"
+            }
+        }
+
+        return summary
+    }
+
+    private func runStep(
+        _ message: String,
+        target: UpgradeTarget?,
+        onProgress: @escaping @Sendable (String, UpgradeTarget?) async -> Void,
+        operation: () async throws -> Void
+    ) async throws {
+        await onProgress(message, target)
+        do {
+            try await operation()
+        } catch {
+            throw UpgradeStepError(step: message, reason: Self.shortReason(error))
+        }
+    }
+
+    static func shortReason(_ error: Error) -> String {
+        let raw: String
+        if case ShellError.executionFailed(let message, _) = error {
+            raw = message
+        } else {
+            raw = error.localizedDescription
+        }
+        let line = raw
+            .split(whereSeparator: \.isNewline)
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .first { !$0.isEmpty } ?? raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if line.count <= 120 { return line }
+        return String(line.prefix(117)) + "…"
     }
 }

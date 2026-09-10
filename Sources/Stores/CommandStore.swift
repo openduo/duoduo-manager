@@ -13,16 +13,19 @@ final class CommandStore {
     var activeOperation: CommandOperation?
     var lastOutput: String
     var errorMessage: String?
+    var upgradeTarget: UpgradeTarget?
 
     init(
         isLoading: Bool = false,
         activeOperation: CommandOperation? = nil,
         lastOutput: String = "",
-        errorMessage: String? = nil
+        errorMessage: String? = nil,
+        upgradeTarget: UpgradeTarget? = nil
     ) {
         self.isLoading = isLoading
         self.activeOperation = activeOperation
         self.lastOutput = lastOutput
         self.errorMessage = errorMessage
+        self.upgradeTarget = upgradeTarget
     }
 }

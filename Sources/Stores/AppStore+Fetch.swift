@@ -11,6 +11,7 @@ extension AppStore {
     func executeCommand(
         activeOperation: CommandOperation? = nil,
         initialOutput: String = "",
+        feedbackClearAfter: Duration = .seconds(4),
         _ operation: @escaping () async throws -> String
     ) {
         guard !command.isLoading else { return }
@@ -18,22 +19,25 @@ extension AppStore {
         command.activeOperation = activeOperation
         command.errorMessage = nil
         command.lastOutput = initialOutput
+        command.upgradeTarget = nil
 
         Task { [weak self] in
             guard let self else { return }
             do {
                 let output = try await operation()
                 self.command.lastOutput = output
+                self.command.upgradeTarget = nil
                 await self.refreshRuntime()
                 if !self.visibleSurfaces.isEmpty {
                     await self.fetchDashboardStatus()
                 }
             } catch {
                 self.command.errorMessage = error.localizedDescription
+                self.command.upgradeTarget = nil
             }
             self.command.isLoading = false
             self.command.activeOperation = nil
-            self.scheduleCommandFeedbackAutoClear()
+            self.scheduleCommandFeedbackAutoClear(after: feedbackClearAfter)
             self.updateStatusBarIcon?()
         }
     }

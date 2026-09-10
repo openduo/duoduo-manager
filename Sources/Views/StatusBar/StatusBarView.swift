@@ -320,15 +320,22 @@ struct StatusBarView: View {
     }
 
     private func statusBarMessageStrip(_ message: String) -> some View {
-        HStack(spacing: 6) {
-            Image(systemName: statusBarPresentation.footer.statusIsError ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
-                .font(.system(size: 10, weight: .semibold))
+        let isBusy = store.command.isLoading
+        let isError = statusBarPresentation.footer.statusIsError
+        return HStack(spacing: 6) {
+            if isBusy {
+                ProgressView()
+                    .controlSize(.mini)
+            } else {
+                Image(systemName: isError ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
+                    .font(.system(size: 10, weight: .semibold))
+            }
             Text(message)
-                .lineLimit(1)
+                .lineLimit(2)
                 .truncationMode(.tail)
         }
         .font(.system(size: 10, design: .monospaced))
-        .foregroundStyle(statusBarPresentation.footer.statusIsError ? ConsolePalette.critical : ConsolePalette.secondaryText)
+        .foregroundStyle(isError ? ConsolePalette.critical : ConsolePalette.secondaryText)
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
         .frame(maxWidth: .infinity, alignment: .leading)
