@@ -20,17 +20,34 @@ A macOS menu bar application for managing the [duoduo](https://github.com/opendu
 
 ## Screenshots
 
-**Menu bar popover** — daemon status, channel controls, and one-click actions. The footer provides shortcuts to open ATC Dashboard, CC Reader, or quit the app.
-
-**ATC Dashboard** — real-time event stream, active sessions, and job queue on the OpenDuo dark plate.
-
-**CC Reader** — browse and search Claude Code and Codex conversation history with markdown rendering, syntax highlighting, and session management.
-
-<p>
-  <img src="assets/screenshot.png" width="32%" alt="Menu bar popover">
-  <img src="assets/dashboard.avif" width="32%" alt="ATC Dashboard">
-  <img src="assets/reader.avif" width="32%" alt="CC Reader">
-</p>
+<table border="0" cellpadding="0" cellspacing="0">
+  <tr>
+    <td rowspan="3" align="center" valign="top" width="470">
+      <img src="assets/screenshot.png" width="470" alt="Menu bar popover">
+    </td>
+    <td align="center">
+      <img src="assets/dashboard.avif" width="430" alt="ATC Dashboard">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <sub><b>ATC Dashboard</b> — real-time event stream, active sessions, and job queue</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="assets/reader.avif" width="430" alt="CC Reader">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <sub><b>Menu bar popover</b> — daemon status, channel controls, and one-click actions</sub>
+    </td>
+    <td align="center">
+      <sub><b>CC Reader</b> — Claude Code / Codex history with rendering and session management</sub>
+    </td>
+  </tr>
+</table>
 
 ## Installation
 
