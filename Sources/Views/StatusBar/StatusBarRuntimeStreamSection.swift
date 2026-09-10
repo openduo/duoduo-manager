@@ -7,11 +7,11 @@ struct StatusRuntimeStreamPanel: View {
     let onToggle: (String) -> Void
 
     var body: some View {
-        StatusPanelSection(icon: "waveform.path.ecg", title: "Runtime Stream", hint: hint) {
+        StatusPanelSection(title: L10n.Status.runtimeStream, hint: hint) {
             if recentEvents.isEmpty {
                 Text("runtime idle, waiting for new activity")
-                    .font(.system(size: 11, design: .monospaced))
-                    .foregroundStyle(ConsolePalette.secondaryText)
+                    .font(.odMono(10))
+                    .foregroundStyle(OpenDuo.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.vertical, 10)
             } else {
@@ -21,64 +21,43 @@ struct StatusRuntimeStreamPanel: View {
         }
     }
 
+    /// The latest event: an inset plate whose only emphasis is the mono
+    /// eyebrow in the event's ramp colour. Flat — no gradient, no glow.
     @ViewBuilder
     private var streamHero: some View {
         if let event = recentEvents.first {
-            VStack(alignment: .leading, spacing: 9) {
-                HStack(alignment: .top, spacing: 9) {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(eventColor(for: event).opacity(0.16))
-                        .frame(width: 36, height: 36)
-                        .overlay(
-                            Image(systemName: heroSymbol(for: event))
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundStyle(eventColor(for: event))
-                        )
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack(alignment: .firstTextBaseline, spacing: 8) {
-                            Text(heroEyebrow(for: event))
-                                .font(.system(size: 10, weight: .semibold, design: .monospaced))
-                                .foregroundStyle(eventColor(for: event))
-                            Text(latestEventTime(for: event))
-                                .font(.system(size: 10, design: .monospaced))
-                                .foregroundStyle(ConsolePalette.secondaryText)
-                        }
-
-                        latestEventHeadline(for: event)
-                    }
-
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text(heroEyebrow(for: event))
+                        .font(.odKicker(9))
+                        .foregroundStyle(eventColor(for: event))
+                    Text(latestEventTime(for: event))
+                        .font(.odMono(9))
+                        .foregroundStyle(OpenDuo.textMuted)
                     Spacer()
+                    Text(event.type)
+                        .font(.odKicker(9))
+                        .foregroundStyle(OpenDuo.textKickerNeutral)
                 }
+
+                latestEventHeadline(for: event)
 
                 if let detail = latestEventDetail(for: event), !detail.isEmpty {
                     Text(detail)
-                        .font(.system(size: 11, design: .monospaced))
-                        .foregroundStyle(ConsolePalette.secondaryText)
+                        .font(.odMono(10))
+                        .foregroundStyle(OpenDuo.textSecondary)
                         .lineLimit(2)
                 }
 
-                HStack(spacing: 8) {
-                    StatusHeroMetaBadge(title: event.type.uppercased(), tint: eventColor(for: event))
-                    if let key = event.session_key, !key.isEmpty {
-                        StatusHeroMetaBadge(title: shortKey(key), tint: ConsolePalette.secondaryText)
-                    }
+                if let key = event.session_key, !key.isEmpty {
+                    Text(shortKey(key))
+                        .font(.odMono(9))
+                        .foregroundStyle(OpenDuo.textMuted)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(12)
-            .background(
-                LinearGradient(
-                    colors: [eventColor(for: event).opacity(0.16), ConsolePalette.panelRaised],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(eventColor(for: event).opacity(0.45), lineWidth: 1)
-            )
+            .padding(10)
+            .odInset()
         }
     }
 
@@ -92,52 +71,31 @@ struct StatusRuntimeStreamPanel: View {
                 )
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(ConsolePalette.divider, lineWidth: 1)
-        )
+        .overlay(alignment: .top) {
+            odHRule()
+        }
     }
 
     private func eventColor(for event: SpineEvent) -> Color {
-        DashboardTheme.color(forEventType: event.type)
+        OpenDuo.color(forEventType: event.type)
     }
 
     private func heroEyebrow(for event: SpineEvent) -> String {
         switch event.type {
         case "agent.tool_use":
-            return "CURRENT TOOL"
+            return L10n.Status.eyebrowCurrentTool
         case "agent.tool_result":
-            return "LATEST RESULT"
+            return L10n.Status.eyebrowLatestResult
         case "agent.error":
-            return "ERROR SIGNAL"
+            return L10n.Status.eyebrowErrorSignal
         case "agent.result":
-            return "AGENT OUTPUT"
+            return L10n.Status.eyebrowAgentOutput
         case "channel.message":
-            return "CHANNEL FLOW"
+            return L10n.Status.eyebrowChannelFlow
         case "route.deliver":
-            return "ROUTE DELIVERY"
+            return L10n.Status.eyebrowRouteDelivery
         default:
-            return "LATEST EVENT"
-        }
-    }
-
-    private func heroSymbol(for event: SpineEvent) -> String {
-        switch event.type {
-        case "agent.tool_use":
-            return "hammer"
-        case "agent.tool_result":
-            return "checkmark.circle"
-        case "agent.error":
-            return "exclamationmark.triangle"
-        case "agent.result":
-            return "sparkles.rectangle.stack"
-        case "channel.message":
-            return "bubble.left.and.bubble.right"
-        case "route.deliver":
-            return "arrowshape.turn.up.forward"
-        default:
-            return "waveform.path.ecg"
+            return L10n.Status.eyebrowLatestEvent
         }
     }
 
@@ -159,8 +117,8 @@ struct StatusRuntimeStreamPanel: View {
                 Text(event.type)
             }
         }
-        .font(.system(size: 15, weight: .semibold, design: .monospaced))
-        .foregroundStyle(ConsolePalette.primaryText)
+        .font(.system(size: 13, weight: .semibold))
+        .foregroundStyle(OpenDuo.textStrong)
     }
 
     private func latestEventDetail(for event: SpineEvent) -> String? {
@@ -182,7 +140,7 @@ struct StatusRuntimeStreamPanel: View {
 
     private func latestEventTime(for event: SpineEvent) -> String {
         guard let ts = event.ts else { return "now" }
-        return DashboardTheme.timeAgo(ts)
+        return SharedPresentationFormatting.timeAgo(ts)
     }
 
     private func shortKey(_ key: String) -> String {

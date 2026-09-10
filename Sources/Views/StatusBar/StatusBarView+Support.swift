@@ -90,7 +90,7 @@ extension StatusBarView {
     }
 
     var daemonRuntimeHintTint: Color? {
-        daemonRuntimeHint == nil ? nil : ConsolePalette.warning
+        daemonRuntimeHint == nil ? nil : OpenDuo.attention
     }
 
     func feishuRuntimeHint(channelIsRunning: Bool) -> String? {
@@ -101,7 +101,7 @@ extension StatusBarView {
     }
 
     func feishuRuntimeHintTint(channelIsRunning: Bool) -> Color? {
-        feishuRuntimeHint(channelIsRunning: channelIsRunning) == nil ? nil : ConsolePalette.warning
+        feishuRuntimeHint(channelIsRunning: channelIsRunning) == nil ? nil : OpenDuo.attention
     }
 }
 

@@ -27,7 +27,7 @@ struct StatusBarPresentationMapper {
                 system: SharedPresentationFormatting.systemHealthSummary(store.dashboard.health),
                 systemTint: systemHealthTint,
                 load: "\(activeSessionCount) \(activeSessionCount == 1 ? "session" : "sessions") · \(runningJobCount) \(runningJobCount == 1 ? "job" : "jobs")",
-                loadTint: activeSessionCount > 0 || runningJobCount > 0 ? ConsolePalette.accent : ConsolePalette.secondaryText,
+                loadTint: activeSessionCount > 0 || runningJobCount > 0 ? OpenDuo.brandSoft : OpenDuo.textSecondary,
                 subconsciousRows: subconsciousRows
             ),
             daemonCard: StatusServiceCardPresentation(
@@ -54,10 +54,10 @@ struct StatusBarPresentationMapper {
                 jobRows: jobSummaryRows
             ),
             footer: StatusFooterPresentation(
-                costValue: DashboardTheme.formatCost(store.dashboard.totalCost),
-                tokenValue: DashboardTheme.formatTokens(store.dashboard.totalTokens),
+                costValue: SharedPresentationFormatting.formatCost(store.dashboard.totalCost),
+                tokenValue: SharedPresentationFormatting.formatTokens(store.dashboard.totalTokens),
                 cacheValue: store.dashboard.cacheHitRate.map { "\($0)%" } ?? "--",
-                toolsValue: DashboardTheme.formatTools(store.dashboard.totalTools),
+                toolsValue: SharedPresentationFormatting.formatTools(store.dashboard.totalTools),
                 statusMessage: footerStatusMessage,
                 statusIsError: footerStatusIsError
             ),
@@ -134,12 +134,12 @@ struct StatusBarPresentationMapper {
 
     private var systemHealthTint: Color {
         if store.dashboard.health?.gateway == "down" || store.dashboard.health?.meta_session == "down" {
-            return ConsolePalette.critical
+            return OpenDuo.alert
         }
         if store.dashboard.health?.gateway == "ok" {
-            return ConsolePalette.signal
+            return OpenDuo.ok
         }
-        return ConsolePalette.warning
+        return OpenDuo.attention
     }
 
     private var subconsciousRows: [SummaryRowData] {
@@ -148,7 +148,7 @@ struct StatusBarPresentationMapper {
                 title: partition.name,
                 detail: partition.done ? "partition warm and ready" : "partition currently executing",
                 state: partition.done ? "WARM" : "RUN",
-                tint: partition.done ? ConsolePalette.fuchsia : ConsolePalette.warning
+                tint: partition.done ? OpenDuo.cyan200 : OpenDuo.attention
             )
         }
     }
@@ -216,25 +216,25 @@ struct StatusBarPresentationMapper {
     private func sessionTint(_ session: SessionInfo) -> Color {
         switch session.status {
         case "active":
-            return ConsolePalette.signal
+            return OpenDuo.ok
         case "error":
-            return ConsolePalette.critical
+            return OpenDuo.alert
         case "ended":
-            return ConsolePalette.mutedText
+            return OpenDuo.textMuted
         default:
-            return ConsolePalette.accent
+            return OpenDuo.brandSoft
         }
     }
 
     private func jobTint(_ job: JobInfo, running: Bool) -> Color {
-        if running { return ConsolePalette.warning }
+        if running { return OpenDuo.attention }
         switch job.state?.last_result {
         case "failure":
-            return ConsolePalette.critical
+            return OpenDuo.alert
         case "success":
-            return ConsolePalette.accent
+            return OpenDuo.brandSoft
         default:
-            return ConsolePalette.mutedText
+            return OpenDuo.textMuted
         }
     }
 

@@ -5,48 +5,29 @@ enum ConfigEditorMode {
     case inline
 }
 
-enum ConfigPalette {
-    static func label(for mode: ConfigEditorMode) -> Color {
-        mode == .inline ? ConsolePalette.primaryText : .primary
-    }
-
-    static func secondary(for mode: ConfigEditorMode) -> Color {
-        mode == .inline ? ConsolePalette.secondaryText : .secondary
-    }
-
-    static func tertiary(for mode: ConfigEditorMode) -> Color {
-        mode == .inline ? ConsolePalette.mutedText : .secondary.opacity(0.8)
-    }
-
-    static func divider(for mode: ConfigEditorMode) -> Color {
-        mode == .inline ? ConsolePalette.divider : Color(nsColor: .separatorColor)
-    }
-}
-
 // MARK: - Shared Config View Layout Helpers
 
 extension View {
-    /// Section header label used in config panels
-    func configSectionLabel(_ title: String, mode: ConfigEditorMode) -> some View {
-        Text(title)
-            .font(.system(size: 10, weight: .semibold))
-            .foregroundStyle(ConfigPalette.secondary(for: mode))
+    /// Section header label used in config panels: a mono kicker.
+    func configSectionLabel(_ title: String, mode _: ConfigEditorMode) -> some View {
+        ODKicker(text: title, tint: OpenDuo.textSecondary)
             .padding(.horizontal, 14)
             .padding(.top, 14)
             .padding(.bottom, 4)
     }
 
     /// Divider with standard config panel horizontal inset
-    func configRowDivider(mode: ConfigEditorMode) -> some View {
-        Divider()
-            .overlay(ConfigPalette.divider(for: mode))
+    func configRowDivider(mode _: ConfigEditorMode) -> some View {
+        Rectangle()
+            .fill(OpenDuo.borderHairline)
+            .frame(height: 1)
             .padding(.horizontal, 14)
     }
 
     /// A labeled config row: label (with optional required indicator and env var hint) + content
     @ViewBuilder
     func configRow<Content: View>(
-        mode: ConfigEditorMode,
+        mode _: ConfigEditorMode,
         label: String,
         required: Bool = false,
         hint: String,
@@ -56,18 +37,27 @@ extension View {
             HStack(spacing: 2) {
                 Text(label)
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(ConfigPalette.label(for: mode))
+                    .foregroundStyle(OpenDuo.textStrong)
                 if required {
-                    Text("*").foregroundStyle(.red).font(.system(size: 11))
+                    Text("*").foregroundStyle(OpenDuo.attention).font(.system(size: 11))
                 }
                 Spacer()
                 Text(hint)
-                    .font(.system(size: 9, design: .monospaced))
-                    .foregroundStyle(ConfigPalette.tertiary(for: mode))
+                    .font(.odMono(9))
+                    .foregroundStyle(OpenDuo.textMuted)
             }
             content()
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 7)
+    }
+
+    /// Square, hairline-framed config field. Invented to match Select metrics.
+    func configTextField(text: Binding<String>, placeholder: String = "") -> some View {
+        TextField(placeholder, text: text)
+            .textFieldStyle(.plain)
+            .font(.odMono(11))
+            .foregroundStyle(OpenDuo.textStrong)
+            .odField()
     }
 }

@@ -34,8 +34,8 @@ final class DashboardPresentationMapperTests: XCTestCase {
         XCTAssertEqual(presentation.sidebarGroups.first?.count, 2)
         XCTAssertEqual(presentation.sidebarGroups.first?.eventTypes.map(\.type), ["agent.tool_use", "agent.tool_result"])
         XCTAssertEqual(presentation.systemEvents.map(\.id), ["4"])
-        XCTAssertEqual(presentation.bottomStats.costText, DashboardTheme.formatCost(12.34))
-        XCTAssertEqual(presentation.bottomStats.tokenText, "tok:\(DashboardTheme.formatTokens(12345))")
+        XCTAssertEqual(presentation.bottomStats.costText, SharedPresentationFormatting.formatCost(12.34))
+        XCTAssertEqual(presentation.bottomStats.tokenText, "tok:\(SharedPresentationFormatting.formatTokens(12345))")
         XCTAssertEqual(presentation.bottomStats.subconsciousItems.first?.name, "partition-long-name")
     }
 
@@ -48,7 +48,7 @@ final class DashboardPresentationMapperTests: XCTestCase {
         let presentation = DashboardPresentationMapper.make(store: store)
 
         XCTAssertEqual(presentation.bottomStats.healthText, SharedPresentationFormatting.dashboardHealthText(dashboard.health))
-        XCTAssertEqual(presentation.bottomStats.healthColor.description, DashboardTheme.red.description)
+        XCTAssertEqual(presentation.bottomStats.healthColor.description, OpenDuo.alert.description)
     }
 
     func testSidebarLabelIncludesSessionRuntime() {

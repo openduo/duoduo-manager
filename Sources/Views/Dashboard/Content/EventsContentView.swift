@@ -16,7 +16,7 @@ struct EventsContentView: View {
     var body: some View {
         VStack(spacing: 0) {
             header
-            Rectangle().fill(DashboardTheme.border).frame(height: 1)
+            Rectangle().fill(OpenDuo.borderHairline).frame(height: 1)
             scrollArea
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -26,15 +26,10 @@ struct EventsContentView: View {
 
     private var header: some View {
         HStack(spacing: 0) {
-            Text("> ")
-                .font(.system(size: 12, design: .monospaced))
-                .foregroundStyle(DashboardTheme.accent)
-            Text(displayName)
-                .font(.system(size: 12, design: .monospaced))
-                .foregroundStyle(DashboardTheme.text)
+            ODKicker(text: displayName, tint: OpenDuo.textKicker)
             Text("  [\(events.count) events]")
-                .font(.system(size: 11, design: .monospaced))
-                .foregroundStyle(DashboardTheme.textTertiary)
+                .font(.odMono(10))
+                .foregroundStyle(OpenDuo.textFaint)
             Spacer()
             liveBadge
         }
@@ -44,13 +39,10 @@ struct EventsContentView: View {
     }
 
     private var liveBadge: some View {
-        HStack(spacing: 4) {
-            Text("●")
-                .font(.system(size: 9, design: .monospaced))
-            Text("LIVE")
-                .font(.system(size: 10, weight: .medium, design: .monospaced))
+        HStack(spacing: 5) {
+            ODSignalDot()
+            ODKicker(text: L10n.Dashboard.live, tint: OpenDuo.ok)
         }
-        .foregroundStyle(DashboardTheme.emerald)
     }
 
     // MARK: - Scroll Area
@@ -88,8 +80,8 @@ struct EventsContentView: View {
         LazyVStack(spacing: 0) {
             if events.isEmpty {
                 Text("no events")
-                    .font(.system(size: 12, design: .monospaced))
-                    .foregroundStyle(DashboardTheme.textTertiary)
+                    .font(.odMono(11))
+                    .foregroundStyle(OpenDuo.textMuted)
                     .padding(40)
             } else {
                 ForEach(events) { evt in
@@ -114,15 +106,15 @@ struct EventsContentView: View {
 
     @ViewBuilder
     private func contextMenu(for evt: SpineEvent) -> some View {
-        Button(expandedIDs.contains(evt.id) ? "Collapse" : "Expand JSON") {
+        Button(expandedIDs.contains(evt.id) ? L10n.Dashboard.collapseJson : L10n.Dashboard.expandJson) {
             toggleExpand(evt.id)
         }
         Divider()
-        Button("Copy Event ID") {
+        Button(L10n.Dashboard.copyEventId) {
             NSPasteboard.general.clearContents()
             NSPasteboard.general.setString(evt.id, forType: .string)
         }
-        Button("Copy Raw JSON") {
+        Button(L10n.Dashboard.copyRawJson) {
             NSPasteboard.general.clearContents()
             NSPasteboard.general.setString(rawJSON(evt), forType: .string)
         }
@@ -140,7 +132,7 @@ struct EventsContentView: View {
     }
 
     private func rawJSON(_ evt: SpineEvent) -> String {
-        DashboardTheme.prettyJSON(evt)
+        SharedPresentationFormatting.prettyJSON(evt)
     }
 
     private func scrollToBottom(_ proxy: ScrollViewProxy) {

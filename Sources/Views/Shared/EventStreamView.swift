@@ -14,14 +14,14 @@ struct EventRowView: View {
                 HStack(alignment: .center, spacing: 8) {
                     // Expand indicator
                     Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
-                        .font(.system(size: 8, weight: .medium))
-                        .foregroundStyle(isExpanded ? DashboardTheme.accent.opacity(0.6) : DashboardTheme.textTertiary.opacity(0.5))
-                        .frame(width: 16)
+                        .font(.system(size: 7, weight: .medium))
+                        .foregroundStyle(isExpanded ? OpenDuo.brandSoft.opacity(0.7) : OpenDuo.textFaint)
+                        .frame(width: 14)
 
                     // Time
                     Text(timeString)
-                        .font(.system(size: 12, design: .monospaced))
-                        .foregroundStyle(DashboardTheme.textTertiary)
+                        .font(.odMono(11))
+                        .foregroundStyle(OpenDuo.textMuted)
 
                     // [type]
                     typeTag
@@ -40,25 +40,25 @@ struct EventRowView: View {
 
             // Expanded: raw JSON (not inside Button, so text selection works)
             if isExpanded {
-                HStack(spacing: 0) {
-                    Rectangle()
-                        .fill(DashboardTheme.accent)
-                        .frame(width: 2)
-                    Text(rawJSON)
-                        .font(.system(size: 11, design: .monospaced))
-                        .foregroundStyle(DashboardTheme.textSecondary)
-                        .textSelection(.enabled)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .background(DashboardTheme.sidebarBackground)
-                }
-                .padding(.leading, 16)
-                .padding(.top, 2)
-                .padding(.bottom, 6)
+                Text(rawJSON)
+                    .font(.odMono(10))
+                    .foregroundStyle(OpenDuo.textSecondary)
+                    .textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(OpenDuo.surfacePanel)
+                    .overlay(alignment: .leading) {
+                        Rectangle()
+                            .fill(OpenDuo.borderBrand)
+                            .frame(width: 2)
+                    }
+                    .padding(.leading, 16)
+                    .padding(.top, 2)
+                    .padding(.bottom, 6)
             }
 
-            Rectangle().fill(DashboardTheme.border).frame(height: 1)
+            Rectangle().fill(OpenDuo.borderHairline).frame(height: 1)
         }
     }
 
@@ -68,16 +68,16 @@ struct EventRowView: View {
     private var typeTag: some View {
         let (label, color) = typeInfo
         HStack(spacing: 0) {
-            Text("[").foregroundStyle(DashboardTheme.accent)
+            Text("[").foregroundStyle(OpenDuo.textFaint)
             Text(label.padding(toLength: 11, withPad: " ", startingAt: 0)).foregroundStyle(color)
-            Text("]").foregroundStyle(DashboardTheme.accent)
+            Text("]").foregroundStyle(OpenDuo.textFaint)
         }
-        .font(.system(size: 12, design: .monospaced))
+        .font(.odMono(11))
     }
 
     private var typeInfo: (label: String, color: Color) {
         let last = String(event.type.split(separator: ".").last ?? Substring(event.type))
-        return (last, DashboardTheme.color(forEventType: event.type))
+        return (last, OpenDuo.color(forEventType: event.type))
     }
 
     // MARK: - Summary (single line)
@@ -104,12 +104,12 @@ struct EventRowView: View {
 
     private var toolUseSummary: some View {
         HStack(spacing: 6) {
-            Text(">").foregroundStyle(DashboardTheme.amber)
+            Text(">").foregroundStyle(OpenDuo.textSecondary)
             Text(event.payload?.tool_name ?? "?")
-                .foregroundStyle(DashboardTheme.amber).fontWeight(.medium)
-            Text(toolDesc).foregroundStyle(DashboardTheme.textSecondary)
+                .foregroundStyle(OpenDuo.textPrimary).fontWeight(.medium)
+            Text(toolDesc).foregroundStyle(OpenDuo.textSecondary)
         }
-        .font(.system(size: 12, design: .monospaced))
+        .font(.odMono(11))
     }
 
     private var toolResultSummary: some View {
@@ -119,25 +119,25 @@ struct EventRowView: View {
         let oneLineSummary = summary.replacing("\n", with: " ")
         return HStack(spacing: 6) {
             Text(isError ? "x" : "+")
-                .foregroundStyle(isError ? DashboardTheme.red : DashboardTheme.emerald)
+                .foregroundStyle(isError ? OpenDuo.alert : OpenDuo.ok)
                 .fontWeight(.semibold)
-            if !tool.isEmpty { Text(tool).foregroundStyle(DashboardTheme.textSecondary) }
+            if !tool.isEmpty { Text(tool).foregroundStyle(OpenDuo.textSecondary) }
             if !oneLineSummary.isEmpty {
-                Text(oneLineSummary).foregroundStyle(DashboardTheme.textTertiary)
+                Text(oneLineSummary).foregroundStyle(OpenDuo.textMuted)
             }
         }
-        .font(.system(size: 12, design: .monospaced))
+        .font(.odMono(11))
     }
 
     private var agentResultSummary: some View {
         let part = event.payload?.partition.map { "[\($0)] " } ?? ""
         let text = (event.payload?.text ?? "").replacing("\n", with: " ")
         return HStack(spacing: 4) {
-            Text("->").foregroundStyle(DashboardTheme.accent)
-            if !part.isEmpty { Text(part).foregroundStyle(DashboardTheme.textTertiary) }
-            Text(text).foregroundStyle(DashboardTheme.textSecondary)
+            Text("->").foregroundStyle(OpenDuo.cyan300)
+            if !part.isEmpty { Text(part).foregroundStyle(OpenDuo.textMuted) }
+            Text(text).foregroundStyle(OpenDuo.textSecondary)
         }
-        .font(.system(size: 12, design: .monospaced))
+        .font(.odMono(11))
     }
 
     private var routeDeliverSummary: some View {
@@ -145,29 +145,29 @@ struct EventRowView: View {
         let content = (event.payload?.payload.flatMap { $0.notify_content ?? $0.text } ?? "")
             .replacing("\n", with: " ")
         return HStack(spacing: 4) {
-            Text("<-").foregroundStyle(DashboardTheme.fuchsia)
-            Text("from:\(src)").foregroundStyle(DashboardTheme.textTertiary)
-            Text(content).foregroundStyle(DashboardTheme.textSecondary)
+            Text("<-").foregroundStyle(OpenDuo.cyan200)
+            Text("from:\(src)").foregroundStyle(OpenDuo.textMuted)
+            Text(content).foregroundStyle(OpenDuo.textSecondary)
         }
-        .font(.system(size: 12, design: .monospaced))
+        .font(.odMono(11))
     }
 
     private var channelMessageSummary: some View {
         let text = (event.payload?.text ?? "").replacing("\n", with: " ")
         return HStack(spacing: 4) {
-            Text(">").foregroundStyle(DashboardTheme.blue)
-            Text(text).foregroundStyle(DashboardTheme.textSecondary)
+            Text(">").foregroundStyle(OpenDuo.cyan100)
+            Text(text).foregroundStyle(OpenDuo.textSecondary)
         }
-        .font(.system(size: 12, design: .monospaced))
+        .font(.odMono(11))
     }
 
     private var agentErrorSummary: some View {
         let err = event.payload?.error ?? event.payload?.text ?? "error"
         return HStack(spacing: 4) {
-            Text("!").foregroundStyle(DashboardTheme.red).bold()
-            Text(String(err.prefix(200))).foregroundStyle(DashboardTheme.red.opacity(0.85))
+            Text("!").foregroundStyle(OpenDuo.alert).bold()
+            Text(String(err.prefix(200))).foregroundStyle(OpenDuo.alert.opacity(0.85))
         }
-        .font(.system(size: 12, design: .monospaced))
+        .font(.odMono(11))
     }
 
     private var fallbackSummary: some View {
@@ -178,11 +178,11 @@ struct EventRowView: View {
 
     private var timeString: String {
         guard let ts = event.ts else { return "--:--:--.--" }
-        return DashboardTheme.formatTime(DashboardTheme.parseISO8601(ts))
+        return SharedPresentationFormatting.formatTime(SharedPresentationFormatting.parseISO8601(ts))
     }
 
     private var rawJSON: String {
-        DashboardTheme.prettyJSON(event)
+        SharedPresentationFormatting.prettyJSON(event)
     }
 
     private var toolDesc: String {
@@ -213,6 +213,6 @@ struct EventRowView: View {
 
 extension View {
     func sysEvtStyle() -> some View {
-        self.font(.system(size: 12, design: .monospaced)).foregroundStyle(DashboardTheme.textTertiary)
+        self.font(.odMono(11)).foregroundStyle(OpenDuo.textMuted)
     }
 }

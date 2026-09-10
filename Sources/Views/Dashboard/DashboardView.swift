@@ -39,13 +39,15 @@ struct DashboardView: View {
     var body: some View {
         HStack(spacing: 0) {
             sidebar
+            odVRule()
             VStack(spacing: 0) {
                 mainContent
                 bottomStatsBar
             }
         }
         .frame(minWidth: 680, minHeight: 500)
-        .background(DashboardTheme.background.ignoresSafeArea(edges: .top))
+        .background(OpenDuo.page.ignoresSafeArea(edges: .top))
+        .odChrome()
         .onChange(of: selectedEntry) { _, new in
             if new == .config { Task { await store.fetchConfig() } }
         }
@@ -70,9 +72,8 @@ struct DashboardView: View {
                     }
 
                     // Static pages
-                    Rectangle()
-                        .fill(DashboardTheme.sidebarDivider)
-                        .frame(height: 1)
+                    odHRule()
+                        .padding(.horizontal, 12)
                         .padding(.top, 8)
                         .padding(.bottom, 4)
 
@@ -89,8 +90,8 @@ struct DashboardView: View {
 
             // Bottom: daemon URL
             Text(store.runtime.daemonConfig.daemonURL)
-                .font(.system(size: 10, design: .monospaced))
-                .foregroundStyle(DashboardTheme.textSecondary)
+                .font(.odMono(9))
+                .foregroundStyle(OpenDuo.textMuted)
                 .lineLimit(1)
                 .truncationMode(.middle)
                 .padding(.horizontal, 14)
@@ -99,14 +100,12 @@ struct DashboardView: View {
         .frame(width: 200)
         .background(
             // Extend sidebar color behind traffic lights
-            DashboardTheme.sidebarBackground.ignoresSafeArea(edges: .top)
+            OpenDuo.surfacePanel.ignoresSafeArea(edges: .top)
         )
     }
 
     private func sectionLabel(_ title: String) -> some View {
-        Text(title)
-            .font(.system(size: 10, weight: .medium, design: .monospaced))
-            .foregroundStyle(DashboardTheme.sidebarHeaderText)
+        ODKicker(text: title, tint: OpenDuo.textKickerNeutral)
             .padding(.horizontal, 14)
             .padding(.top, 6)
             .padding(.bottom, 4)
@@ -119,9 +118,9 @@ struct DashboardView: View {
         let isSelected = selectedEntry == .sessionGroup(key: group.key)
 
         return HStack(spacing: 0) {
-            // Left accent bar
+            // Left brand bar marks the active selection
             Rectangle()
-                .fill(isSelected ? DashboardTheme.accent : Color.clear)
+                .fill(isSelected ? OpenDuo.brand : Color.clear)
                 .frame(width: 2)
 
             // Chevron: expand/collapse only — big enough to hit easily
@@ -129,9 +128,9 @@ struct DashboardView: View {
                 if isExpanded { expandedGroups.remove(group.key) } else { expandedGroups.insert(group.key) }
             } label: {
                 Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(DashboardTheme.textSecondary)
-                    .frame(width: 28, height: 32)
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(OpenDuo.textMuted)
+                    .frame(width: 24, height: 30)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
@@ -142,16 +141,16 @@ struct DashboardView: View {
             } label: {
                 HStack(spacing: 0) {
                     Text(group.label)
-                        .font(.system(size: 13, design: .monospaced))
-                        .foregroundStyle(isSelected ? DashboardTheme.text : DashboardTheme.sidebarItemText)
+                        .font(.odMono(12))
+                        .foregroundStyle(isSelected ? OpenDuo.textStrong : OpenDuo.textSecondary)
                         .lineLimit(1)
                         .truncationMode(.middle)
 
                     Spacer()
 
                     Text("\(group.count)")
-                        .font(.system(size: 11, design: .monospaced))
-                        .foregroundStyle(DashboardTheme.textTertiary)
+                        .font(.odMono(10))
+                        .foregroundStyle(OpenDuo.textFaint)
                         .padding(.trailing, 10)
                 }
                 .frame(height: 30)
@@ -159,7 +158,7 @@ struct DashboardView: View {
             }
             .buttonStyle(.plain)
         }
-        .background(isSelected ? DashboardTheme.sidebarActive : Color.clear)
+        .background(isSelected ? OpenDuo.surfaceInset : Color.clear)
     }
 
     // Sub-item: event type within a session
@@ -179,26 +178,24 @@ struct DashboardView: View {
                 Color.clear.frame(width: 22)
 
                 HStack(spacing: 6) {
-                    Text("\u{25CF}")
-                        .font(.system(size: 7))
-                        .foregroundStyle(item.color.opacity(0.8))
+                    ODStateTick(tint: item.color.opacity(0.8), size: 5)
 
                     Text(item.shortName)
-                        .font(.system(size: 12, design: .monospaced))
-                        .foregroundStyle(isSelected ? item.color : item.color.opacity(0.65))
+                        .font(.odMono(11))
+                        .foregroundStyle(isSelected ? item.color : item.color.opacity(0.7))
                         .lineLimit(1)
 
                     Spacer()
 
                     Text("\(item.count)")
-                        .font(.system(size: 11, design: .monospaced))
-                        .foregroundStyle(DashboardTheme.textTertiary)
+                        .font(.odMono(10))
+                        .foregroundStyle(OpenDuo.textFaint)
                         .padding(.trailing, 10)
                 }
                 .frame(height: 26)
                 .contentShape(Rectangle())
             }
-            .background(isSelected ? item.color.opacity(0.08) : Color.clear)
+            .background(isSelected ? OpenDuo.surfaceInset : Color.clear)
         }
         .buttonStyle(.plain)
     }
@@ -211,24 +208,24 @@ struct DashboardView: View {
         } label: {
             HStack(spacing: 0) {
                 Rectangle()
-                    .fill(isSelected ? DashboardTheme.textTertiary : Color.clear)
+                    .fill(isSelected ? OpenDuo.textSecondary : Color.clear)
                     .frame(width: 2)
 
                 HStack(spacing: 6) {
                     Color.clear.frame(width: 20)
                     Text("system")
-                        .font(.system(size: 13, design: .monospaced))
-                        .foregroundStyle(isSelected ? DashboardTheme.text : DashboardTheme.sidebarItemText)
+                        .font(.odMono(12))
+                        .foregroundStyle(isSelected ? OpenDuo.textStrong : OpenDuo.textSecondary)
                     Spacer()
                     Text("\(dashboardPresentation.systemEvents.count)")
-                        .font(.system(size: 11, design: .monospaced))
-                        .foregroundStyle(DashboardTheme.textTertiary)
+                        .font(.odMono(10))
+                        .foregroundStyle(OpenDuo.textFaint)
                         .padding(.trailing, 10)
                 }
                 .frame(height: 30)
                 .contentShape(Rectangle())
             }
-            .background(isSelected ? DashboardTheme.sidebarActive : Color.clear)
+            .background(isSelected ? OpenDuo.surfaceInset : Color.clear)
         }
         .buttonStyle(.plain)
     }
@@ -249,20 +246,20 @@ struct DashboardView: View {
         } label: {
             HStack(spacing: 0) {
                 Rectangle()
-                    .fill(isSelected ? DashboardTheme.accent : Color.clear)
+                    .fill(isSelected ? OpenDuo.brand : Color.clear)
                     .frame(width: 2)
 
                 HStack(spacing: 6) {
                     Color.clear.frame(width: 20)
                     Text(label)
-                        .font(.system(size: 13, design: .monospaced))
-                        .foregroundStyle(isSelected ? DashboardTheme.text : DashboardTheme.sidebarItemText)
+                        .font(.odMono(12))
+                        .foregroundStyle(isSelected ? OpenDuo.textStrong : OpenDuo.textSecondary)
                     Spacer()
                 }
                 .frame(height: 30)
                 .contentShape(Rectangle())
             }
-            .background(isSelected ? DashboardTheme.sidebarActive : Color.clear)
+            .background(isSelected ? OpenDuo.surfaceInset : Color.clear)
         }
         .buttonStyle(.plain)
     }
@@ -297,39 +294,39 @@ struct DashboardView: View {
     private var bottomStatsBar: some View {
         HStack(spacing: 0) {
             Text(dashboardPresentation.bottomStats.costText)
-                .font(.system(size: 11, design: .monospaced))
-                .foregroundStyle(DashboardTheme.text)
+                .font(.odMono(10))
+                .foregroundStyle(OpenDuo.textPrimary)
             bottomDivider
 
             Text(dashboardPresentation.bottomStats.tokenText)
-                .font(.system(size: 11, design: .monospaced))
-                .foregroundStyle(DashboardTheme.text)
+                .font(.odMono(10))
+                .foregroundStyle(OpenDuo.textPrimary)
             bottomDivider
 
             Text(dashboardPresentation.bottomStats.cacheText)
-                .font(.system(size: 11, design: .monospaced))
-                .foregroundStyle(DashboardTheme.text)
+                .font(.odMono(10))
+                .foregroundStyle(OpenDuo.textPrimary)
             bottomDivider
 
             Text(dashboardPresentation.bottomStats.toolText)
-                .font(.system(size: 11, design: .monospaced))
-                .foregroundStyle(DashboardTheme.text)
+                .font(.odMono(10))
+                .foregroundStyle(OpenDuo.textPrimary)
 
             if !dashboardPresentation.bottomStats.subconsciousItems.isEmpty {
                 bottomDivider
                 HStack(spacing: 6) {
                     Text("sub:")
-                        .font(.system(size: 10, design: .monospaced))
-                        .foregroundStyle(DashboardTheme.accent)
+                        .font(.odMono(9))
+                        .foregroundStyle(OpenDuo.textKicker)
                         .fixedSize(horizontal: true, vertical: false)
                     ForEach(dashboardPresentation.bottomStats.subconsciousItems) { item in
                         HStack(spacing: 2) {
                             Text(item.marker)
-                                .font(.system(size: 10, design: .monospaced))
+                                .font(.odMono(9))
                                 .foregroundStyle(item.markerColor)
                                 .frame(width: 10)
                             Text(item.name)
-                                .font(.system(size: 10, design: .monospaced))
+                                .font(.odMono(9))
                                 .foregroundStyle(item.textColor)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.85)
@@ -343,28 +340,25 @@ struct DashboardView: View {
             }
 
             HStack(spacing: 5) {
-                Circle()
-                    .fill(dashboardPresentation.bottomStats.healthColor)
-                    .frame(width: 6, height: 6)
-                    .shadow(color: dashboardPresentation.bottomStats.healthColor.opacity(0.6), radius: 2)
+                ODSignalDot(tint: dashboardPresentation.bottomStats.healthColor)
                 Text(dashboardPresentation.bottomStats.healthText)
-                    .font(.system(size: 11, design: .monospaced))
+                    .font(.odMono(10))
                     .foregroundStyle(dashboardPresentation.bottomStats.healthColor)
             }
         }
         .padding(.horizontal, 14)
         .frame(height: 32)
-        .background(DashboardTheme.cardBackground)
+        .background(OpenDuo.surfacePanel)
         .overlay(alignment: .top) {
             Rectangle()
-                .fill(DashboardTheme.border)
+                .fill(OpenDuo.borderHairline)
                 .frame(height: 1)
         }
     }
 
     private var bottomDivider: some View {
         Rectangle()
-            .fill(DashboardTheme.border)
+            .fill(OpenDuo.borderSubtle)
             .frame(width: 1, height: 12)
             .padding(.horizontal, 10)
     }

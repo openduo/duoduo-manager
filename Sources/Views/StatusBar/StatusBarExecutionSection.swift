@@ -8,14 +8,18 @@ struct StatusExecutionPanel: View {
     let jobRows: [SummaryRowData]
 
     var body: some View {
-        StatusPanelSection(icon: "square.stack.3d.up", title: "Execution Board", hint: hint) {
-            HStack(alignment: .top, spacing: 10) {
+        StatusPanelSection(title: L10n.Status.executionBoard, hint: hint) {
+            HStack(alignment: .top, spacing: 0) {
                 summarySection(
                     title: "sessions",
                     caption: sessionCaption,
                     rows: sessionRows,
                     emptyText: "no active sessions"
                 )
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                odVRule()
+                    .padding(.horizontal, 10)
 
                 summarySection(
                     title: "jobs",
@@ -23,6 +27,7 @@ struct StatusExecutionPanel: View {
                     rows: jobRows,
                     emptyText: "no jobs running"
                 )
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
     }
@@ -30,57 +35,45 @@ struct StatusExecutionPanel: View {
     private func summarySection(title: String, caption: String, rows: [SummaryRowData], emptyText: String) -> some View {
         VStack(alignment: .leading, spacing: 7) {
             HStack(alignment: .firstTextBaseline, spacing: 6) {
-                Image(systemName: title == "sessions" ? "person.2.fill" : "shippingbox.fill")
-                    .font(.system(size: 8, weight: .semibold))
-                    .foregroundStyle(ConsolePalette.mutedText)
-                Text(title.uppercased())
-                    .font(.system(size: 10, weight: .medium, design: .monospaced))
-                    .foregroundStyle(ConsolePalette.secondaryText)
+                ODKicker(text: title, tint: OpenDuo.textSecondary, size: 9)
                 Spacer()
                 Text(caption)
-                    .font(.system(size: 9, design: .monospaced))
-                    .foregroundStyle(ConsolePalette.mutedText)
+                    .font(.odMono(9))
+                    .foregroundStyle(OpenDuo.textMuted)
             }
 
             if rows.isEmpty {
                 Text(emptyText)
-                    .font(.system(size: 10, design: .monospaced))
-                    .foregroundStyle(ConsolePalette.mutedText)
+                    .font(.odMono(10))
+                    .foregroundStyle(OpenDuo.textMuted)
                     .padding(.vertical, 2)
             } else {
                 ForEach(Array(rows.prefix(3)), id: \.title) { row in
                     HStack(spacing: 8) {
-                        Circle()
-                            .fill(row.tint)
-                            .frame(width: 6, height: 6)
+                        ODStateTick(tint: row.tint, size: 5)
 
                         VStack(alignment: .leading, spacing: 2) {
                             Text(row.title)
-                                .font(.system(size: 10, weight: .medium, design: .monospaced))
-                                .foregroundStyle(ConsolePalette.primaryText)
+                                .font(.odMono(10, weight: .medium))
+                                .foregroundStyle(OpenDuo.textPrimary)
                                 .lineLimit(1)
                             Text(row.detail)
-                                .font(.system(size: 9, design: .monospaced))
-                                .foregroundStyle(ConsolePalette.secondaryText)
+                                .font(.odMono(9))
+                                .foregroundStyle(OpenDuo.textSecondary)
                                 .lineLimit(1)
                         }
 
                         Spacer()
 
                         Text(row.state)
-                            .font(.system(size: 9, weight: .semibold, design: .monospaced))
+                            .font(.odMono(9, weight: .medium))
                             .foregroundStyle(row.tint)
                     }
                 }
             }
         }
         .padding(9)
-        .background(ConsolePalette.panelRaised)
-        .clipShape(RoundedRectangle(cornerRadius: 10))
-        .overlay(
-            RoundedRectangle(cornerRadius: 10)
-                .stroke(ConsolePalette.divider, lineWidth: 1)
-        )
+        .odInset()
     }
 }
 
@@ -93,7 +86,6 @@ struct StatusFooterBar: View {
     let onSelectTerminalApp: (PreferredTerminalApp) -> Void
     let onQuit: () -> Void
 
-    @State private var showTerminalPicker = false
     @State private var installedTerminalApps: [PreferredTerminalApp] = []
 
     private func refreshInstalledTerminalApps() {
@@ -114,7 +106,10 @@ struct StatusFooterBar: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 9)
-        .background(ConsolePalette.panel)
+        .background(OpenDuo.surfacePanel)
+        .overlay(alignment: .top) {
+            Rectangle().fill(OpenDuo.borderHairline).frame(height: 1)
+        }
     }
 
     @ViewBuilder
@@ -125,68 +120,42 @@ struct StatusFooterBar: View {
             HStack(spacing: 0) {
                 Button(action: onTerminal) {
                     footerButtonLabel(title: preferredTerminalApp.title, systemImage: "terminal")
-                        .padding(.leading, 10)
-                        .padding(.trailing, 6)
-                        .padding(.vertical, 6)
+                        .padding(.leading, 8)
+                        .padding(.trailing, 5)
+                        .padding(.vertical, 5)
                 }
                 .buttonStyle(.plain)
 
                 Rectangle()
-                    .fill(ConsolePalette.divider)
-                    .frame(width: 1, height: 18)
+                    .fill(OpenDuo.borderInput)
+                    .frame(width: 1, height: 14)
 
-                Button {
-                    showTerminalPicker.toggle()
-                } label: {
-                    Text("▾")
-                        .font(.system(size: 12, weight: .heavy))
-                        .foregroundColor(ConsolePalette.signal)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 6)
-                }
-                .buttonStyle(.plain)
-                .popover(isPresented: $showTerminalPicker, arrowEdge: .bottom) {
-                    VStack(alignment: .leading, spacing: 0) {
-                        ForEach(installedTerminalApps, id: \.rawValue) { app in
-                            Button {
-                                onSelectTerminalApp(app)
-                                showTerminalPicker = false
-                            } label: {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "terminal")
-                                        .font(.system(size: 11))
-                                        .foregroundStyle(ConsolePalette.secondaryText)
-                                        .frame(width: 16)
-                                    Text(app.title)
-                                        .font(.system(size: 12, design: .monospaced))
-                                        .foregroundStyle(ConsolePalette.primaryText)
-                                    Spacer()
-                                    if preferredTerminalApp == app {
-                                        Image(systemName: "checkmark")
-                                            .font(.system(size: 10, weight: .bold))
-                                            .foregroundColor(ConsolePalette.signal)
-                                    }
-                                }
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
-                                .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
-
-                            if app != installedTerminalApps.last {
-                                Divider()
-                                    .overlay(ConsolePalette.divider)
-                                    .padding(.leading, 36)
+                Menu {
+                    ForEach(installedTerminalApps, id: \.rawValue) { app in
+                        Button {
+                            onSelectTerminalApp(app)
+                        } label: {
+                            if preferredTerminalApp == app {
+                                Label(app.title, systemImage: "checkmark")
+                            } else {
+                                Text(app.title)
                             }
                         }
                     }
-                    .padding(.vertical, 4)
-                    .frame(width: 180)
-                    .background(ConsolePalette.panel)
+                } label: {
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 7, weight: .bold))
+                        .foregroundStyle(OpenDuo.textMuted)
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 5)
+                        .contentShape(Rectangle())
                 }
+                .menuStyle(.borderlessButton)
+                .menuIndicator(.hidden)
+                .buttonStyle(.plain)
             }
-            .background(ConsolePalette.panelRaised)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .background(OpenDuo.surfaceInset)
+            .overlay(Rectangle().stroke(OpenDuo.borderInput, lineWidth: 1))
             .help("Open in \(preferredTerminalApp.title)")
         }
     }
@@ -194,22 +163,17 @@ struct StatusFooterBar: View {
     private func footerButtonLabel(title: String, systemImage: String) -> some View {
         HStack(spacing: 6) {
             Image(systemName: systemImage)
-                .font(.system(size: 11, weight: .semibold))
+                .font(.system(size: 10, weight: .medium))
             Text(title)
-                .font(.system(size: 11, weight: .medium, design: .monospaced))
+                .font(.system(size: 11, weight: .medium))
         }
-        .foregroundStyle(ConsolePalette.primaryText)
+        .foregroundStyle(OpenDuo.textSecondary)
     }
 
     private func footerButton(title: String, systemImage: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             footerButtonLabel(title: title, systemImage: systemImage)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(ConsolePalette.panelRaised)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(ODOutlineButtonStyle())
     }
-
 }

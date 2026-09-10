@@ -13,26 +13,23 @@ struct OnboardingView: View {
     @Bindable var store: OnboardingStore
     let onClose: () -> Void
     var onPreferredHeightChange: (CGFloat) -> Void = { _ in }
-    @State private var completionReveal = false
-    @State private var completionAxisShift = false
     @State private var shellPathStatus: ShellPathInstaller.Status = .installed
     @State private var shellPathErrorMessage: String?
 
     var body: some View {
         VStack(spacing: 0) {
             header
-            Divider().overlay(ConsolePalette.divider)
+            Rectangle().fill(OpenDuo.borderHairline).frame(height: 1)
             Group {
                 if store.state.step == .complete {
                     completionView
-                        .transition(.opacity.combined(with: .scale(scale: 0.98)))
                 } else {
                     taskList
-                        .transition(.opacity)
                 }
             }
         }
-        .background(ConsolePalette.background)
+        .background(OpenDuo.page)
+        .odChrome()
         .frame(width: 620)
         .background(
             GeometryReader { proxy in
@@ -42,8 +39,8 @@ struct OnboardingView: View {
         .onPreferenceChange(OnboardingContentHeightKey.self) { height in
             onPreferredHeightChange(height)
         }
-        .animation(.easeOut(duration: 0.22), value: store.state.step)
-        .animation(.easeOut(duration: 0.22), value: store.state.currentRequirement)
+        .animation(.easeInOut(duration: 0.15), value: store.state.step)
+        .animation(.easeInOut(duration: 0.15), value: store.state.currentRequirement)
         .task {
             if store.state.step == .detecting,
                store.state.currentRequirement == nil,
@@ -56,43 +53,26 @@ struct OnboardingView: View {
         }
         .task(id: store.state.step == .complete) {
             guard store.state.step == .complete else {
-                completionReveal = false
-                completionAxisShift = false
                 shellPathStatus = .installed
                 shellPathErrorMessage = nil
                 return
             }
             await prepareCompletionSupplementaryPanel()
-            withAnimation(.easeOut(duration: 0.35)) {
-                completionReveal = true
-            }
-            withAnimation(.easeInOut(duration: 2.4).repeatForever(autoreverses: true)) {
-                completionAxisShift = true
-            }
         }
     }
 
     private var header: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
-            HStack(spacing: 10) {
-                Image(systemName: "list.bullet.rectangle.portrait")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(ConsolePalette.secondaryText)
-                    .frame(width: 18)
-
-                Text(L10n.Onboard.headerTitle)
-                    .font(.system(size: 22, weight: .semibold))
-                    .foregroundStyle(ConsolePalette.primaryText)
-            }
+            ODKicker(text: L10n.Onboard.headerTitle, tint: OpenDuo.textKicker)
 
             Spacer()
 
             Text(progressCounter)
-                .font(.system(size: 18, weight: .medium, design: .monospaced))
-                .foregroundStyle(ConsolePalette.secondaryText)
+                .font(.odMono(12))
+                .foregroundStyle(OpenDuo.textSecondary)
         }
         .padding(.horizontal, 24)
-        .padding(.vertical, 18)
+        .padding(.vertical, 16)
     }
 
     private var taskList: some View {
@@ -124,18 +104,12 @@ struct OnboardingView: View {
     }
 
     private var completionWideLayout: some View {
-        HStack(alignment: .top, spacing: 34) {
+        HStack(alignment: .top, spacing: 30) {
             completionHeroColumn
-                .offset(y: completionReveal ? 0 : 10)
-                .opacity(completionReveal ? 1 : 0)
 
             completionAxis
-                .offset(y: completionReveal ? 0 : 18)
-                .opacity(completionReveal ? 1 : 0)
 
             completionInfoColumn
-                .offset(y: completionReveal ? 0 : 14)
-                .opacity(completionReveal ? 1 : 0)
         }
     }
 
@@ -221,25 +195,9 @@ struct OnboardingView: View {
 
     private var completionHeroColumn: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text(L10n.Onboard.setupComplete)
-                .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                .tracking(1.2)
-                .foregroundStyle(ConsolePalette.secondaryText)
+            ODKicker(text: L10n.Onboard.setupComplete, tint: OpenDuo.textKickerNeutral)
 
-            Text("Enjoy.")
-                .font(.system(size: 52, weight: .bold, design: .rounded))
-                .foregroundStyle(ConsolePalette.primaryText)
-
-            Rectangle()
-                .fill(
-                    LinearGradient(
-                        colors: [ConsolePalette.accent, ConsolePalette.secondaryText],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-                .frame(width: 108, height: 3)
-                .clipShape(Capsule())
+            ODHeadline(text: L10n.Onboard.enjoy, size: 48)
 
             if showsCompletionSupplementaryPanel {
                 AgentShellPathPanel(
@@ -249,8 +207,8 @@ struct OnboardingView: View {
                     .padding(.top, 2)
             } else {
                 Text(L10n.Onboard.readyHint)
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(ConsolePalette.secondaryText)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(OpenDuo.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, 4)
             }
@@ -307,24 +265,19 @@ struct OnboardingView: View {
         }
     }
 
+    /// A static hairline axis with the live signal dot at its foot. The one
+    /// element allowed a glow.
     private var completionAxis: some View {
-        ZStack(alignment: .top) {
+        VStack(spacing: 0) {
             Rectangle()
-                .fill(ConsolePalette.divider.opacity(0.7))
+                .fill(OpenDuo.borderSubtle)
                 .frame(width: 1)
 
-            Capsule()
-                .fill(
-                    LinearGradient(
-                        colors: [ConsolePalette.accent.opacity(0.2), ConsolePalette.accent, ConsolePalette.signal.opacity(0.24)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .frame(width: 3, height: 72)
-                .offset(y: completionAxisShift ? 138 : 8)
+            ODSignalDot()
+                .padding(.top, 6)
         }
-        .frame(width: 12, height: 230)
+        .frame(width: 12, alignment: .top)
+        .frame(maxHeight: 230, alignment: .top)
     }
 
     private var completionInfoColumn: some View {
@@ -336,17 +289,18 @@ struct OnboardingView: View {
                 completionMetricRow("Daemon", daemonCompletionLabel, showsDivider: false)
             }
 
-            HStack(spacing: 12) {
-                primaryButton(title: L10n.Onboard.editConfig, tint: ConsolePalette.accent, disabled: false) {
+            HStack(spacing: 10) {
+                Button {
                     store.send(.editRequirementRequested(.claudeAccess))
+                } label: {
+                    Text(L10n.Onboard.editConfig)
                 }
+                .buttonStyle(ODOutlineButtonStyle())
 
                 Button(action: onClose) {
                     Text(L10n.Onboard.close)
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(ConsolePalette.secondaryText)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(ODQuietButtonStyle())
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -357,18 +311,18 @@ struct OnboardingView: View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(ConsolePalette.mutedText)
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundStyle(OpenDuo.textMuted)
 
                 Text(value)
-                    .font(.system(size: 13, weight: .semibold, design: .monospaced))
-                    .foregroundStyle(ConsolePalette.primaryText)
+                    .font(.odMono(12, weight: .medium))
+                    .foregroundStyle(OpenDuo.textPrimary)
             }
             .padding(.vertical, 10)
             .frame(maxWidth: .infinity, alignment: .leading)
 
             if showsDivider {
-                Divider().overlay(ConsolePalette.divider.opacity(0.7))
+                Rectangle().fill(OpenDuo.borderHairline).frame(height: 1)
             }
         }
     }
@@ -423,42 +377,39 @@ private struct TaskRow: View {
     private var leadingRail: some View {
         VStack(spacing: 0) {
             Rectangle()
-                .fill(ConsolePalette.divider.opacity(0.8))
-                .frame(width: 2, height: 18)
+                .fill(OpenDuo.borderSubtle)
+                .frame(width: 1, height: 18)
                 .opacity(isFirst ? 0 : 1)
 
             HStack(spacing: 0) {
                 Rectangle()
-                    .fill(ConsolePalette.divider.opacity(0.8))
-                    .frame(width: 18, height: 2)
+                    .fill(OpenDuo.borderSubtle)
+                    .frame(width: 16, height: 1)
 
                 checkbox
             }
             .frame(height: 26)
 
             Rectangle()
-                .fill(ConsolePalette.divider.opacity(0.8))
-                .frame(width: 2, height: connectorHeight)
+                .fill(OpenDuo.borderSubtle)
+                .frame(width: 1, height: connectorHeight)
                 .opacity(isLast ? 0 : 1)
         }
         .frame(width: 72, alignment: .leading)
         .padding(.top, 2)
     }
 
+    /// Square checkbox — the only shape a marker is allowed to be.
     private var checkbox: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 4)
-                .fill(phase == .complete ? ConsolePalette.signal.opacity(0.12) : .clear)
-                .frame(width: 18, height: 18)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 4)
-                        .stroke(borderTint, lineWidth: 1.6)
-                )
+            Rectangle()
+                .stroke(borderTint, lineWidth: 1.4)
+                .frame(width: 17, height: 17)
 
             if phase == .complete {
                 Image(systemName: "checkmark")
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundStyle(ConsolePalette.signal)
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundStyle(OpenDuo.ok)
             }
         }
     }
@@ -466,11 +417,11 @@ private struct TaskRow: View {
     private var rowBody: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(requirement.title)
-                .font(.system(size: 18, weight: .semibold))
+                .font(.odDisplay(16))
                 .foregroundStyle(titleTint)
 
             Text(statusText)
-                .font(.system(size: 12, weight: .medium))
+                .font(.system(size: 12, weight: .regular))
                 .foregroundStyle(detailTint)
 
             if isExpanded {
@@ -497,11 +448,11 @@ private struct TaskRow: View {
                 daemonSetup
             default:
                 if isBusy {
-                    ProgressView(value: 0.66)
-                        .tint(highlightTint)
+                    ProgressView()
+                        .controlSize(.small)
+                        .tint(OpenDuo.brand)
                         .padding(.top, 10)
-                        .frame(maxWidth: 320)
-                        .transition(.opacity.combined(with: .scale(scale: 0.98, anchor: .leading)))
+                        .frame(maxWidth: 320, alignment: .leading)
                 }
             }
 
@@ -538,37 +489,39 @@ private struct TaskRow: View {
                 }
 
                 HStack(spacing: 10) {
-                    primaryButton(
-                        title: store.state.isBusy ? L10n.Onboard.saving : L10n.Onboard.continue_,
-                        tint: ConsolePalette.accent,
-                        disabled: store.state.isBusy || !store.state.canSaveProvider
-                    ) {
+                    Button {
                         store.send(.saveProviderRequested)
+                    } label: {
+                        Text(store.state.isBusy ? L10n.Onboard.saving : L10n.Onboard.continue_)
                     }
+                    .buttonStyle(ODPrimaryButtonStyle())
+                    .disabled(store.state.isBusy || !store.state.canSaveProvider)
 
-                    secondaryButton(title: L10n.Onboard.verify) {
+                    Button {
                         store.send(.verifyClaudeStatusRequested)
+                    } label: {
+                        Text(L10n.Onboard.verify)
                     }
+                    .buttonStyle(ODOutlineButtonStyle())
                 }
             }
 
             if let message = store.state.errorMessage ?? store.state.statusMessage {
                 Text(message)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(store.state.errorMessage == nil ? ConsolePalette.secondaryText : ConsolePalette.critical)
+                    .font(.system(size: 11, weight: .regular))
+                    .foregroundStyle(store.state.errorMessage == nil ? OpenDuo.textSecondary : OpenDuo.alert)
                     .padding(.top, 2)
             }
         }
         .padding(.top, 10)
         .frame(maxWidth: 320, alignment: .leading)
-        .transition(.opacity.combined(with: .move(edge: .top)))
     }
 
     private var daemonSetup: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(L10n.Onboard.workDirPrompt)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(ConsolePalette.secondaryText)
+                .font(.system(size: 12, weight: .regular))
+                .foregroundStyle(OpenDuo.textSecondary)
 
             HStack(spacing: 8) {
                 simpleField(
@@ -583,38 +536,29 @@ private struct TaskRow: View {
                     selectWorkDir()
                 } label: {
                     Image(systemName: "folder")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(ConsolePalette.secondaryText)
-                        .frame(width: 36, height: 36)
-                        .background(ConsolePalette.panelRaised)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(ConsolePalette.divider, lineWidth: 1)
-                        )
+                        .font(.system(size: 12, weight: .regular))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(ODIconButtonStyle(tint: OpenDuo.textSecondary))
                 .disabled(store.state.isBusy)
             }
 
-            primaryButton(
-                title: store.state.isBusy ? L10n.Onboard.starting : L10n.Onboard.startDaemon,
-                tint: ConsolePalette.accent,
-                disabled: store.state.isBusy
-            ) {
+            Button {
                 store.send(.startDaemonRequested)
+            } label: {
+                Text(store.state.isBusy ? L10n.Onboard.starting : L10n.Onboard.startDaemon)
             }
+            .buttonStyle(ODPrimaryButtonStyle())
+            .disabled(store.state.isBusy)
 
             if let message = store.state.errorMessage ?? store.state.statusMessage {
                 Text(message)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(store.state.errorMessage == nil ? ConsolePalette.secondaryText : ConsolePalette.critical)
+                    .font(.system(size: 11, weight: .regular))
+                    .foregroundStyle(store.state.errorMessage == nil ? OpenDuo.textSecondary : OpenDuo.alert)
                     .padding(.top, 2)
             }
         }
         .padding(.top, 10)
         .frame(maxWidth: 360, alignment: .leading)
-        .transition(.opacity.combined(with: .move(edge: .top)))
     }
 
     private func selectWorkDir() {
@@ -645,26 +589,26 @@ private struct TaskRow: View {
                 }
             }
         } label: {
-            HStack(spacing: 10) {
+            HStack(spacing: 8) {
                 Image(systemName: store.state.selectedPreset.icon)
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.system(size: 10, weight: .regular))
+                    .foregroundStyle(OpenDuo.textMuted)
 
                 Text(store.state.selectedPreset.name)
-                    .font(.system(size: 13, weight: .medium))
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(OpenDuo.textPrimary)
 
                 Spacer()
 
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 10, weight: .bold))
+                    .font(.system(size: 8, weight: .bold))
+                    .foregroundStyle(OpenDuo.textMuted)
             }
-            .foregroundStyle(ConsolePalette.primaryText)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
-            .background(ConsolePalette.panelRaised)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+            .background(OpenDuo.surfaceInset)
             .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(ConsolePalette.divider, lineWidth: 1)
+                Rectangle().stroke(OpenDuo.borderInput, lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
@@ -673,16 +617,16 @@ private struct TaskRow: View {
     private var officialLoginUI: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(L10n.Onboard.officialHint)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(ConsolePalette.secondaryText)
+                .font(.system(size: 12, weight: .regular))
+                .foregroundStyle(OpenDuo.textSecondary)
 
-            primaryButton(
-                title: store.state.isBusy ? L10n.Onboard.waitingLogin : L10n.Onboard.browserLogin,
-                tint: ConsolePalette.accent,
-                disabled: store.state.isBusy
-            ) {
+            Button {
                 store.send(.oauthLoginRequested)
+            } label: {
+                Text(store.state.isBusy ? L10n.Onboard.waitingLogin : L10n.Onboard.browserLogin)
             }
+            .buttonStyle(ODPrimaryButtonStyle())
+            .disabled(store.state.isBusy)
         }
     }
 
@@ -703,32 +647,17 @@ private struct TaskRow: View {
             }
             .focused($tokenFieldFocused)
             .textFieldStyle(.plain)
-            .font(.system(size: 13, weight: .medium, design: .monospaced))
-            .foregroundStyle(ConsolePalette.primaryText)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
-            .background(ConsolePalette.panelRaised)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(ConsolePalette.divider, lineWidth: 1)
-            )
+            .font(.odMono(12))
+            .foregroundStyle(OpenDuo.textPrimary)
+            .odField(horizontal: 10, vertical: 8)
 
             Button {
                 store.send(.showSecretToggled)
             } label: {
                 Image(systemName: store.state.showSecret ? "eye.slash" : "eye")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(ConsolePalette.secondaryText)
-                    .frame(width: 36, height: 36)
-                    .background(ConsolePalette.panelRaised)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(ConsolePalette.divider, lineWidth: 1)
-                    )
+                    .font(.system(size: 11, weight: .regular))
             }
-            .buttonStyle(.plain)
+            .buttonStyle(ODIconButtonStyle())
         }
         .onAppear {
             DispatchQueue.main.async {
@@ -740,46 +669,35 @@ private struct TaskRow: View {
     private func simpleField(placeholder: String, text: Binding<String>) -> some View {
         TextField(placeholder, text: text)
             .textFieldStyle(.plain)
-            .font(.system(size: 13, weight: .medium, design: .monospaced))
-            .foregroundStyle(ConsolePalette.primaryText)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
-            .background(ConsolePalette.panelRaised)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(ConsolePalette.divider, lineWidth: 1)
-            )
+            .font(.odMono(12))
+            .foregroundStyle(OpenDuo.textPrimary)
+            .odField(horizontal: 10, vertical: 8)
     }
 
     private var titleTint: Color {
         switch phase {
         case .complete:
-            return ConsolePalette.primaryText
+            return OpenDuo.textStrong
         case .current:
-            return highlightTint
+            return OpenDuo.textStrong
         case .upcoming:
-            return ConsolePalette.mutedText
+            return OpenDuo.textFaint
         }
     }
 
     private var detailTint: Color {
-        phase == .upcoming ? ConsolePalette.mutedText : ConsolePalette.secondaryText
+        phase == .upcoming ? OpenDuo.textFaint : OpenDuo.textSecondary
     }
 
     private var borderTint: Color {
         switch phase {
         case .complete:
-            return ConsolePalette.signal
+            return OpenDuo.ok
         case .current:
-            return highlightTint
+            return OpenDuo.brand
         case .upcoming:
-            return ConsolePalette.divider
+            return OpenDuo.borderStrong
         }
-    }
-
-    private var highlightTint: Color {
-        (requirement == .claudeAccess || requirement == .daemon) ? ConsolePalette.accent : ConsolePalette.warning
     }
 
     private var connectorHeight: CGFloat {
@@ -790,37 +708,6 @@ private struct TaskRow: View {
         }
         return 52
     }
-}
-
-private func primaryButton(title: String, tint: Color, disabled: Bool, action: @escaping () -> Void) -> some View {
-    Button(action: action) {
-        Text(title)
-            .font(.system(size: 12, weight: .semibold, design: .monospaced))
-            .foregroundStyle(ConsolePalette.background)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .background(disabled ? ConsolePalette.mutedText : tint)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-    }
-    .buttonStyle(.plain)
-    .disabled(disabled)
-}
-
-private func secondaryButton(title: String, action: @escaping () -> Void) -> some View {
-    Button(action: action) {
-        Text(title)
-            .font(.system(size: 12, weight: .semibold, design: .monospaced))
-            .foregroundStyle(ConsolePalette.primaryText)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .background(ConsolePalette.panelRaised)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(ConsolePalette.divider, lineWidth: 1)
-            )
-    }
-    .buttonStyle(.plain)
 }
 
 /// Post-completion enhancement: lets the user opt into having
@@ -834,9 +721,7 @@ private struct AgentShellPathPanel: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .firstTextBaseline) {
-                Text(L10n.Onboard.ShellPath.title)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(ConsolePalette.primaryText)
+                ODKicker(text: L10n.Onboard.ShellPath.title, tint: OpenDuo.textSecondary)
 
                 Spacer()
 
@@ -844,29 +729,24 @@ private struct AgentShellPathPanel: View {
             }
 
             Text(summaryText)
-                .font(.system(size: 10, weight: .medium))
-                .foregroundStyle(ConsolePalette.secondaryText)
+                .font(.system(size: 10, weight: .regular))
+                .foregroundStyle(OpenDuo.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
 
             if let gateMessage {
                 Text(gateMessage)
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundStyle(ConsolePalette.warning)
+                    .font(.system(size: 10, weight: .regular))
+                    .foregroundStyle(OpenDuo.attention)
             }
 
             if let errorMessage {
                 Text(errorMessage)
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundStyle(ConsolePalette.critical)
+                    .font(.system(size: 10, weight: .regular))
+                    .foregroundStyle(OpenDuo.alert)
             }
         }
         .padding(12)
-        .background(ConsolePalette.panelRaised)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(ConsolePalette.divider, lineWidth: 1)
-        )
+        .odPanel(surface: OpenDuo.surfaceInset, border: OpenDuo.borderSubtle)
     }
 
     private var gateMessage: String? {
@@ -879,26 +759,13 @@ private struct AgentShellPathPanel: View {
         return nil
     }
 
+    /// Bare mono type on the surface — labels are never plated.
     @ViewBuilder
     private var statusControl: some View {
-        statePill(
-            label: L10n.Onboard.ShellPath.stateNeedsManualAction,
-            tint: ConsolePalette.warning
-        )
+        ODKicker(text: L10n.Onboard.ShellPath.stateNeedsManualAction, tint: OpenDuo.attention)
     }
 
     private var summaryText: String {
         errorMessage == nil ? L10n.Onboard.ShellPath.summary : L10n.Onboard.ShellPath.summaryFailed
-    }
-
-    private func statePill(label: String, tint: Color) -> some View {
-        Text(label)
-            .font(.system(size: 10, weight: .semibold, design: .monospaced))
-            .tracking(0.6)
-            .foregroundStyle(tint)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 3)
-            .background(tint.opacity(0.12))
-            .clipShape(Capsule())
     }
 }
