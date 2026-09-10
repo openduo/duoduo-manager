@@ -604,12 +604,7 @@ private struct TaskRow: View {
                     .font(.system(size: 8, weight: .bold))
                     .foregroundStyle(OpenDuo.textMuted)
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 8)
-            .background(OpenDuo.surfaceInset)
-            .overlay(
-                Rectangle().stroke(OpenDuo.borderInput, lineWidth: 1)
-            )
+            .odField(horizontal: 10, vertical: 8)
         }
         .buttonStyle(.plain)
     }

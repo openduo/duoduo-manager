@@ -308,10 +308,7 @@ struct SessionsContentView: View {
                 .foregroundStyle(OpenDuo.textPrimary)
                 .frame(height: 120)
                 .scrollContentBackground(.hidden)
-                .background(OpenDuo.surfaceInset)
-                .overlay {
-                    Rectangle().stroke(OpenDuo.borderInput, lineWidth: 1)
-                }
+                .odField(horizontal: 0, vertical: 0)
             HStack {
                 Spacer()
                 Button(L10n.Config.cancel) {

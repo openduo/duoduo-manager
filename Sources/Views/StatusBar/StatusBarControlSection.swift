@@ -59,6 +59,8 @@ struct StatusServiceCard: View {
     /// Whether this card's start button is the scene's cyan primary. Only
     /// the daemon start earns the fill; channel starts are outline actions,
     /// so a stopped daemon + stopped channel never shows two cyan fills.
+    /// An expanded inline config also stands the start button down — its
+    /// Save button is the primary while editing.
     var isPrimaryStartAction: Bool = true
     let expandedContent: AnyView?
 
@@ -88,7 +90,7 @@ struct StatusServiceCard: View {
                 if isRunning {
                     StatusIconButton(
                         systemImage: "stop.fill",
-                        tint: OpenDuo.alert,
+                        tint: OpenDuo.textSecondary,
                         isDisabled: isLoading,
                         action: onStop
                     )
@@ -98,7 +100,7 @@ struct StatusServiceCard: View {
                         isDisabled: isLoading,
                         action: onRestart
                     )
-                } else if isPrimaryStartAction {
+                } else if isPrimaryStartAction && expandedContent == nil {
                     Button(action: onStart) {
                         Image(systemName: "play.fill")
                             .font(.system(size: 9, weight: .semibold))

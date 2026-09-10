@@ -154,8 +154,7 @@ struct StatusFooterBar: View {
                 .menuIndicator(.hidden)
                 .buttonStyle(.plain)
             }
-            .background(OpenDuo.surfaceInset)
-            .overlay(Rectangle().stroke(OpenDuo.borderInput, lineWidth: 1))
+            .odField(horizontal: 0, vertical: 0)
             .help("Open in \(preferredTerminalApp.title)")
         }
     }
