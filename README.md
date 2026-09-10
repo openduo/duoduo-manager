@@ -13,29 +13,24 @@ A macOS menu bar application for managing the [duoduo](https://github.com/opendu
 - **Channel management** — Install, configure, and control messaging channels (currently Feishu)
 - **Smart upgrades** — Version-aware: only updates and restarts components with newer versions
 - **Sparkle auto-update** — In-app update checks with channel-based rollouts per build variant
-- **ATC Dashboard** — Real-time event stream, session monitoring, and job management in a native panel (Catppuccin Mocha theme)
+- **ATC Dashboard** — Real-time event stream, session monitoring, and job management in a native panel (OpenDuo dark theme)
 - **CC Reader** — Embedded [cc-reader](https://github.com/kuaner/cc-reader) for browsing Claude Code and Codex session history, with timeline rendering, syntax highlighting, and multi-pane layout
+- **Status item menu** — Right-click the menu bar item to pop the status panel out into a window, or quit
 - **Shared app state** — Status popover and ATC Dashboard read from the same root store, so runtime state, dashboard data, and update signals stay in sync
 
 ## Screenshots
 
-### Menu Bar Popover
+**Menu bar popover** — daemon status, channel controls, and one-click actions. The footer provides shortcuts to open ATC Dashboard, CC Reader, or quit the app.
 
-Quick access to daemon status, channel controls, and one-click actions. The footer provides shortcuts to open ATC Dashboard, CC Reader, or quit the app.
+**ATC Dashboard** — real-time event stream, active sessions, and job queue on the OpenDuo dark plate.
 
-![DuoduoManager screenshot](assets/screenshot.png)
+**CC Reader** — browse and search Claude Code and Codex conversation history with markdown rendering, syntax highlighting, and session management.
 
-### ATC Dashboard
-
-Real-time event stream, active sessions, and job queue. Built with a Catppuccin Mocha dark theme for comfortable monitoring.
-
-![ATC Dashboard](assets/dashboard.avif)
-
-### CC Reader
-
-Browse and search Claude Code and Codex conversation history with markdown rendering, syntax highlighting, and session management. Toolbar items (working directory, resume, refresh) are integrated into the title bar.
-
-![CC Reader](assets/reader.avif)
+<p>
+  <img src="assets/screenshot.png" width="32%" alt="Menu bar popover">
+  <img src="assets/dashboard.avif" width="32%" alt="ATC Dashboard">
+  <img src="assets/reader.avif" width="32%" alt="CC Reader">
+</p>
 
 ## Installation
 
