@@ -78,6 +78,7 @@
 		D0DF3F1980B048444A509AB0 /* ConfigStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2528FBA2BF72BF1A03D7A7EA /* ConfigStore.swift */; };
 		D16D454824A600FDE4AB37FC /* ClaudeAuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBDDA8B25C6AAF6D04A90EAD /* ClaudeAuthService.swift */; };
 		D2BE4E4DF0173E7FC1821406 /* DaemonStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63FD10798EC2CABC731AE9AB /* DaemonStatus.swift */; };
+		D614EFA841C775B5ABF9D462 /* StatusWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 363E7A5850BC0E8394280BD9 /* StatusWindowController.swift */; };
 		DCD14982263FD265DD213F3D /* AppWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCAE8BA826F3F2FC84989E8E /* AppWindowController.swift */; };
 		E08920046FF8BCA7E8693D74 /* DuoduoManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5175981D0FA6FAD90921DCE /* DuoduoManagerApp.swift */; };
 		E29D739D6216455B4D6F60CA /* UpdateStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77280A851FF3D40035BCF49 /* UpdateStore.swift */; };
@@ -119,6 +120,7 @@
 		26F554D4114DA0C65758F78F /* DuoduoManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DuoduoManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2AFE377434F91AB5220C4E12 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		34783CE341F17B98A5BFC0DD /* DaemonServiceAutostartTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonServiceAutostartTests.swift; sourceTree = "<group>"; };
+		363E7A5850BC0E8394280BD9 /* StatusWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusWindowController.swift; sourceTree = "<group>"; };
 		383647EF2C49D5F7595B6F3E /* SessionsContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionsContentView.swift; sourceTree = "<group>"; };
 		389CB96D37729402A1A97FFF /* DaemonServiceRestartReasonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaemonServiceRestartReasonTests.swift; sourceTree = "<group>"; };
 		3BEA40D33E29FED5A01BEB28 /* EventStreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventStreamView.swift; sourceTree = "<group>"; };
@@ -433,6 +435,7 @@
 			children = (
 				6FD413F335364A6203A47A3D /* AppStatusController.swift */,
 				FCAE8BA826F3F2FC84989E8E /* AppWindowController.swift */,
+				363E7A5850BC0E8394280BD9 /* StatusWindowController.swift */,
 			);
 			path = Host;
 			sourceTree = "<group>";
@@ -638,6 +641,7 @@
 				C96C679274ED41CD859A7290 /* StatusBarSharedViews.swift in Sources */,
 				3F06193C066E4B68CD4DB443 /* StatusBarView+Support.swift in Sources */,
 				FA953AF57994D9DB7B81424A /* StatusBarView.swift in Sources */,
+				D614EFA841C775B5ABF9D462 /* StatusWindowController.swift in Sources */,
 				E29D739D6216455B4D6F60CA /* UpdateStore.swift in Sources */,
 				88E8A60676091CE351ED2CEA /* UpgradeService.swift in Sources */,
 				18F89BEAF2BBD471D20C580E /* VersionService.swift in Sources */,
