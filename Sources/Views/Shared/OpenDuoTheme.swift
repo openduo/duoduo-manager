@@ -7,6 +7,11 @@ import SwiftUI
 // mappers and AppKit chrome all read tokens and primitives from here —
 // not from per-surface palettes.
 //
+// Dark is Manager's only skin, mirroring the source product ("dark is the
+// product's only shipped skin"). The system defines a light mirror under
+// the same token names; Manager deliberately pins dark on every window
+// instead of resolving the OS appearance.
+//
 // Editorial, sharp, restrained. Hierarchy comes from typography, scale,
 // whitespace and hairlines — not from radius, shadows, gradients or blur.
 //
