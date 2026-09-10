@@ -17,12 +17,11 @@ struct StatusHeaderBar: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
-            ODSignalDot(isLive: runtimeLive)
+            appGlyph
 
             VStack(alignment: .leading, spacing: 5) {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     Text("duoduo manager")
-                    ODBrandStop()
 
                     if showAppUpdate {
                         Button(action: onAppUpdate) {
@@ -63,6 +62,26 @@ struct StatusHeaderBar: View {
         .overlay(alignment: .bottom) {
             Rectangle().fill(OpenDuo.borderHairline).frame(height: 1)
         }
+    }
+
+    /// The app icon, framed by a hairline. The icon asset carries its own
+    /// rounded-square silhouette; the frame hugs it.
+    private var appGlyph: some View {
+        Group {
+            if let url = Bundle.main.url(forResource: "AppIcon", withExtension: "icns"),
+               let nsImage = NSImage(contentsOf: url) {
+                Image(nsImage: nsImage)
+                    .resizable()
+                    .interpolation(.high)
+                    .scaledToFit()
+                    .frame(width: 38, height: 38)
+                    .clipShape(RoundedRectangle(cornerRadius: 9))
+            }
+        }
+        .overlay(
+            RoundedRectangle(cornerRadius: 9)
+                .stroke(OpenDuo.borderSubtle, lineWidth: 1)
+        )
     }
 
     private func headerMetric(_ title: String, _ value: String) -> some View {

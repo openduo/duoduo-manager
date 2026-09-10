@@ -162,14 +162,6 @@ struct ODKicker: View {
     }
 }
 
-/// The cyan full stop that ends a page-level headline. One per headline.
-struct ODBrandStop: View {
-    var body: some View {
-        Text(".")
-            .foregroundStyle(OpenDuo.brand)
-    }
-}
-
 /// Page-level headline. A trailing period in `text` is stripped and replaced
 /// by the cyan brand stop.
 struct ODHeadline: View {
