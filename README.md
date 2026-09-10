@@ -31,7 +31,7 @@ A macOS menu bar application for managing the [duoduo](https://github.com/opendu
   </tr>
   <tr>
     <td align="center">
-      <sub><b>ATC Dashboard</b> — real-time event stream, active sessions, and job queue</sub>
+      <sub><b>ATC Dashboard</b><br>real-time event stream, active sessions, and job queue</sub>
     </td>
   </tr>
   <tr>
@@ -41,10 +41,10 @@ A macOS menu bar application for managing the [duoduo](https://github.com/opendu
   </tr>
   <tr>
     <td align="center">
-      <sub><b>Menu bar popover</b> — daemon status, channel controls, and one-click actions</sub>
+      <sub><b>Menu bar popover</b><br>daemon status, channel controls, and one-click actions</sub>
     </td>
     <td align="center">
-      <sub><b>CC Reader</b> — Claude Code / Codex history with rendering and session management</sub>
+      <sub><b>CC Reader</b><br>Claude Code / Codex history with rendering and session management</sub>
     </td>
   </tr>
 </table>
