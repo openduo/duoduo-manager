@@ -10,6 +10,7 @@
 "status.install" = "Install";
 "status.clear" = "Clear";
 "status.quit" = "Quit";
+"status.popOut" = "Pop out window";
 
 /* Autostart */
 "autostart.enable" = "Enable autostart";

@@ -35,6 +35,7 @@ enum L10n {
         static let actions = String(localized: "status.actions", bundle: bundle)
         static let clear = String(localized: "status.clear", bundle: bundle)
         static let quit = String(localized: "status.quit", bundle: bundle)
+        static let popOut = String(localized: "status.popOut", bundle: bundle)
 
         // Section labels. Instrument-style dashboard labels; zh-Hans ships
         // the English source text by product decision, not by omission.

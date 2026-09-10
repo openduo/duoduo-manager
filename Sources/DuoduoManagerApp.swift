@@ -56,9 +56,13 @@ private struct CCReaderSceneView: View {
 class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
     private var store: AppStore?
     private var statusController: AppStatusController?
+    private var statusWindowController: StatusWindowController?
     private var windowController: AppWindowController?
     private var onboardingController: OnboardingWindowController?
     private var openReaderWindowAction: (() -> Void)?
+    /// Popover-driven polling runs while either popover-like surface is up.
+    private var popoverVisible = false
+    private var statusWindowVisible = false
     lazy var updaterController = SPUStandardUpdaterController(
         startingUpdater: true,
         updaterDelegate: self,
@@ -79,6 +83,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
 
             NSApp.setActivationPolicy(.accessory)
             statusController = AppStatusController()
+            statusWindowController = StatusWindowController()
             windowController = AppWindowController()
             initViewModel()
         }
@@ -88,6 +93,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         Task { @MainActor in
             store?.shutdown()
             statusController?.shutdown()
+            statusWindowController?.shutdown()
             windowController?.shutdown()
         }
     }
@@ -110,7 +116,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
             self?.updateStatusBarIcon()
         }
         statusController?.onPopoverVisibilityChanged = { [weak self] isVisible in
-            self?.store?.setPopoverVisible(isVisible)
+            self?.popoverVisible = isVisible
+            self?.syncPopoverDrivenPolling()
+        }
+        statusController?.onPopOut = { [weak self] in
+            self?.openStatusWindow()
+        }
+        statusWindowController?.onVisibilityChanged = { [weak self] isVisible in
+            self?.statusWindowVisible = isVisible
+            self?.syncPopoverDrivenPolling()
         }
         windowController?.onDashboardVisibilityChanged = { [weak self] isVisible in
             self?.store?.setDashboardVisible(isVisible)
@@ -152,13 +166,31 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
 
     private func updatePopoverContent() {
         guard let store else { return }
-        statusController?.setPopoverContent(StatusBarView(
+        statusController?.setPopoverContent(makeStatusContentView(store: store))
+        updateStatusBarIcon()
+    }
+
+    private func makeStatusContentView(store: AppStore) -> StatusBarView {
+        StatusBarView(
             store: store,
             openDashboard: { [weak self] in self?.openDashboard() },
             openReader: { [weak self] in self?.openReader() },
             openOnboard: { [weak self] in self?.openOnboarding(at: .claudeAccess) }
-        ))
-        updateStatusBarIcon()
+        )
+    }
+
+    /// The popover and the detached status window share one polling gate:
+    /// runtime/update polling runs while either surface is on screen.
+    private func syncPopoverDrivenPolling() {
+        store?.setPopoverVisible(popoverVisible || statusWindowVisible)
+    }
+
+    // MARK: - Detached status window
+
+    private func openStatusWindow() {
+        statusController?.dismissPopover()
+        guard let store else { return }
+        statusWindowController?.show(content: AnyView(makeStatusContentView(store: store)))
     }
 
     private func updateStatusBarIcon() {
