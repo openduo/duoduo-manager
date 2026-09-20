@@ -38,7 +38,8 @@ struct StatusBarPresentationMapper {
                 latestVersion: store.updates.latestVersions["daemon"] ?? "0.4.7",
                 pid: store.runtime.status.pid,
                 isRunning: store.runtime.status.isRunning,
-                isLoading: store.command.isLoading
+                isLoading: store.command.isLoading,
+                isUpdating: isUpdating(.daemon)
             ),
             operations: operations,
             stream: StatusRuntimeStreamPresentation(
@@ -81,7 +82,8 @@ struct StatusBarPresentationMapper {
             latestVersion: store.updates.latestVersions[channel.type] ?? "0.3.1",
             pid: channel.pid,
             isRunning: channel.isRunning,
-            isLoading: store.command.isLoading
+            isLoading: store.command.isLoading,
+            isUpdating: isUpdating(.channel(channel.type))
         )
     }
 
@@ -234,6 +236,10 @@ struct StatusBarPresentationMapper {
         default:
             return OpenDuo.textMuted
         }
+    }
+
+    private func isUpdating(_ target: UpgradeTarget) -> Bool {
+        store.command.activeOperation == .upgradeAll && store.command.upgradeTarget == target
     }
 
     private func channelControlIcon(for type: String) -> String {

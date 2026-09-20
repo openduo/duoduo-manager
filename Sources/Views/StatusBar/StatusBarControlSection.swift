@@ -44,6 +44,7 @@ struct StatusServiceCard: View {
     let pid: String
     let isRunning: Bool
     let isLoading: Bool
+    let isUpdating: Bool
     let runtimeHint: String?
     let runtimeHintTint: Color?
     let onConfig: (() -> Void)?
@@ -130,13 +131,45 @@ struct StatusServiceCard: View {
 
     private var metaLine: some View {
         HStack(spacing: 0) {
+            versionAndPid
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .layoutPriority(-1)
+
+            Spacer(minLength: 8)
+
+            HStack(spacing: 0) {
+                ODSignalDot(tint: statusDotTint, isLive: statusDotLive)
+
+                Text(statusLabel)
+                    .padding(.leading, 6)
+                    .foregroundStyle(statusTint)
+
+                if !isUpdating, let runtimeHint, !runtimeHint.isEmpty {
+                    Text(" · ")
+                        .foregroundStyle(OpenDuo.textMuted)
+                    Text(runtimeHint)
+                        .foregroundStyle(runtimeHintTint ?? OpenDuo.attention)
+                }
+            }
+            .lineLimit(1)
+            .fixedSize(horizontal: true, vertical: false)
+        }
+        .font(.odMono(10))
+        .lineLimit(1)
+    }
+
+    private var versionAndPid: some View {
+        HStack(spacing: 0) {
             if !version.isEmpty {
                 Text("v\(version)")
                     .foregroundStyle(hasUpdate ? OpenDuo.attention : OpenDuo.textSecondary)
+                    .lineLimit(1)
 
                 if hasUpdate && !latestVersion.isEmpty {
                     Text(" → v\(latestVersion)")
                         .foregroundStyle(OpenDuo.attention)
+                        .lineLimit(1)
                 }
 
                 if !pid.isEmpty {
@@ -148,25 +181,28 @@ struct StatusServiceCard: View {
             if !pid.isEmpty {
                 Text("PID \(pid)")
                     .foregroundStyle(OpenDuo.textSecondary)
-            }
-
-            Spacer()
-
-            ODSignalDot(tint: OpenDuo.ok, isLive: isRunning)
-
-            Text(isRunning ? L10n.Status.running : L10n.Status.stopped)
-                .padding(.leading, 6)
-                .foregroundStyle(isRunning ? OpenDuo.ok : OpenDuo.textSecondary)
-
-            if let runtimeHint, !runtimeHint.isEmpty {
-                Text(" · ")
-                    .foregroundStyle(OpenDuo.textMuted)
-
-                Text(runtimeHint)
-                    .foregroundStyle(runtimeHintTint ?? OpenDuo.attention)
+                    .lineLimit(1)
             }
         }
-        .font(.odMono(10))
+        .lineLimit(1)
+    }
+
+    private var statusLabel: String {
+        if isUpdating { return L10n.Upgrade.cardUpdating }
+        return isRunning ? L10n.Status.running : L10n.Status.stopped
+    }
+
+    private var statusTint: Color {
+        if isUpdating { return OpenDuo.attention }
+        return isRunning ? OpenDuo.ok : OpenDuo.textSecondary
+    }
+
+    private var statusDotTint: Color {
+        isUpdating ? OpenDuo.attention : OpenDuo.ok
+    }
+
+    private var statusDotLive: Bool {
+        isUpdating || isRunning
     }
 }
 

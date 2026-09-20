@@ -86,24 +86,14 @@ extension StatusBarView {
 
 extension StatusBarView {
     var daemonRuntimeHint: String? {
-        if store.command.activeOperation == .upgradeAll, store.command.upgradeTarget == .daemon {
-            return L10n.Upgrade.cardUpdating
-        }
-        return (daemonNotice?.actionTitle != nil && store.runtime.status.isRunning) ? "restart required" : nil
+        (daemonNotice?.actionTitle != nil && store.runtime.status.isRunning) ? "restart required" : nil
     }
 
     var daemonRuntimeHintTint: Color? {
-        if store.command.activeOperation == .upgradeAll, store.command.upgradeTarget == .daemon {
-            return OpenDuo.attention
-        }
-        return daemonRuntimeHint == nil ? nil : OpenDuo.attention
+        daemonRuntimeHint == nil ? nil : OpenDuo.attention
     }
 
     func feishuRuntimeHint(channelIsRunning: Bool) -> String? {
-        if store.command.activeOperation == .upgradeAll,
-           case .channel("feishu") = store.command.upgradeTarget {
-            return L10n.Upgrade.cardUpdating
-        }
         if feishuNotice?.actionTitle != nil && channelIsRunning {
             return "restart required"
         }

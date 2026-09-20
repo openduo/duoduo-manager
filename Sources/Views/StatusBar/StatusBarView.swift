@@ -110,13 +110,14 @@ struct StatusBarView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .center, spacing: 8) {
                 ODKicker(text: title, tint: OpenDuo.textKicker)
+                    .layoutPriority(1)
                 Spacer(minLength: 8)
                 if let trailing {
                     trailing
-                        .layoutPriority(1)
                         .fixedSize(horizontal: true, vertical: false)
                 }
             }
+            .lineLimit(1)
 
             content()
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -130,12 +131,14 @@ struct StatusBarView: View {
             if statusBarPresentation.header.showRuntimeUpdate {
                 controlPlaneUpdateButton
             }
-            StatusOperationsMenu(
-                title: statusBarPresentation.operations.title,
-                installSkillsTitle: statusBarPresentation.operations.installSkillsTitle,
-                isDisabled: statusBarPresentation.operations.isDisabled,
-                onInstallSkills: { store.installSkills() }
-            )
+            if !store.command.isLoading {
+                StatusOperationsMenu(
+                    title: statusBarPresentation.operations.title,
+                    installSkillsTitle: statusBarPresentation.operations.installSkillsTitle,
+                    isDisabled: statusBarPresentation.operations.isDisabled,
+                    onInstallSkills: { store.installSkills() }
+                )
+            }
         }
     }
 
@@ -203,6 +206,7 @@ struct StatusBarView: View {
             pid: statusBarPresentation.daemonCard.pid,
             isRunning: statusBarPresentation.daemonCard.isRunning,
             isLoading: statusBarPresentation.daemonCard.isLoading,
+            isUpdating: statusBarPresentation.daemonCard.isUpdating,
             runtimeHint: daemonRuntimeHint,
             runtimeHintTint: daemonRuntimeHintTint,
             onConfig: {
@@ -230,6 +234,7 @@ struct StatusBarView: View {
             pid: presentation.pid,
             isRunning: presentation.isRunning,
             isLoading: presentation.isLoading,
+            isUpdating: presentation.isUpdating,
             runtimeHint: feishuRuntimeHint(channelIsRunning: presentation.isRunning),
             runtimeHintTint: feishuRuntimeHintTint(channelIsRunning: presentation.isRunning),
             onConfig: channel.type == "feishu" ? {
