@@ -12,14 +12,6 @@
 "status.quit" = "Quit";
 "status.popOut" = "Pop out window";
 
-/* Autostart */
-"autostart.enable" = "Enable autostart";
-"autostart.disable" = "Disable autostart";
-"autostart.enabling" = "Enabling autostart...";
-"autostart.disabling" = "Disabling autostart...";
-"autostart.enabled" = "Daemon will start on login";
-"autostart.disabled" = "Daemon will not start on login";
-
 /* Skills */
 "skills.title" = "Skills";
 "skills.install" = "Install Skills";

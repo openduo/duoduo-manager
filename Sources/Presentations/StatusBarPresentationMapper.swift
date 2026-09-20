@@ -68,8 +68,6 @@ struct StatusBarPresentationMapper {
         StatusOperationsPresentation(
             title: L10n.Status.actions,
             installSkillsTitle: L10n.Skills.install,
-            autostartTitle: store.runtime.isAutostartEnabled ? L10n.Autostart.disable : L10n.Autostart.enable,
-            autostartEnabled: store.runtime.isAutostartEnabled,
             isDisabled: store.command.isLoading
         )
     }

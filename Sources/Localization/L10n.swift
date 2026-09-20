@@ -219,17 +219,6 @@ enum L10n {
         static let cardUpdating = String(localized: "upgrade.cardUpdating", bundle: bundle)
     }
 
-    // MARK: - Autostart
-
-    enum Autostart {
-        static let enable = String(localized: "autostart.enable", bundle: bundle)
-        static let disable = String(localized: "autostart.disable", bundle: bundle)
-        static let enabling = String(localized: "autostart.enabling", bundle: bundle)
-        static let disabling = String(localized: "autostart.disabling", bundle: bundle)
-        static let enabled = String(localized: "autostart.enabled", bundle: bundle)
-        static let disabled = String(localized: "autostart.disabled", bundle: bundle)
-    }
-
     // MARK: - Skills
 
     enum Skills {

@@ -69,10 +69,6 @@ extension AppStore {
         }
         if runtime.channels != channelInfos { runtime.channels = channelInfos }
 
-        let autostart = daemonService.isAutostartEnabled()
-        if runtime.isAutostartEnabled != autostart {
-            runtime.isAutostartEnabled = autostart
-        }
         updateStatusBarIcon?()
     }
 
