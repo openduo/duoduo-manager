@@ -200,4 +200,45 @@ final class StatusBarPresentationMapperTests: XCTestCase {
         XCTAssertEqual(presentation.footer.statusMessage, L10n.Skills.installing)
         XCTAssertFalse(presentation.footer.statusIsError)
     }
+
+    func testDaemonCardIsUpdatingDuringDaemonUpgrade() {
+        let store = AppStore(
+            runtime: RuntimeStore(
+                status: DaemonStatus(isRunning: true, version: "0.8.1", pid: "11", output: "", lastUpdated: .now)
+            ),
+            dashboard: DashboardStore(),
+            updates: UpdateStore(),
+            command: CommandStore(
+                isLoading: true,
+                activeOperation: .upgradeAll,
+                lastOutput: L10n.Status.updatingAll,
+                upgradeTarget: .daemon
+            ),
+            dependencies: TestFactory.dependencies()
+        )
+
+        let presentation = StatusBarPresentationMapper(store: store).make(expandedEventIDs: [])
+        XCTAssertTrue(presentation.daemonCard.isUpdating)
+        XCTAssertTrue(presentation.daemonCard.isRunning)
+    }
+
+    func testChannelCardIsUpdatingDuringChannelUpgrade() {
+        let channel = ChannelInfo(type: "feishu", version: "0.8.1", isRunning: true, pid: "22")
+        let store = AppStore(
+            runtime: RuntimeStore(channels: [channel]),
+            dashboard: DashboardStore(),
+            updates: UpdateStore(),
+            command: CommandStore(
+                isLoading: true,
+                activeOperation: .upgradeAll,
+                lastOutput: L10n.Upgrade.updatingChannel("Feishu", from: "0.8.1", to: "0.8.2"),
+                upgradeTarget: .channel("feishu")
+            ),
+            dependencies: TestFactory.dependencies()
+        )
+
+        let mapper = StatusBarPresentationMapper(store: store)
+        XCTAssertTrue(mapper.channelCard(for: channel).isUpdating)
+        XCTAssertFalse(mapper.make(expandedEventIDs: []).daemonCard.isUpdating)
+    }
 }

@@ -53,6 +53,7 @@ struct StatusServiceCardPresentation {
     let pid: String
     let isRunning: Bool
     let isLoading: Bool
+    let isUpdating: Bool
 }
 
 struct StatusInstallCardPresentation {
