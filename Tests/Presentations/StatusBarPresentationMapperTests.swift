@@ -177,23 +177,7 @@ final class StatusBarPresentationMapperTests: XCTestCase {
         let presentation = StatusBarPresentationMapper(store: store).make(expandedEventIDs: [])
         XCTAssertEqual(presentation.operations.title, L10n.Status.actions)
         XCTAssertEqual(presentation.operations.installSkillsTitle, L10n.Skills.install)
-        XCTAssertEqual(presentation.operations.autostartTitle, L10n.Autostart.enable)
-        XCTAssertFalse(presentation.operations.autostartEnabled)
         XCTAssertFalse(presentation.operations.isDisabled)
-    }
-
-    func testOperationsMenuShowsDisableWhenAutostartEnabled() {
-        let store = AppStore(
-            runtime: RuntimeStore(isAutostartEnabled: true),
-            dashboard: DashboardStore(),
-            updates: UpdateStore(),
-            command: CommandStore(),
-            dependencies: TestFactory.dependencies()
-        )
-
-        let presentation = StatusBarPresentationMapper(store: store).make(expandedEventIDs: [])
-        XCTAssertEqual(presentation.operations.autostartTitle, L10n.Autostart.disable)
-        XCTAssertTrue(presentation.operations.autostartEnabled)
     }
 
     func testOperationsMenuKeepsActionsTitleWhileBusy() {
@@ -203,8 +187,8 @@ final class StatusBarPresentationMapperTests: XCTestCase {
             updates: UpdateStore(),
             command: CommandStore(
                 isLoading: true,
-                activeOperation: .autostart,
-                lastOutput: L10n.Autostart.enabling
+                activeOperation: .installSkills,
+                lastOutput: L10n.Skills.installing
             ),
             dependencies: TestFactory.dependencies()
         )
@@ -213,7 +197,7 @@ final class StatusBarPresentationMapperTests: XCTestCase {
         XCTAssertEqual(presentation.operations.title, L10n.Status.actions)
         XCTAssertEqual(presentation.operations.installSkillsTitle, L10n.Skills.install)
         XCTAssertTrue(presentation.operations.isDisabled)
-        XCTAssertEqual(presentation.footer.statusMessage, L10n.Autostart.enabling)
+        XCTAssertEqual(presentation.footer.statusMessage, L10n.Skills.installing)
         XCTAssertFalse(presentation.footer.statusIsError)
     }
 }

@@ -133,13 +133,8 @@ struct StatusBarView: View {
             StatusOperationsMenu(
                 title: statusBarPresentation.operations.title,
                 installSkillsTitle: statusBarPresentation.operations.installSkillsTitle,
-                autostartTitle: statusBarPresentation.operations.autostartTitle,
-                autostartEnabled: statusBarPresentation.operations.autostartEnabled,
                 isDisabled: statusBarPresentation.operations.isDisabled,
-                onInstallSkills: { store.installSkills() },
-                onToggleAutostart: {
-                    store.setDaemonAutostart(enabled: !statusBarPresentation.operations.autostartEnabled)
-                }
+                onInstallSkills: { store.installSkills() }
             )
         }
     }

@@ -10,19 +10,13 @@ private enum StatusCardLayout {
 struct StatusOperationsMenu: View {
     let title: String
     let installSkillsTitle: String
-    let autostartTitle: String
-    let autostartEnabled: Bool
     let isDisabled: Bool
     let onInstallSkills: () -> Void
-    let onToggleAutostart: () -> Void
 
     var body: some View {
         Menu {
             Button(action: onInstallSkills) {
                 Label(installSkillsTitle, systemImage: "sparkles")
-            }
-            Button(action: onToggleAutostart) {
-                Label(autostartTitle, systemImage: autostartEnabled ? "poweroff" : "power")
             }
         } label: {
             HStack(spacing: 5) {
