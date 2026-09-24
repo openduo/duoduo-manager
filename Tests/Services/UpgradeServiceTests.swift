@@ -8,26 +8,90 @@ final class UpgradeServiceTests: XCTestCase {
             .failure(ShellError.executionFailed("unknown command upgrade", exitCode: 1)),
             .success("npm upgraded\n")
         ])
+        let restarts = RestartRecorder()
         let service = UpgradeService(runCommand: recorder.runner)
 
         let output = try await service.upgradeAll(
             daemonInstalledVersion: "0.2.5",
             channels: [],
             latestVersions: ["daemon": "0.4.6"],
+            restartDaemon: restarts.handler,
             stopChannel: { _ in "" },
             syncChannel: { _ in "" },
             startChannel: { _ in "" },
             refreshSkills: { "" }
         )
 
-        // `duoduo upgrade` restarts the daemon itself, so Manager no longer
-        // issues a second restart (see #13).
         XCTAssertEqual(output, L10n.Upgrade.updated("duoduo 0.2.5 → 0.4.6"))
         XCTAssertEqual(recorder.commands.map(\.executable), ["duoduo", "npm"])
         XCTAssertEqual(recorder.commands.map(\.arguments), [
             ["upgrade"],
             ["install", "-g", "@openduo/duoduo"]
         ])
+        // `npm install` reloads nothing, so the fallback always restarts —
+        // matching `duoduo upgrade`, which restarts unconditionally (a
+        // stopped daemon gets started by the restart command itself).
+        XCTAssertEqual(restarts.calls, ["0.4.6"])
+    }
+
+    func testNpmFallbackRestartFailureIsNonFatal() async throws {
+        let recorder = CommandRecorder(results: [
+            .failure(ShellError.executionFailed("unknown command upgrade", exitCode: 1)),
+            .success("npm upgraded\n")
+        ])
+        let service = UpgradeService(runCommand: recorder.runner)
+
+        let output = try await service.upgradeAll(
+            daemonInstalledVersion: "0.2.5",
+            channels: [],
+            latestVersions: ["daemon": "0.4.6"],
+            restartDaemon: { _ in
+                throw ShellError.executionFailed("rpc_shutdown_failed\nnoise", exitCode: 1)
+            },
+            stopChannel: { _ in "" },
+            syncChannel: { _ in "" },
+            startChannel: { _ in "" },
+            refreshSkills: { "" }
+        )
+
+        // The package did update; the failed restart becomes a summary note
+        // instead of failing the whole upgrade — mirrors the CLI's own
+        // "installed but restart failed" warning.
+        XCTAssertEqual(
+            output,
+            L10n.Upgrade.updated("duoduo 0.2.5 → 0.4.6") + " "
+                + L10n.Upgrade.daemonRestartFailed("rpc_shutdown_failed")
+        )
+    }
+
+    func testNpmFallbackRestartReportsProgress() async throws {
+        let recorder = CommandRecorder(results: [
+            .failure(ShellError.executionFailed("unknown command upgrade", exitCode: 1)),
+            .success("npm upgraded\n")
+        ])
+        let service = UpgradeService(runCommand: recorder.runner)
+        let progress = ProgressRecorder()
+
+        _ = try await service.upgradeAll(
+            daemonInstalledVersion: "0.2.5",
+            channels: [],
+            latestVersions: ["daemon": "0.4.6"],
+            restartDaemon: { _ in "restarted\n" },
+            stopChannel: { _ in "" },
+            syncChannel: { _ in "" },
+            startChannel: { _ in "" },
+            refreshSkills: { "" },
+            onProgress: { message, target in
+                progress.record(message, target)
+            }
+        )
+
+        XCTAssertEqual(progress.messages, [
+            L10n.Upgrade.updatingDaemon(from: "0.2.5", to: "0.4.6"),
+            L10n.Upgrade.restartingDaemon,
+            L10n.Upgrade.refreshingSkills
+        ])
+        XCTAssertEqual(progress.targets, [.daemon, .daemon, .skills])
     }
 
     func testDaemonUpgradeUsesCliUpgradeWhenAvailable() async throws {
@@ -56,21 +120,25 @@ final class UpgradeServiceTests: XCTestCase {
         // daemon internally, so Manager must not call restart again (it would
         // kill any in-flight turn a second time, without a reason).
         let recorder = CommandRecorder(results: [.success("cli upgraded\n")])
+        let restarts = RestartRecorder()
         let service = UpgradeService(runCommand: recorder.runner)
 
         _ = try await service.upgradeAll(
             daemonInstalledVersion: "0.4.5",
             channels: [],
             latestVersions: ["daemon": "0.4.6"],
+            restartDaemon: restarts.handler,
             stopChannel: { _ in "" },
             syncChannel: { _ in "" },
             startChannel: { _ in "" },
             refreshSkills: { "" }
         )
 
-        // Only the `duoduo upgrade` command — no `daemon restart`.
+        // Only the `duoduo upgrade` command — no `daemon restart` on top of
+        // the one the CLI already performed internally.
         XCTAssertEqual(recorder.commands.map(\.executable), ["duoduo"])
         XCTAssertEqual(recorder.commands.map(\.arguments), [["upgrade"]])
+        XCTAssertEqual(restarts.calls, [])
     }
 
     func testSkillsRefreshRunsWhenDaemonUpdates() async throws {
@@ -154,6 +222,7 @@ final class UpgradeServiceTests: XCTestCase {
             daemonInstalledVersion: "0.4.5",
             channels: [channel],
             latestVersions: ["daemon": "0.4.6", "feishu": "0.2.0"],
+            restartDaemon: { _ in "restarted\n" },
             stopChannel: { _ in "stopped" },
             syncChannel: { _ in "synced" },
             startChannel: { _ in "started" },
@@ -242,6 +311,7 @@ private extension UpgradeService {
         daemonInstalledVersion: String,
         channels: [ChannelInfo],
         latestVersions: [String: String],
+        restartDaemon: @escaping (String?) async throws -> String = { _ in "" },
         stopChannel: @escaping (String) async throws -> String,
         syncChannel: @escaping (String) async throws -> String,
         startChannel: @escaping (String) async throws -> String,
@@ -251,12 +321,29 @@ private extension UpgradeService {
             daemonInstalledVersion: daemonInstalledVersion,
             channels: channels,
             latestVersions: latestVersions,
+            restartDaemon: restartDaemon,
             stopChannel: stopChannel,
             syncChannel: syncChannel,
             startChannel: startChannel,
             refreshSkills: refreshSkills,
             onProgress: { _, _ in }
         )
+    }
+}
+
+private final class RestartRecorder: @unchecked Sendable {
+    private let lock = NSLock()
+    private var recordedVersions: [String?] = []
+
+    var calls: [String?] {
+        lock.withLock { recordedVersions }
+    }
+
+    var handler: (String?) async throws -> String {
+        { version in
+            self.lock.withLock { self.recordedVersions.append(version) }
+            return "restarted\n"
+        }
     }
 }
 

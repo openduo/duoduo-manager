@@ -122,12 +122,14 @@
 "upgrade.updatingCount" = "Updating %d component(s)…";
 "upgrade.stoppingChannel %@" = "Stopping %@…";
 "upgrade.updatingDaemon %@ %@" = "Updating duoduo %@ → %@…";
+"upgrade.restartingDaemon" = "Restarting daemon…";
 "upgrade.updatingChannel %@ %@ %@" = "Updating %@ %@ → %@…";
 "upgrade.startingChannel %@" = "Starting %@…";
 "upgrade.refreshingSkills" = "Refreshing Skills…";
 "upgrade.updated %@" = "Updated %@";
 "upgrade.failedDuring %@ %@" = "Failed while %@: %@";
 "upgrade.skillsFailed" = "Skills refresh failed.";
+"upgrade.daemonRestartFailed %@" = "Daemon restart failed (%@) — restart it manually to load the new version.";
 "upgrade.cardUpdating" = "updating…";
 
 /* Setup */

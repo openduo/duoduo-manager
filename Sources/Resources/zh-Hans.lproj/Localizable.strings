@@ -122,12 +122,14 @@
 "upgrade.updatingCount" = "正在更新 %d 个组件…";
 "upgrade.stoppingChannel %@" = "正在停止 %@…";
 "upgrade.updatingDaemon %@ %@" = "正在更新 duoduo %@ → %@…";
+"upgrade.restartingDaemon" = "正在重启 daemon…";
 "upgrade.updatingChannel %@ %@ %@" = "正在更新 %@ %@ → %@…";
 "upgrade.startingChannel %@" = "正在启动 %@…";
 "upgrade.refreshingSkills" = "正在刷新 Skills…";
 "upgrade.updated %@" = "已更新 %@";
 "upgrade.failedDuring %@ %@" = "失败于%@：%@";
 "upgrade.skillsFailed" = "Skills 刷新失败。";
+"upgrade.daemonRestartFailed %@" = "Daemon 重启失败（%@），请手动重启以加载新版本。";
 "upgrade.cardUpdating" = "更新中…";
 
 /* Setup */

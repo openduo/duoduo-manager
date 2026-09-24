@@ -94,6 +94,7 @@ struct FakeUpgradeService: UpgradeServicing {
         daemonInstalledVersion: String,
         channels: [ChannelInfo],
         latestVersions: [String: String],
+        restartDaemon: (String?) async throws -> String,
         stopChannel: (String) async throws -> String,
         syncChannel: (String) async throws -> String,
         startChannel: (String) async throws -> String,
