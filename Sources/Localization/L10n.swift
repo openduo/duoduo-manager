@@ -202,6 +202,7 @@ enum L10n {
         static func updatingDaemon(from: String, to: String) -> String {
             String(localized: "upgrade.updatingDaemon \(from) \(to)", bundle: bundle)
         }
+        static let restartingDaemon = String(localized: "upgrade.restartingDaemon", bundle: bundle)
         static func updatingChannel(_ name: String, from: String, to: String) -> String {
             String(localized: "upgrade.updatingChannel \(name) \(from) \(to)", bundle: bundle)
         }
@@ -216,6 +217,9 @@ enum L10n {
             String(localized: "upgrade.failedDuring \(step) \(reason)", bundle: bundle)
         }
         static let skillsFailed = String(localized: "upgrade.skillsFailed", bundle: bundle)
+        static func daemonRestartFailed(_ reason: String) -> String {
+            String(localized: "upgrade.daemonRestartFailed \(reason)", bundle: bundle)
+        }
         static let cardUpdating = String(localized: "upgrade.cardUpdating", bundle: bundle)
     }
 

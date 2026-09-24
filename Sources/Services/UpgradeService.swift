@@ -50,15 +50,21 @@ struct UpgradeService: Sendable {
         )]
     }
 
-    private func upgradeDaemon() async throws -> String {
+    /// `duoduo upgrade` reinstalls the package and restarts the daemon
+    /// itself. The npm fallback only exists for CLIs too old to have the
+    /// command — it updates the package but leaves any running daemon on
+    /// the old code, so the caller must restart it (see `upgradeAll`).
+    private func upgradeDaemon() async throws -> (output: String, usedNpmFallback: Bool) {
         do {
-            return try await runCommand("duoduo", ["upgrade"], NodeRuntime.environment)
+            let output = try await runCommand("duoduo", ["upgrade"], NodeRuntime.environment)
+            return (output, false)
         } catch {
-            return try await runCommand(
+            let output = try await runCommand(
                 "npm",
                 ["install", "-g", "@openduo/duoduo"],
                 NodeRuntime.environment
             )
+            return (output, true)
         }
     }
 
@@ -67,6 +73,7 @@ struct UpgradeService: Sendable {
         daemonInstalledVersion: String,
         channels: [ChannelInfo],
         latestVersions: [String: String],
+        restartDaemon: (String?) async throws -> String,
         stopChannel: (String) async throws -> String,
         syncChannel: (String) async throws -> String,
         startChannel: (String) async throws -> String,
@@ -88,6 +95,7 @@ struct UpgradeService: Sendable {
         guard daemonNeedsUpdate || !channelsToUpdate.isEmpty else { return "" }
 
         var completed: [String] = []
+        var notes: [String] = []
 
         for ch in channelsToUpdate where ch.isRunning {
             try await runStep(
@@ -100,14 +108,32 @@ struct UpgradeService: Sendable {
         }
 
         if daemonNeedsUpdate, let latest = latestVersions["daemon"] {
+            var usedNpmFallback = false
             try await runStep(
                 L10n.Upgrade.updatingDaemon(from: daemonInstalledVersion, to: latest),
                 target: .daemon,
                 onProgress: onProgress
             ) {
-                _ = try await upgradeDaemon()
+                let result = try await upgradeDaemon()
+                usedNpmFallback = result.usedNpmFallback
             }
             completed.append("duoduo \(daemonInstalledVersion) → \(latest)")
+
+            // The npm fallback path does not reload the daemon. `duoduo
+            // upgrade` restarts unconditionally — on a stopped daemon the
+            // restart command starts it — so the fallback does the same:
+            // end state is the new version running, however it was before.
+            if usedNpmFallback {
+                await onProgress(L10n.Upgrade.restartingDaemon, .daemon)
+                do {
+                    _ = try await restartDaemon(latest)
+                } catch {
+                    // The package did update; a failed restart is surfaced as
+                    // a note (mirroring the CLI's own upgrade warning) rather
+                    // than failing the whole upgrade.
+                    notes.append(L10n.Upgrade.daemonRestartFailed(Self.shortReason(error)))
+                }
+            }
         }
 
         for ch in channelsToUpdate {
@@ -139,8 +165,11 @@ struct UpgradeService: Sendable {
             do {
                 _ = try await refreshSkills()
             } catch {
-                summary += " \(L10n.Upgrade.skillsFailed)"
+                notes.append(L10n.Upgrade.skillsFailed)
             }
+        }
+        for note in notes {
+            summary += " \(note)"
         }
 
         return summary

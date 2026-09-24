@@ -160,6 +160,17 @@ extension AppStore {
                 daemonInstalledVersion: self.runtime.status.version,
                 channels: self.runtime.channels,
                 latestVersions: self.updates.latestVersions,
+                // Only reached on the npm-fallback path, where the package was
+                // updated without the daemon reloading. Attribute the restart
+                // to manager (see #13); the closure receives the just-installed
+                // version, which is what's on disk when the gate needs it.
+                restartDaemon: { installedVersion in
+                    try await self.daemonService.restart(
+                        extraEnv: [:],
+                        reason: "npm fallback upgrade in duoduo-manager",
+                        installedVersion: installedVersion
+                    )
+                },
                 stopChannel: { type in try await self.channelService.stopChannel(type) },
                 syncChannel: { pkg in try await self.channelService.syncChannel(pkg) },
                 startChannel: { type in try await self.channelService.startChannel(type, extraEnv: [:]) },
