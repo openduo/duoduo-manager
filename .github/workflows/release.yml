@@ -12,14 +12,11 @@ on:
 permissions:
   contents: write
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Select Xcode 26.3
         run: sudo xcode-select -s /Applications/Xcode_26.3.app
@@ -81,7 +78,7 @@ jobs:
           security delete-keychain "${KEYCHAIN_PATH}" || true
 
       - name: Upload DMG artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: duoduo-manager-dmg-${{ github.run_id }}
           path: dist/*.dmg
@@ -89,7 +86,7 @@ jobs:
 
       - name: Create GitHub Release (tag push)
         if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         id: create_release
         with:
           files: dist/*.dmg
@@ -110,7 +107,7 @@ jobs:
 
       - name: Create GitHub Release (cc-reader sync)
         if: github.event_name == 'repository_dispatch'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: sync-${{ github.event.client_payload.cc_reader_tag }}
           name: Sync with cc-reader ${{ github.event.client_payload.cc_reader_tag }}
