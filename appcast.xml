@@ -6,43 +6,43 @@
     <description>DuoduoManager Updates</description>
     <language>en</language>
     <item>
-      <title>DuoduoManager 1.8.2</title>
-      <pubDate>Sun, 20 Sep 2026 07:12:18 +0000</pubDate>
+      <title>DuoduoManager 1.8.3</title>
+      <pubDate>Thu, 24 Sep 2026 07:09:57 +0000</pubDate>
       <sparkle:channel>arm64-with-nodejs</sparkle:channel>
       <enclosure
-        url="https://github.com/openduo/duoduo-manager/releases/download/v1.8.2/DuoduoManager-1.8.2-arm64-with-nodejs.dmg"
-        sparkle:version="1.8.2"
-        sparkle:shortVersionString="1.8.2"
-        sparkle:edSignature="UNKEBQJPOz9gDv73jZzQj6p9rGrhukI728pOQOFjpbtfjsMVu5++d6s/vTs0wXFFaDT9jn/n7MrPpFFLdEeJBQ=="
-        length="100547528"
+        url="https://github.com/openduo/duoduo-manager/releases/download/v1.8.3/DuoduoManager-1.8.3-arm64-with-nodejs.dmg"
+        sparkle:version="1.8.3"
+        sparkle:shortVersionString="1.8.3"
+        sparkle:edSignature="+Ksgd+3lSEX/eze4/T1WQOpwYj+S4mYaTwuu1yIC1JFS0uwNkow3a4N2OKf1PiFftGH8W5KDEI+hACWDEKtaDQ=="
+        length="100291046"
         type="application/octet-stream"
       />
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
     </item>
     <item>
-      <title>DuoduoManager 1.8.2</title>
-      <pubDate>Sun, 20 Sep 2026 07:12:18 +0000</pubDate>
+      <title>DuoduoManager 1.8.3</title>
+      <pubDate>Thu, 24 Sep 2026 07:09:57 +0000</pubDate>
       <sparkle:channel>x86_64-with-nodejs</sparkle:channel>
       <enclosure
-        url="https://github.com/openduo/duoduo-manager/releases/download/v1.8.2/DuoduoManager-1.8.2-x86_64-with-nodejs.dmg"
-        sparkle:version="1.8.2"
-        sparkle:shortVersionString="1.8.2"
-        sparkle:edSignature="NeLSARrKYZRpX8oirseU48WGPht5i6xNs7w19hy1aaH3xTzOcqakZ2LwlnGuE/zfozCqDVDk8zhDEq0Y7+oXDA=="
-        length="98698063"
+        url="https://github.com/openduo/duoduo-manager/releases/download/v1.8.3/DuoduoManager-1.8.3-x86_64-with-nodejs.dmg"
+        sparkle:version="1.8.3"
+        sparkle:shortVersionString="1.8.3"
+        sparkle:edSignature="F1piTMeVFQVhoH/VUDgoohXKLCBiO2njR01znJCF1PcVqvBv35qLRn7WC6E7pvuV3D2BFm8uxMlHimb+PL17BQ=="
+        length="101277741"
         type="application/octet-stream"
       />
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
     </item>
     <item>
-      <title>DuoduoManager 1.8.2</title>
-      <pubDate>Sun, 20 Sep 2026 07:12:18 +0000</pubDate>
+      <title>DuoduoManager 1.8.3</title>
+      <pubDate>Thu, 24 Sep 2026 07:09:57 +0000</pubDate>
       <sparkle:channel>universal-lite</sparkle:channel>
       <enclosure
-        url="https://github.com/openduo/duoduo-manager/releases/download/v1.8.2/DuoduoManager-1.8.2-universal-lite.dmg"
-        sparkle:version="1.8.2"
-        sparkle:shortVersionString="1.8.2"
-        sparkle:edSignature="Da3Q+MDUTbYcdsVomPMVNmRPvD2yLgbNqTvdtnXLJmac782TygJITAfARBzwNJVt/W1659+asK8sK/YxlzflCg=="
-        length="6185855"
+        url="https://github.com/openduo/duoduo-manager/releases/download/v1.8.3/DuoduoManager-1.8.3-universal-lite.dmg"
+        sparkle:version="1.8.3"
+        sparkle:shortVersionString="1.8.3"
+        sparkle:edSignature="mFZoFtTghX1CQZoRWJijWnw2HlRSo+00E/VlvJxH+eIVGyDkylatr7tNRVOMqZvytrgPzixg1heXSPlbJCPSBg=="
+        length="6190723"
         type="application/octet-stream"
       />
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
